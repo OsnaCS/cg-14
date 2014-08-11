@@ -1,14 +1,5 @@
 #pragma once
 
-#include "lumina/lumina.hpp"
+#include "../lumina/lumina.hpp"
 
-class Pyramid {
-public:
-  Pyramid();
-
-private:
-  bool m_visible;
-
-  
-
-};
+lum::VertexSeq createPyramid(float length, float height);
