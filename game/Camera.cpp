@@ -15,11 +15,8 @@ Mat4<float> Camera::get_matrix(){
 		return viewMatrix(m_position,m_direction,m_up);
 }
 
-/*
-void Camera::setPosition(Vec3<float> point){
-	m_position = point;
+Mat4<float> Camera::get_ProjectionMatrix(){
+		return projectionMatrix(0.8f, 1.0f, 0.0001f, 1000000.0f);
 };
-*/
-
 
 

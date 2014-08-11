@@ -16,7 +16,7 @@ public:
 		}
 
 	lumina::Mat4<float> get_matrix();
-	
+	lumina::Mat4<float> get_ProjectionMatrix();
 
 private:
 	lumina::Vec3<float> m_position;
