@@ -4,7 +4,7 @@ using namespace lumina;
 
 VertexSeq createPyramid(float length, float height) {
     VertexSeq pyramid;
-    pyramid.create(6, 5);
+    pyramid.create(6, 5, 18);
 
     pyramid.prime<Vec3f, Color32f>([=](HotVertexSeq<Vec3f, Color32f>& hot){
 	    hot.vertex[0].set(Vec3f(-length, 0.f, -length), Color32f(0, 1, 0));

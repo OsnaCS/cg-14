@@ -1,4 +1,5 @@
 #include "CraftGame.hpp"
+#include "Pyramid.hpp"
 
 #include <functional>
 #include <chrono>
@@ -48,13 +49,13 @@ void CraftGame::start() {
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
   // create VertexSeq that represents a triangle
-  VertexSeq triangle;
-  triangle.create(5, 3);  // 2+3 floats, 3 vertices
+  VertexSeq triangle = createPyramid(.5f, .5f);
+  /*triangle.create(5, 3);  // 2+3 floats, 3 vertices
   triangle.prime<Vec2f, Color32f>([](HotVertexSeq<Vec2f, Color32f>& hot){
     hot.vertex[0].set(Vec2f(-1.f, -1.f), Color32f(1, 0, 0));
     hot.vertex[1].set(Vec2f( 0.f,  1.f),  Color32f(0, 1, 0));
     hot.vertex[2].set(Vec2f( 1.f, -1.f),  Color32f(0, 0, 1));
-  });
+  });*/
 
 
   // load and compile vertex and fragment shader
