@@ -7,7 +7,9 @@
 
 using namespace std;
 
-class Map{
+class Map
+{
+	
 public:
 
 	/**

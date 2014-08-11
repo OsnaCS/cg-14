@@ -8,7 +8,8 @@
 using namespace lum;
 using namespace std;
 
-class Chunk{
+class Chunk
+{
 
 public:
 
@@ -17,7 +18,7 @@ public:
 	*/
 	Chunk();
 
-		/**
+	/**
 	* setBlockType
 	* @param pos 3D Position within Chunk pos.y = hight
 	* @param type BlockType
@@ -35,4 +36,5 @@ private:
 
 	// Vector to save the Blocktypes
 	vector<BlockType> m_blocks;
+	
 };
