@@ -14,9 +14,12 @@ public:
 		lumina::Vec3f get_direction(){
 			return m_direction;
 		}
-		lumina::type get_matrix();
+
+	lumina::Mat4<float> get_matrix();
+	
 
 private:
-	lumina::Vec3f m_position;
-	lumina::Vec3f m_direction;
+	lumina::Vec3<float> m_position;
+	lumina::Vec3<float> m_direction;
+	lumina::Vec3<float> m_up;
 };
