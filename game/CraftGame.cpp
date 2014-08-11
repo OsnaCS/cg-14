@@ -68,9 +68,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program p;
   p.create(vs, fs);
 
+  //slog(this->m_camera.get_matrix());
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
+
     // poll events
     m_window.update();
     
@@ -82,6 +84,9 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       // prime program to use it
       p.prime([&](HotProgram& hot) {
+
+        hot.uniform["u_trans"] = this->m_camera.get_matrix();
+
         // draw the triangle
         hot.draw(triangle, PrimitiveType::Triangle);
       });

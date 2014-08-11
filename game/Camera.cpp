@@ -6,8 +6,8 @@ using namespace std;
 
 Camera::Camera()
 {
-	m_position = Vec3<float>(0.0f, 0.0f, 0.0f);
-	m_direction = Vec3<float>(-1.0f, 0.0f, 0.0f);
+	m_position = Vec3<float>(0.0f, 0.0f, 10.0f);
+	m_direction = Vec3<float>(1.0f, 0.0f, -1.0f);
 	m_up = Vec3<float>(0.0f, 1.0f, 0.0f);
 }
 
