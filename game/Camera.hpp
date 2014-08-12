@@ -33,7 +33,7 @@ public:
         m_movingspeed = movingspeed;
     };
 
-    lumina::EventResult processEvent( lumina::InputEvent& e );
+    lumina::EventResult processEvent( lumina::InputEvent& e, Window& win );
 
 private:
     void move_left();
@@ -42,11 +42,13 @@ private:
     void move_backward();
     void move_up();
     void move_down();
-    void turn_left();
-    void turn_right();
-
+    void turn_side(float deltaX);
+    void turn_upDown(float deltaY);
+  
 	lumina::Vec3<float> m_position;
 	lumina::Vec3<float> m_direction;
 	lumina::Vec3<float> m_up;
     float m_movingspeed;
+    bool m_mouseCaptured;
+
 };
