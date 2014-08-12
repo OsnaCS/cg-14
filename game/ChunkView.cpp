@@ -6,7 +6,7 @@ ChunkView::ChunkView(Chunk& chunk, Vec2i index)
 	: m_chunk(chunk), m_index(index) {
 
 		if(m_box.nativeVertexHandle() == 0) {
-			m_box = createBox<VAttr::Position, VAttr::Normal>(Vec3f(.45f,.45f,.45f));
+			m_box = createBox<VAttr::Position, VAttr::TexUV>(Vec3f(.45f,.45f,.45f));
 		}
 }
 
