@@ -15,6 +15,7 @@ CraftGame::CraftGame() {
   
   for(int i = 0; i < 16; i++){
      m_map.setBlockType(Vec3i(i,0,i), BlockType::Stone);
+     m_map.setBlockType(Vec3i(15-i,0,i), BlockType::Water);
   }
 
 } 

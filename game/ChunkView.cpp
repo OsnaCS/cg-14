@@ -24,7 +24,10 @@ void ChunkView::draw(HotProgram& hotProg){
 			auto hPos = m_index * 16;
 			auto zPos = Vec3i(pos.x + hPos.x, pos.y, pos.z + hPos.y);
 
+			Color8A c = getColor(block);
+
 			hotProg.uniform["u_world"] = translationMatrix(vector_cast<float>(zPos));
+			hotProg.uniform["u_color"] = Vec3f(c.r/255.f,c.g/255.f,c.b/255.f);
       hotProg.draw(m_box, PrimitiveType::TriangleStrip);
 		}
 	}
