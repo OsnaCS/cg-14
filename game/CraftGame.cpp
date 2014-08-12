@@ -1,5 +1,6 @@
 #include "CraftGame.hpp"
 #include "Pyramid.hpp"
+#include "ChunkView.hpp"
 
 #include <functional>
 #include <chrono>
@@ -11,7 +12,10 @@ CraftGame::CraftGame() {
   m_running = true;
   m_rotationAngleStep = 0.03f;
   m_map.addChunk(Vec2i(0,0));
-  m_map.setBlockType(Vec3i(8,0,8), BlockType::Stone);
+  
+  for(int i = 0; i < 16; i++){
+     m_map.setBlockType(Vec3i(i,0,i), BlockType::Stone);
+  }
 
 } 
 
@@ -97,16 +101,7 @@ void CraftGame::start() {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
-  // create VertexSeq that represents a triangle
-  VertexSeq triangle = createBox<VAttr::Position, VAttr::Normal>(Vec3f(1.f,1.f,1.f));
-  /*triangle.create(5, 3);  // 2+3 floats, 3 vertices
-  triangle.prime<Vec2f, Color32f>([](HotVertexSeq<Vec2f, Color32f>& hot){
-    hot.vertex[0].set(Vec2f(-1.f, -1.f), Color32f(1, 0, 0));
-    hot.vertex[1].set(Vec2f( 0.f,  1.f),  Color32f(0, 1, 0));
-    hot.vertex[2].set(Vec2f( 1.f, -1.f),  Color32f(0, 0, 1));
-  });*/
-
-
+  
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -124,7 +119,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   p.primitiveProc.enableCulling();
 
   auto now = chrono::system_clock::now();
-  Vec3i dim(5,5,5);
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
@@ -150,19 +144,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
 
-        for(Vec3i pos : dim) {
-          hot.uniform["u_world"] = translationMatrix(vector_cast<float>(pos) * -3);
-          hot.draw(triangle, PrimitiveType::TriangleStrip);
-        }
+        Chunk& currentChunk = m_map.getChunk(Vec2i(0,0));
+        ChunkView cV(currentChunk,Vec2i(0,0));
 
-        // hot.uniform["u_world"] = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.f, 1.0f, 0.f), angle));
-        // // draw the triangle
-        // hot.draw(triangle, PrimitiveType::TriangleStrip);
-
-
-
-        // hot.uniform["u_world"] = translationMatrix(Vec3f(0, 1, 0));
-        // hot.draw(triangle, PrimitiveType::TriangleStrip);
+        cV.draw(hot);
 
       });
     });

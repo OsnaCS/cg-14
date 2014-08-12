@@ -26,12 +26,6 @@ void ChunkView::draw(HotProgram& hotProg){
 
 			hotProg.uniform["u_world"] = translationMatrix(vector_cast<float>(zPos));
       hotProg.draw(m_box, PrimitiveType::TriangleStrip);
-
 		}
-
-
-
 	}
-
-
 }
