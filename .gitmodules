@@ -1,3 +1,4 @@
 [submodule "lumina"]
 	path = lumina
 	url = https://github.com/LukasKalbertodt/lumina.git
+  branch = fixes

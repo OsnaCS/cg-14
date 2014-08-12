@@ -189,3 +189,9 @@ map<Vec2i, Chunk> Map::loadWorld(string chunkname)
   return m_map;
 
 }
+Chunk& Map::getChunk(Vec2i pos)
+{
+
+
+	return m_map[pos];
+}
