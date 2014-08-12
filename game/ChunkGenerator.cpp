@@ -18,26 +18,30 @@ ChunkGenerator::ChunkGenerator() {
   mt19937 rng(m_seed);
 }
 
-void ChunkGenerator::chunkGenerationPrime(Map m) {
+void ChunkGenerator::chunkGenerationPrime(Map& m) {
 
   // generiere die 9 Startchunks, der Chunk 0,0 ist in der Mitte (Start bei
   // -1,-1)
-  for(int x = -1; x < 2; x++) {   // Chunks von links nach rechts (in Chunkkoordinaten)
-    for(int z = -1; z < 2; z++) { // Chunks von oben nach unten (in Chunkkoordinaten) (von oben
+  for(int x = -32; x < 32; x= x+16) {   // Chunks von links nach rechts (in Chunkkoordinaten)
+    for(int z = -32; z < 32; z= z+16) { // Chunks von oben nach unten (in Chunkkoordinaten) (von oben
                                   // nach unten wird zuerst abgearbeitet)
       m.addChunk({x, z});         // Chunk hinzufügen zur Map
 
       // Bearbeiten des soeben hinzugefügten Chunks
       // Blöcke von links nach rechts (in Blockkoordinaten)
-      for(int i = x * 15; i < (x * 15) + 16; i++) {
+      for(int i = x * 16; i < (x * 16) + 16; i++) {
         // Blöcke von oben nach unten (in Blockkoordinaten)
-        for(int j = z * 15; j < (z * 15) + 16; j++) {
+        for(int j = z * 16; j < (z * 16) + 16; j++) {
           int noise = perlinNoise(i, j); // Perlin Noise berechnen
           // auffüllen:
           for(int k = 0; k < 128; k++) {
-            if(k <= noise) {
+          	if(k == noise) {
+          		m.setBlockType({i, k, j}, BlockType::Grass);
+          	}else if(k <= noise && k >= noise-3) {
               m.setBlockType({i, k, j}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
-            } else {
+            }else if(k< (noise-3) && k >= noise-10) {
+            	m.setBlockType({i, k, j}, BlockType::Stone); 
+          	}else{
               m.setBlockType({i, k, j}, BlockType::Air); //  Über dem Noise-Wert gibt es nur Air
             }
           }
@@ -47,7 +51,10 @@ void ChunkGenerator::chunkGenerationPrime(Map m) {
   }
 }
 
-void ChunkGenerator::chunkGeneration(Map m, Vec3i player_pos) {}
+void ChunkGenerator::chunkGeneration(Map m, Vec3i player_pos) {
+	Vec2i chunkPos = m.getChunkPos(player_pos);
+	
+}
 
 
 int ChunkGenerator::perlinNoise(int x, int z) {
@@ -74,7 +81,7 @@ int ChunkGenerator::perlinNoise(int x, int z) {
 
 float ChunkGenerator::randomPos(Vec2i vector) {
   float var = 10000 * (sin(vector.x) + cos(vector.y) + tan(m_seed)); // randomzahl
-  uniform_real_distribution<float> dist(30.f, 88.f);
+  uniform_real_distribution<float> dist(75.f, 88.f);
   minstd_rand0 nrng(var);
   float wert = dist(nrng);
   return wert;
