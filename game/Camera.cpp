@@ -17,7 +17,7 @@ Mat4<float> Camera::get_matrix(){
 }
 
 Mat4<float> Camera::get_ProjectionMatrix(){
-		return projectionMatrix(0.785f, 1.0f, 0.0001f, 1000000.0f);
+		return projectionMatrix(22.f * static_cast<float>(M_PI) / 180.f, 4.f / 3.f, 0.1f, 100.f);
 };
 
 EventResult Camera::processEvent( InputEvent& e )
@@ -25,12 +25,17 @@ EventResult Camera::processEvent( InputEvent& e )
     // Key
     if(e.type == InputType::KeyPressed)
     {
-        switch( e.keyInput.key)
-        case KeyCode::Q :
+        switch( e.keyInput.key) {
+        	case KeyCode::Q :
             move_left();
             return EventResult::Processed;
+            break;
          //case KeyCode::W :
          //   return EventResult::Processed;
+        default:
+        	break;
+        }
+        
     }
 
     if (e.type == InputType::LMousePressed )

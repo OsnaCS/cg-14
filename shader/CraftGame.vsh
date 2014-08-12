@@ -18,19 +18,9 @@ void main() {
   // just forward position 
   outData.color = i_color;
 
-  vec4 pos = vec4(i_pos, 1);
-
-  pos = pos * u_world;
-
-  mat4 pipe = u_projection * u_view;
-  mat4 final = pipe * u_world;
-
-  // pos /= pos.w;
-
-
-  pos = u_view * pos;
-  pos = u_projection * pos;
+  mat4 pipeline = u_projection * u_view;
+  mat4 final = pipeline * u_world;
 
   // write gl_Position -> make OpenGL happy
-  gl_Position = final  * vec4(i_pos, 1);
+  gl_Position = final * vec4(i_pos, 1);
 }
