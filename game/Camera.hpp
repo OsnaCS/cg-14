@@ -4,6 +4,8 @@
 #include "lumina/input/InputEvent.hpp"
 //#include <functional>
 
+using namespace lumina;
+
 class Camera{
 
 public:
@@ -19,6 +21,13 @@ public:
 
 	lumina::Mat4<float> get_matrix();
 	lumina::Mat4<float> get_ProjectionMatrix();
+	void setPosition(Vec3f position) {
+		m_position = position;
+	}
+
+	Vec3f getPosition() {
+		return m_position;
+	}
 
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
