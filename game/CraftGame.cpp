@@ -1,5 +1,4 @@
 #include "CraftGame.hpp"
-#include "Pyramid.hpp"
 #include "ChunkView.hpp"
 
 #include <functional>
@@ -10,14 +9,15 @@ using namespace std;
 
 CraftGame::CraftGame() {
   m_running = true;
-  m_rotationAngleStep = 0.03f;
   m_map.addChunk(Vec2i(0,0));
   
-  for(int i = 0; i < 16; i++){
-     m_map.setBlockType(Vec3i(i,0,i), BlockType::Stone);
-     m_map.setBlockType(Vec3i(15-i,0,i), BlockType::Water);
-  }
-
+  for(int i = 0; i < 16; i++) {
+    for(int j = 0; j < 16; j++) {
+      for(int k = 0; k < 63; k++) {
+        m_map.setBlockType(Vec3i(i, k, j), BlockType::Dirt);
+      }
+    }
+  } 
 } 
 
 
@@ -64,13 +64,6 @@ void CraftGame::init() {
           pos.z -= 0.5f;
           m_camera.setPosition(pos);
           break;
-        case KeyCode::P:
-          if (m_rotationAngleStep > 0.000001f) {
-            m_rotationAngleStep = 0.0f;
-          } else {
-            m_rotationAngleStep = 0.03f;
-          }
-          break;
         default:
           return m_camera.processEvent(e);
           break;
@@ -78,23 +71,16 @@ void CraftGame::init() {
     }
     return EventResult::Skipped;
   });
-
-  // control the camera...
-
-
-
   // resize window
-  m_window.resize(Vec2i(800, 600));
+  m_window.resize(Vec2i(400, 300));
 }
 
 void CraftGame::start() {
   // open the window (we need to call init before!)
   m_window.open();
-
   // obtain and create render context
   auto& renderContext = m_window.getRenderContext();
   renderContext.create();
-
   // we just need one context, so we can prime it here just once
   renderContext.prime([this](HotRenderContext& hotContext) {
     this->run(hotContext);
@@ -102,7 +88,6 @@ void CraftGame::start() {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
-  
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -113,7 +98,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program p;
   p.create(vs, fs);
 
-  float angle = 0.f;
   p.perFragProc.enableDepthTest();
   p.perFragProc.enableDepthWrite();
   p.perFragProc.setDepthFunction(DepthFunction::Less);
@@ -131,8 +115,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // poll events
     m_window.update();
     
-    angle += m_rotationAngleStep;
-
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
@@ -152,8 +134,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
     });
-    
-
     // swap buffer
     hotContext.swapBuffer();
   }
