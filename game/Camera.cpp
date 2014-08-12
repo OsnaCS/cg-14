@@ -7,7 +7,7 @@ using namespace std;
 Camera::Camera() :
     m_position(Vec3f(0.0f, 0.0f, 10.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
-    ,m_movingspeed(0.1f),
+    ,m_movingspeed(0.3f),
     m_mouseCaptured(false)
 {
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
@@ -100,6 +100,7 @@ void Camera::move_forward()
 {
    m_position.x += m_movingspeed*m_direction.x;
    m_position.z += m_movingspeed*m_direction.z;
+   m_position.y += m_movingspeed*m_direction.y;
 }
 
 
@@ -107,6 +108,7 @@ void Camera::move_backward()
 {
    m_position.x -= m_movingspeed*m_direction.x;
    m_position.z -= m_movingspeed*m_direction.z;
+   m_position.y -= m_movingspeed*m_direction.y;   
 }
 
 void Camera::move_up()
