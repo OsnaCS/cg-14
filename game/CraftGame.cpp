@@ -27,6 +27,10 @@ void CraftGame::init() {
     return EventResult::Skipped;
   });
 
+  // m_window.addEventCallback([&](InputEvent e){
+  //   mplayer.onEvent(e);
+  // })
+
   // resize window
   m_window.resize(Vec2i(800, 600));
 }

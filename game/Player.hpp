@@ -28,6 +28,8 @@ public:
 		return m_hunger;
 	}
 
+	void onEvent(InputEvent e);
+
 
 
 private:
