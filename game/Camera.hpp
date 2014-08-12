@@ -2,6 +2,8 @@
 
 #include "lumina/lumina.hpp"
 
+using namespace lumina;
+
 class Camera{
 
 public:
@@ -17,6 +19,13 @@ public:
 
 	lumina::Mat4<float> get_matrix();
 	lumina::Mat4<float> get_ProjectionMatrix();
+	void setPosition(Vec3f position) {
+		m_position = position;
+	}
+
+	Vec3f getPosition() {
+		return m_position;
+	}
 
 private:
 	lumina::Vec3<float> m_position;
