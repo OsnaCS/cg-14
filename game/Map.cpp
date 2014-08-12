@@ -70,3 +70,10 @@ bool Map::exists(Vec3i pos)
 	return m_map.count(getChunkPos(pos)) > 0;
 
 }
+
+Chunk& Map::getChunk(Vec2i pos)
+{
+
+
+	return m_map[pos];
+}

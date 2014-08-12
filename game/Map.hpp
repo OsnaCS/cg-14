@@ -77,6 +77,8 @@ public:
 	*/
 	//map<Vec2i, Chunk> loadWorld("WeltDatei");
 
+	Chunk& getChunk(Vec2i pos);
+
 private:
 
 	// Map with all Chunks
