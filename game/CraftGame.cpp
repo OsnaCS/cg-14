@@ -12,11 +12,8 @@ CraftGame::CraftGame() {
   m_map.addChunk(Vec2i(0,0));
   
   for(int i = 0; i < 16; i++) {
-    for(int j = 0; j < 16; j++) {
-      for(int k = 0; k < 63; k++) {
-        m_map.setBlockType(Vec3i(i, k, j), BlockType::Dirt);
-      }
-    }
+    m_map.setBlockType(Vec3i(i, 0, i), BlockType::Dirt);
+    m_map.setBlockType(Vec3i(15-i, 0, i), BlockType::Dirt);
   } 
 } 
 
@@ -72,7 +69,7 @@ void CraftGame::init() {
     return EventResult::Skipped;
   });
   // resize window
-  m_window.resize(Vec2i(400, 300));
+  m_window.resize(Vec2i(1280, 1024));
 }
 
 void CraftGame::start() {
