@@ -38,9 +38,11 @@ public:
 	*/
 	BlockType getBlockType(Vec3i pos);
 
-private:
+
 
 	// Vector to save the Blocktypes
 	vector<BlockType> m_blocks;
+
+	private:
 	
 };

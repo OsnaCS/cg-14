@@ -16,6 +16,12 @@ class Map
 	
 public:
 
+	Map();
+
+	Map(string name);
+
+	void setName(string name);
+
 	/**
 	* adds a Chunk to the Map at the given 2D Position.
 	* If the Chunk already exists, it will be overwritten with
@@ -70,16 +76,17 @@ public:
 	/**
 	* Save's the World
 	*/
-	//void saveWorld();
+	void saveWorld();
 
 	/**
 	*	Soll die Dateien einlesen
 	*/
-	//map<Vec2i, Chunk> loadWorld("WeltDatei");
+	map<Vec2i, Chunk> loadWorld(string chunkname);
 
 private:
 
 	// Map with all Chunks
 	map<Vec2i, Chunk> m_map;
+	string m_name;
 
 };

@@ -5,6 +5,7 @@ Color8A getColor(BlockType type)
 
 	switch(type)
 	{
+
 		case BlockType::Air:
 			return Color8A(255,255,255,0);
 
@@ -25,6 +26,7 @@ Color8A getColor(BlockType type)
 
 		case BlockType::Grass:
 			return Color8A(102,205,0,255);			
+	
 	}
 
 }
