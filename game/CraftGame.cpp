@@ -40,8 +40,15 @@ void CraftGame::init() {
         m_rotationAngleStep = 0.03f;
       }
     }
+    else {
+        return m_camera.processEvent(e);
+    }
     return EventResult::Skipped;
   });
+
+  // control the camera...
+
+
 
   // resize window
   m_window.resize(Vec2i(800, 600));
