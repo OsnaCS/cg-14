@@ -37,8 +37,13 @@ public:
 
 private:
     void move_left();
-
-
+    void move_right();
+    void move_forward();
+    void move_backward();
+    void move_up();
+    void move_down();
+    void turn_left();
+    void turn_right();
 
 	lumina::Vec3<float> m_position;
 	lumina::Vec3<float> m_direction;
