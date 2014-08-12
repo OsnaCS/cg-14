@@ -13,7 +13,6 @@ public:
 
 private:
   lumina::Window m_window;
-  float m_rotationAngleStep;
   bool m_running;
   Camera m_camera;
   Map m_map;

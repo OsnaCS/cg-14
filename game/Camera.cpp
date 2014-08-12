@@ -73,7 +73,6 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
     {
     	turn_side(-e.mouseInput.x / 300);
     	turn_upDown(-e.mouseInput.y / 300);
-    	slog(e.mouseInput.x, ",", e.mouseInput.y);
     }
 
 
