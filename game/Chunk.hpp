@@ -3,7 +3,6 @@
 #include <vector>
 #include "lumina/lumina.hpp"
 #include "BlockType.hpp"
-#include "lumina/core/LuminaException.hpp"
 
 using namespace lum;
 using namespace std;
