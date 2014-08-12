@@ -1,5 +1,6 @@
 #include "CraftGame.hpp"
 #include "Pyramid.hpp"
+#include "ChunkView.hpp"
 
 #include <functional>
 #include <chrono>
@@ -10,6 +11,12 @@ using namespace std;
 CraftGame::CraftGame() {
   m_running = true;
   m_rotationAngleStep = 0.03f;
+  m_map.addChunk(Vec2i(0,0));
+  
+  for(int i = 0; i < 16; i++){
+     m_map.setBlockType(Vec3i(i,0,i), BlockType::Stone);
+  }
+
 } 
 
 
@@ -18,30 +25,55 @@ void CraftGame::init() {
   m_window.setTitle("CG Praktikum 2014 :)");
   m_window.setVersionHint(3, 3);
 
-  // add event callback (capture by reference)
+  // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
-      m_running = false;
-      return EventResult::Processed;
-    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Up) {
+
+    if (e.type == InputType::KeyPressed || e.type == InputType::KeyHold) {
+
       auto pos = m_camera.getPosition();
-      pos.y += 0.5f;
-      m_camera.setPosition(pos);
-    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Down) {
-      auto pos = m_camera.getPosition();
-      pos.y -= 0.5f;
-      m_camera.setPosition(pos);
-    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P) {
-      if (m_rotationAngleStep > 0.000001f) {
-        m_rotationAngleStep = 0.0f;
-      } else {
-        m_rotationAngleStep = 0.03f;
+
+      switch (e.keyInput.key) {
+        case KeyCode::Escape:
+          m_running = false;
+          return EventResult::Processed;
+          break;
+        case KeyCode::Up:
+          pos.y += 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::Down:
+          pos.y -= 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::Left:
+          pos.x -= 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::Right:
+          pos.x += 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::W:
+          pos.z += 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::S:
+          pos.z -= 0.5f;
+          m_camera.setPosition(pos);
+          break;
+        case KeyCode::P:
+          if (m_rotationAngleStep > 0.000001f) {
+            m_rotationAngleStep = 0.0f;
+          } else {
+            m_rotationAngleStep = 0.03f;
+          }
+          break;
+        default:
+          return m_camera.processEvent(e);
+          break;
       }
-    }
-    else {
-        return m_camera.processEvent(e);
     }
     return EventResult::Skipped;
   });
@@ -69,16 +101,7 @@ void CraftGame::start() {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
-  // create VertexSeq that represents a triangle
-  VertexSeq triangle = createPyramid(.5f, .5f);
-  /*triangle.create(5, 3);  // 2+3 floats, 3 vertices
-  triangle.prime<Vec2f, Color32f>([](HotVertexSeq<Vec2f, Color32f>& hot){
-    hot.vertex[0].set(Vec2f(-1.f, -1.f), Color32f(1, 0, 0));
-    hot.vertex[1].set(Vec2f( 0.f,  1.f),  Color32f(0, 1, 0));
-    hot.vertex[2].set(Vec2f( 1.f, -1.f),  Color32f(0, 0, 1));
-  });*/
-
-
+  
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -92,10 +115,17 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   float angle = 0.f;
   p.perFragProc.enableDepthTest();
   p.perFragProc.enableDepthWrite();
-  p.perFragProc.setDepthFunction(DepthFunction::Greater);
+  p.perFragProc.setDepthFunction(DepthFunction::Less);
+  p.primitiveProc.enableCulling();
+
+  auto now = chrono::system_clock::now();
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
+    auto diff = chrono::system_clock::now() - now;
+    float s = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
+    slog(s, ", FPS:", 1/s);
+    now = chrono::system_clock::now();
 
     // poll events
     m_window.update();
@@ -106,17 +136,19 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
-      hotFB.clearDepth(0.f);
+      hotFB.clearDepth(1.f);
 
       // prime program to use it
       p.prime([&](HotProgram& hot) {
 
-        hot.uniform["u_world"] = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.f, 1.0f, 0.f), angle));
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
 
-        // draw the triangle
-        hot.draw(triangle, PrimitiveType::Triangle);
+        Chunk& currentChunk = m_map.getChunk(Vec2i(0,0));
+        ChunkView cV(currentChunk,Vec2i(0,0));
+
+        cV.draw(hot);
+
       });
     });
     
