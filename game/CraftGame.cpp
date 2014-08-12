@@ -21,8 +21,7 @@ void CraftGame::init() {
   m_window.addEventCallback([&](InputEvent e) {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-    if(e.type == InputType::Key && e.keyInput.type == KeyInputType::Pressed
-       && e.keyInput.key == KeyCode::Escape) {
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
       m_running = false;
       return EventResult::Processed;
     }
