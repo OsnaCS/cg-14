@@ -10,5 +10,14 @@ out vec4 o_color;
 
 
 void main() {
-  o_color = vec4(inData.color, 1);
+  
+  vec3 color = inData.color;
+
+  if(color.x < 0) color.x *= -1;
+  if(color.y < 0) color.y *= -1;
+  if(color.z < 0) color.z *= -1;
+
+
+  o_color = vec4(color, 1);
+
 }
