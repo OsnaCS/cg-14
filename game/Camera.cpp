@@ -7,7 +7,8 @@ using namespace std;
 Camera::Camera() :
     m_position(Vec3f(0.0f, 0.0f, 10.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
-    ,m_movingspeed(0.1f)
+    ,m_movingspeed(0.1f),
+    m_mouseCaptured(false)
 {
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
 }
@@ -22,7 +23,7 @@ Mat4<float> Camera::get_ProjectionMatrix(){
 		return projectionMatrix(0.785f, 1.0f, 0.0001f, 1000000.0f);
 };
 
-EventResult Camera::processEvent( InputEvent& e )
+EventResult Camera::processEvent( InputEvent& e , Window& win)
 {
     // Key
     if(e.type == InputType::KeyHold || e.type == InputType::KeyPressed)
@@ -47,10 +48,10 @@ EventResult Camera::processEvent( InputEvent& e )
             move_down();
             return EventResult::Processed;
         case KeyCode::A :
-            turn_left();
+            turn_side(0.1f);
             return EventResult::Processed;
         case KeyCode::D :
-            turn_right();
+            turn_side(-0.1f);
             return EventResult::Processed;
         default:
             break;
@@ -58,10 +59,21 @@ EventResult Camera::processEvent( InputEvent& e )
        }
     }
 
-    // Mouse
-    if (e.type == InputType::MouseMoveDir || e.type == InputType::MouseMovePos)
-    {
+    if(e.type == InputType::LMousePressed) {
+    	m_mouseCaptured = true;
+    	win.setCursorMode(CursorMode::Free);
+    }
+    if(e.type == InputType::LMouseReleased) {
+    	m_mouseCaptured = false;
+    	win.setCursorMode(CursorMode::Normal);
+    }
 
+    // Mouse
+    if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
+    {
+    	turn_side(-e.mouseInput.x / 300);
+    	turn_upDown(-e.mouseInput.y / 300);
+    	slog(e.mouseInput.x, ",", e.mouseInput.y);
     }
 
 
@@ -80,10 +92,6 @@ void Camera::move_right()
 {
    Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), -1.5708f ));
    Vec4f left_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
-   for( int i=0; i< left_direction.size; i++  ) {
-       cout<<left_direction[i]<<" ";
-   }
-   cout<<endl;
    m_position.x += m_movingspeed*left_direction.x;
    m_position.z += m_movingspeed*left_direction.z;
 }
@@ -112,18 +120,18 @@ void Camera::move_down()
 }
 
 // change direction to 9 degree
-void Camera::turn_left()
+void Camera::turn_side(float deltaX)
 {
-    Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), (float)(M_PI_2/2)));
+    Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), deltaX));
     Vec4f new_direction =  rotationM*Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
     m_direction.x = new_direction.x;
     m_direction.z = new_direction.z;
 }
-// change direction
-void Camera::turn_right()
+
+void Camera::turn_upDown(float deltaY)
 {
-    Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f),(float)(-M_PI_2/10)));
-    Vec4f new_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
-    m_direction.x = new_direction.x;
-    m_direction.z = new_direction.z;
+Vec3f trans_Vec = cross(m_direction, Vec3f(0.f, 1.f, 0.f));
+Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(trans_Vec.x, trans_Vec.y, trans_Vec.z), deltaY));
+    Vec4f new_direction =  rotationM*Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
+    m_direction.y = new_direction.y;
 }
