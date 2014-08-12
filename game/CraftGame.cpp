@@ -85,7 +85,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   float angle = 0.f;
   p.perFragProc.enableDepthTest();
   p.perFragProc.enableDepthWrite();
-  p.perFragProc.setDepthFunction(DepthFunction::Greater);
+  p.perFragProc.setDepthFunction(DepthFunction::Less);
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
@@ -99,7 +99,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
-      hotFB.clearDepth(0.f);
+      hotFB.clearDepth(1.f);
 
       // prime program to use it
       p.prime([&](HotProgram& hot) {
