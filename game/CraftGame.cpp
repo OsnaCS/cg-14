@@ -9,6 +9,7 @@ using namespace std;
 
 CraftGame::CraftGame() {
   m_running = true;
+  m_rotationAngleStep = 0.03f;
 } 
 
 
@@ -21,13 +22,33 @@ void CraftGame::init() {
   m_window.addEventCallback([&](InputEvent e) {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-    if(e.type == InputType::Key && e.keyInput.type == KeyInputType::Pressed
-       && e.keyInput.key == KeyCode::Escape) {
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
       m_running = false;
       return EventResult::Processed;
+    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Up) {
+      auto pos = m_camera.getPosition();
+      pos.y += 0.5f;
+      m_camera.setPosition(pos);
+    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Down) {
+      auto pos = m_camera.getPosition();
+      pos.y -= 0.5f;
+      m_camera.setPosition(pos);
+    } else if (e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P) {
+      if (m_rotationAngleStep > 0.000001f) {
+        m_rotationAngleStep = 0.0f;
+      } else {
+        m_rotationAngleStep = 0.03f;
+      }
+    }
+    else {
+        return m_camera.processEvent(e);
     }
     return EventResult::Skipped;
   });
+
+  // control the camera...
+
+
 
   // resize window
   m_window.resize(Vec2i(800, 600));
@@ -68,20 +89,32 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program p;
   p.create(vs, fs);
 
+  float angle = 0.f;
+  p.perFragProc.enableDepthTest();
+  p.perFragProc.enableDepthWrite();
+  p.perFragProc.setDepthFunction(DepthFunction::Greater);
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
+
     // poll events
     m_window.update();
     
+    angle += m_rotationAngleStep;
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
+      hotFB.clearDepth(0.f);
 
       // prime program to use it
       p.prime([&](HotProgram& hot) {
+
+        hot.uniform["u_world"] = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.f, 1.0f, 0.f), angle));
+        hot.uniform["u_view"] = this->m_camera.get_matrix();
+        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
+
         // draw the triangle
         hot.draw(triangle, PrimitiveType::Triangle);
       });

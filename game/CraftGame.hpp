@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lumina/lumina.hpp"
+#include "Camera.hpp"
 
 class CraftGame {
 public:
@@ -11,7 +12,9 @@ public:
 
 private:
   lumina::Window m_window;
+  float m_rotationAngleStep;
   bool m_running;
+  Camera m_camera;
 
   void run(lumina::HotRenderContext& hotContext);
 
