@@ -30,7 +30,7 @@ void CraftGame::init() {
   m_window.addEventCallback([&](InputEvent e) {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-
+  return m_camera.processEvent(e, m_window);
     if (e.type == InputType::KeyPressed || e.type == InputType::KeyHold) {
 
       auto pos = m_camera.getPosition();
@@ -72,7 +72,7 @@ void CraftGame::init() {
           }
           break;
         default:
-          return m_camera.processEvent(e);
+          
           break;
       }
     }
