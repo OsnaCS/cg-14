@@ -70,8 +70,8 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
     // Mouse
     if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
     {
-        slog(-e.mouseInput.x, " // ", -e.mouseInput.y);
-        slog(m_direction.x, " // ", m_direction.y, " // ", m_direction.z);
+        //slog(-e.mouseInput.x, " // ", -e.mouseInput.y);
+        //slog(m_direction.x, " // ", m_direction.y, " // ", m_direction.z);
     	turn_side(-e.mouseInput.x / 300.0f);
     	turn_upDown(-e.mouseInput.y / 50.0f);
     }
