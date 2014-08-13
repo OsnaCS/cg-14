@@ -13,9 +13,9 @@ CraftGame::CraftGame() {
 
   for(int i = 0; i < 16; i++) {
     for(int j = 0; j < 16; j++) {
-      for(int k = 0; k < 64; k++) {
-    m_map.setBlockType(Vec3i(i, k, j), BlockType::Dirt);
-    //m_map.setBlockType(Vec3i(15 - i, 0, i), BlockType::Dirt);
+      for(int k = 0; k < 128; k++) {
+    		m_map.setBlockType(Vec3i(i, k, j), static_cast<BlockType>((i*j*k)%5));
+    		//m_map.setBlockType(Vec3i(15 - i, 0, i), BlockType::Dirt);
       }
     }
   }

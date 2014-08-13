@@ -20,7 +20,7 @@ Mat4<float> Camera::get_matrix(){
 }
 
 Mat4<float> Camera::get_ProjectionMatrix(){
-		return projectionMatrix(0.785f, 1.0f, 0.0001f, 1000000.0f);
+		return projectionMatrix(0.785f, 1.0f, 0.01f, 1000.0f);
 };
 
 EventResult Camera::processEvent( InputEvent& e , Window& win)
