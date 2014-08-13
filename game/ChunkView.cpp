@@ -137,7 +137,7 @@ void ChunkView::updateView() {
 
 void ChunkView::draw(HotProgram& hotProg) {
   for(VertexSeq& sequence : m_chunkSequences) {
-    if(sequence.nativeVertexHandle() != 0) {
+    if(sequence) {
       hotProg.draw(sequence, PrimitiveType::TriangleStrip);
     }
  	}
