@@ -29,7 +29,6 @@ void CraftGame::init() {
   // add event callback (capture by reference
   m_window.addEventCallback(
     [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
-
   m_window.addEventCallback([&](InputEvent e) {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
@@ -88,6 +87,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // poll events
     m_window.update();
+    m_camera.update();
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {

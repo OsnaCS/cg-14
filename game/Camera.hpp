@@ -7,6 +7,7 @@
 using namespace lumina;
 
 class Camera{
+ 
 
 public:
 	Camera();
@@ -29,12 +30,13 @@ public:
 		return m_position;
 	}
 
+		void update();
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
     };
 
     lumina::EventResult processEvent( lumina::InputEvent& e, Window& win );
-
+ 		
 private:
     void move_left();
     void move_right();
@@ -45,11 +47,19 @@ private:
     void turn_side(float deltaX);
     void turn_upDown(float deltaY);
     void reset_camera();
+
   
 	lumina::Vec3<float> m_position;
 	lumina::Vec3<float> m_direction;
 	lumina::Vec3<float> m_up;
     float m_movingspeed;
     bool m_mouseCaptured;
-
+    bool m_wPressed;
+    bool m_sPressed;
+    bool m_aPressed;
+    bool m_dPressed;
+		bool m_SpacePressed;
+    bool m_CtrlPressed;
+  	bool m_ShiftPressed;
+      
 };
