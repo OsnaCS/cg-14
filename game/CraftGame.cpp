@@ -99,7 +99,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       p.prime([&](HotProgram& hot) {
 
         hot.uniform["u_view"] = this->m_camera.get_matrix();
-        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
+        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
         Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
         ChunkView cV(currentChunk, Vec2i(0, 0));
