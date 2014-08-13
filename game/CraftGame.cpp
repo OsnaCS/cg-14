@@ -12,11 +12,14 @@ CraftGame::CraftGame() {
   m_map.addChunk(Vec2i(0, 0));
 
   for(int i = 0; i < 16; i++) {
-    m_map.setBlockType(Vec3i(i, 0, i), BlockType::Dirt);
-    m_map.setBlockType(Vec3i(15 - i, 0, i), BlockType::Dirt);
+    for(int j = 0; j < 16; j++) {
+      for(int k = 0; k < 64; k++) {
+    m_map.setBlockType(Vec3i(i, k, j), BlockType::Dirt);
+    //m_map.setBlockType(Vec3i(15 - i, 0, i), BlockType::Dirt);
+      }
+    }
   }
 }
-
 
 void CraftGame::init() {
   // configure window
@@ -105,7 +108,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
     });
-    
+
     // swap buffer
     hotContext.swapBuffer();
 
