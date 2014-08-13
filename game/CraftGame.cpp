@@ -12,7 +12,7 @@ CraftGame::CraftGame() {
   m_running = true;
 
   ChunkGenerator cg;
-  cg.chunkGenerationPrime(m_map);
+  cg.chunkGeneration(m_map,{0,0,0});
 
 
   /*for(int i = 0; i < 16; i++) {
@@ -104,9 +104,34 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
 
         Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
-        ChunkView cV(currentChunk, Vec2i(0, 0));
+        ChunkView cV1(currentChunk, Vec2i(0, 0));
 
-        cV.draw(hot);
+        cV1.draw(hot);
+        ChunkView cV2(currentChunk, Vec2i(-1, 0));
+
+        cV2.draw(hot);
+        ChunkView cV3(currentChunk, Vec2i(1, 0));
+
+        cV3.draw(hot);
+        ChunkView cV4(currentChunk, Vec2i(0, -1));
+
+        cV4.draw(hot);
+        ChunkView cV5(currentChunk, Vec2i(0, 1));
+
+        cV5.draw(hot);
+
+        /*        ChunkView cV6(currentChunk, Vec2i(1, 1));
+
+        cV6.draw(hot);
+                ChunkView cV7(currentChunk, Vec2i(-1, 1));
+
+        cV7.draw(hot);
+                ChunkView cV8(currentChunk, Vec2i(1, -1));
+
+        cV8.draw(hot);
+                ChunkView cV9(currentChunk, Vec2i(-1, -1));
+
+        cV9.draw(hot);*/
 
       });
     });
