@@ -11,10 +11,10 @@ class ChunkView {
 public:
 	ChunkView(Chunk& chunk, Vec2i index);
 	void draw(HotProgram& hotProg);
+	void updateView();
 
 private:
 	Chunk& m_chunk;
 	Vec2i m_index;
-	
-	static VertexSeq m_box;
+	std::array<VertexSeq, 8> m_chunkSequences;
 };
