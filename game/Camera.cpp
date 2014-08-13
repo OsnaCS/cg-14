@@ -1,5 +1,6 @@
 #include "Camera.hpp"
 #include "lumina/lumina.hpp"
+#include <algorithm> 
 
 using namespace lumina;
 using namespace std;
@@ -19,8 +20,9 @@ Mat4<float> Camera::get_matrix(){
     return viewMatrix(m_position,m_direction,m_up);
 }
 
-Mat4<float> Camera::get_ProjectionMatrix(){
-		return projectionMatrix(0.785f, 1.0f, 0.01f, 1000.0f);
+Mat4<float> Camera::get_ProjectionMatrix(Window& w){
+       Vec2i s = w.getSize();
+		return projectionMatrix(float(s[0]/s[1]), 1.0f, 0.01f, 1000.0f);
 };
 
 EventResult Camera::processEvent( InputEvent& e , Window& win)
@@ -29,12 +31,6 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
     if(e.type == InputType::KeyHold || e.type == InputType::KeyPressed)
     {
         switch( (KeyCode)(e.keyInput.key) ) {
-        case KeyCode::Q :
-            move_left();
-            return EventResult::Processed;
-        case KeyCode::E :
-            move_right();
-            return EventResult::Processed;
         case KeyCode::W :
             move_forward();
             return EventResult::Processed;
@@ -48,10 +44,13 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
             move_down();
             return EventResult::Processed;
         case KeyCode::A :
-            turn_side(0.1f);
+            move_left();
             return EventResult::Processed;
         case KeyCode::D :
-            turn_side(-0.1f);
+            move_right();
+            return EventResult::Processed;
+        case KeyCode::K :
+            reset_camera();
             return EventResult::Processed;
         default:
             break;
@@ -71,8 +70,10 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
     // Mouse
     if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
     {
-    	turn_side(-e.mouseInput.x / 300);
-    	turn_upDown(-e.mouseInput.y / 300);
+        slog(-e.mouseInput.x, " // ", -e.mouseInput.y);
+        slog(m_direction.x, " // ", m_direction.y, " // ", m_direction.z);
+    	turn_side(-e.mouseInput.x / 300.0f);
+    	turn_upDown(-e.mouseInput.y / 50.0f);
     }
 
 
@@ -125,14 +126,29 @@ void Camera::turn_side(float deltaX)
 {
     Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), deltaX));
     Vec4f new_direction =  rotationM*Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
-    m_direction.x = new_direction.x;
-    m_direction.z = new_direction.z;
+    float sum_vector = abs(new_direction.x) + abs(new_direction.y) + abs(new_direction.z);
+    m_direction.x = new_direction.x / sum_vector;
+    m_direction.y = new_direction.y / sum_vector;
+    m_direction.z = new_direction.z / sum_vector;
 }
 
 void Camera::turn_upDown(float deltaY)
 {
-Vec3f trans_Vec = cross(m_direction, Vec3f(0.f, 1.f, 0.f));
-Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(trans_Vec.x, trans_Vec.y, trans_Vec.z), deltaY));
+    if((m_direction.y < 0.9f && deltaY >0 ) || (m_direction.y > -0.9f && deltaY <0)){
+    Vec3f trans_Vec = cross(m_direction, Vec3f(0.f, 1.f, 0.f));
+    Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(trans_Vec.x, trans_Vec.y, trans_Vec.z),1.5708f/10* deltaY));
+
     Vec4f new_direction =  rotationM*Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
-    m_direction.y = new_direction.y;
+    float sum_vector = abs(new_direction.x) + abs(new_direction.y) + abs(new_direction.z);
+
+    m_direction.x = new_direction.x / sum_vector;
+    m_direction.y = new_direction.y / sum_vector;
+    m_direction.z = new_direction.z / sum_vector;
+    }
+}
+
+void Camera::reset_camera()
+{
+    m_position = Vec3f(0.0f, 0.0f, 10.0f);
+    m_direction = Vec3f(0.0f, 0.0f, -1.0f);
 }

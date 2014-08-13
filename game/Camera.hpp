@@ -2,7 +2,7 @@
 
 #include "lumina/lumina.hpp"
 #include "lumina/input/InputEvent.hpp"
-//#include <functional>
+#include <algorithm> 
 
 using namespace lumina;
 
@@ -20,7 +20,7 @@ public:
     }
 
 	lumina::Mat4<float> get_matrix();
-	lumina::Mat4<float> get_ProjectionMatrix();
+	lumina::Mat4<float> get_ProjectionMatrix(Window& w);
 	void setPosition(Vec3f position) {
 		m_position = position;
 	}
@@ -44,6 +44,7 @@ private:
     void move_down();
     void turn_side(float deltaX);
     void turn_upDown(float deltaY);
+    void reset_camera();
   
 	lumina::Vec3<float> m_position;
 	lumina::Vec3<float> m_direction;
