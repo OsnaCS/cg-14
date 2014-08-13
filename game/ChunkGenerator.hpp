@@ -12,9 +12,6 @@ class ChunkGenerator {
 public:
   ChunkGenerator();
 
-  // generiert den Chunk auf dem der Player startet
-  void chunkGenerationPrime(Map& m);
-
   // generiert alle weiteren Chunks abhängig davon wo der Player hinläuft
   void chunkGeneration(Map& m, Vec3i player_pos);
 

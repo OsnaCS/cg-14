@@ -14,13 +14,7 @@ CraftGame::CraftGame() {
   ChunkGenerator cg;
   cg.chunkGeneration(m_map,{0,0,0});
 
-
-  /*for(int i = 0; i < 16; i++) {
-    m_map.setBlockType(Vec3i(i, 0, i), BlockType::Dirt);
-    m_map.setBlockType(Vec3i(15 - i, 0, i), BlockType::Dirt);
-  }*/
 }
-
 
 void CraftGame::init() {
   // configure window
@@ -101,7 +95,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       p.prime([&](HotProgram& hot) {
 
         hot.uniform["u_view"] = this->m_camera.get_matrix();
-        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix();
+        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
         Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
         ChunkView cV1(currentChunk, Vec2i(0, 0));
@@ -135,7 +129,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
     });
-    
+
     // swap buffer
     hotContext.swapBuffer();
 
