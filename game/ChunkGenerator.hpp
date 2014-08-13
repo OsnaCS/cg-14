@@ -16,15 +16,17 @@ public:
   void chunkGenerationPrime(Map& m);
 
   // generiert alle weiteren Chunks abhängig davon wo der Player hinläuft
-  void chunkGeneration(Map m, Vec3i player_pos);
+  void chunkGeneration(Map& m, Vec3i player_pos);
 
   // berechnet den Perlin Noise Wert (eine randomisierte Höhe)
   int perlinNoise(int x, int z);
 
-  float randomPos(Vec2i vector);
+	float randomPos(Vec2i vector);
+  //float randomPos(int x, int z);
+
+  float interpolate(float a, float b, float x);
 
 private:
   long m_seed;
   int m_octave;
-  // random
 };
