@@ -27,6 +27,18 @@ Color8A getColor(BlockType type)
 		case BlockType::Grass:
 			return Color8A(102,205,0,255);			
 	
+		case BlockType::Glass:
+			return Color8A(102,205,0,255);			
+	
+		case BlockType::Metal:
+			return Color8A(102,205,0,255);			
+	
+		case BlockType::Pine:
+			return Color8A(102,205,0,255);			
+	
+		case BlockType::Oak:
+			return Color8A(102,205,0,255);			
+	
 	}
 
 }

@@ -10,7 +10,7 @@ using namespace lumina;
 enum class BlockType
 {
 
-	Air, Dirt, Wood, Stone, Water, Sand, Grass
+	Air, Dirt, Wood, Stone, Water, Sand, Grass, Glass, Metal, Pine, Oak
 	
 };
 

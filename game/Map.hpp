@@ -5,6 +5,7 @@
 #include <map>
 
 using namespace std;
+
 /**
 * A Map consists of arbitrary many Chunks.
 * Chunks have to be added to the Map with the function
@@ -20,6 +21,11 @@ public:
 
 	Map(string name);
 
+	/**
+	* sets the name of the Map
+	*
+	* @param name new name of the Map
+	*/
 	void setName(string name);
 
 	/**
@@ -34,15 +40,13 @@ public:
 	void addChunk(Vec2i pos);
 
 	/**
-	* sets the BlockType of the given Position to the given
-	* Blocktype. To check if the BlockType can be set,
-	* use the exists(Vec3i pos) method
+	* returns the Chunk of the given 2D Position
 	*
-	* @param pos 3D Position of the Block in the complete Map
-	* 				pos.y = hight
-	* @param type BlockType
+	* @param pos 2D Position of the Chunk
+	*
+	* @return 
 	*/
-	void setBlockType(Vec3i pos, BlockType type);
+	Chunk& getChunk(Vec2i pos);
 
 	/**
 	* convinient Method to get the corresponding 2d Position of 
@@ -55,6 +59,17 @@ public:
 	Vec2i getChunkPos(Vec3i pos);
 
 	/**
+	* sets the BlockType of the given Position to the given
+	* Blocktype. To check if the BlockType can be set,
+	* use the exists(Vec3i pos) method
+	*
+	* @param pos 3D Position of the Block in the complete Map
+	* 				pos.y = hight
+	* @param type BlockType
+	*/
+	void setBlockType(Vec3i pos, BlockType type);
+
+	/**
 	* returns the BlockType of the given Position
 	*
 	* @param pos 3D Position of the Block in the complete Map
@@ -62,7 +77,6 @@ public:
 	* @return BlockType of the Block on the given Position
 	*/
 	BlockType getBlockType(Vec3i pos);
-
 
 	/**
 	* returns if a Block exists for the given Position
@@ -72,7 +86,6 @@ public:
 	*/
 	bool exists(Vec3i pos);
 
-
 	/**
 	* Save's the World
 	*/
@@ -81,14 +94,14 @@ public:
 	/**
 	*	Soll die Dateien einlesen
 	*/
-	map<Vec2i, Chunk> loadWorld(string chunkname);
-
-	Chunk& getChunk(Vec2i pos);
+	void loadWorld(string chunkname);
 
 private:
 
 	// Map with all Chunks
 	map<Vec2i, Chunk> m_map;
+
+	//Name of the Map
 	string m_name;
 
 };
