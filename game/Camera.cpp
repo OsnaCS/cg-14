@@ -5,11 +5,21 @@
 using namespace lumina;
 using namespace std;
 
+const float BASIC_SPEED = 0.3f; 
+const float FAST_SPEED = 3.0f;
+
 Camera::Camera() :
     m_position(Vec3f(0.0f, 0.0f, 10.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
-    ,m_movingspeed(0.3f),
-    m_mouseCaptured(false)
+    ,m_movingspeed(0.3f)
+    ,m_mouseCaptured(false)
+    ,m_wPressed(false)
+    ,m_sPressed(false)
+    ,m_aPressed(false)
+    ,m_dPressed(false)
+    ,m_SpacePressed(false)
+    ,m_CtrlPressed(false)
+    ,m_ShiftPressed(false)
 {
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
 }
@@ -27,37 +37,82 @@ Mat4<float> Camera::get_ProjectionMatrix(Window& w){
 
 EventResult Camera::processEvent( InputEvent& e , Window& win)
 {
-    // Key
-    if(e.type == InputType::KeyHold || e.type == InputType::KeyPressed)
-    {
-        switch( (KeyCode)(e.keyInput.key) ) {
-        case KeyCode::W :
-            move_forward();
-            return EventResult::Processed;
-        case KeyCode::S :
-            move_backward();
-            return EventResult::Processed;
-        case KeyCode::Space :
-            move_up();
-            return EventResult::Processed;
-        case KeyCode::C :
-            move_down();
-            return EventResult::Processed;
-        case KeyCode::A :
-            move_left();
-            return EventResult::Processed;
-        case KeyCode::D :
-            move_right();
-            return EventResult::Processed;
-        case KeyCode::K :
-            reset_camera();
-            return EventResult::Processed;
-        default:
+    //Key Pressed and Released
+    if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
+        bool proccessed = false;
+        switch( (KeyCode)(e.keyInput.key))
+        {
+            case KeyCode::W :
+            if(m_wPressed == false){
+                m_wPressed = true;
+            }else{
+                m_wPressed = false;
+            }
+            proccessed = true;
             break;
 
-       }
+            case KeyCode::S :
+            if(m_sPressed == false){
+                m_sPressed = true;
+            }else{
+                m_sPressed = false;
+            }
+            proccessed = true;
+            break;
+
+            case KeyCode::A :
+            if(m_aPressed == false){
+                m_aPressed = true;
+            }else{
+                m_aPressed = false;
+            }
+            proccessed = true;
+            break;
+
+            case KeyCode::D :
+            if(m_dPressed == false){
+                m_dPressed = true;
+            }else{
+                m_dPressed = false;
+            }
+            proccessed = true;
+            break;
+
+            case KeyCode::Space :
+            if(m_SpacePressed == false){
+                m_SpacePressed = true;
+            }else{
+                m_SpacePressed = false;
+            }
+            proccessed = true;
+            break;
+
+            case KeyCode::Control :
+            if(m_CtrlPressed == false){
+                m_CtrlPressed = true;
+            }else{
+                m_CtrlPressed = false;
+            }
+            proccessed = true;
+            break;
+            case KeyCode::Shift :
+            if(m_ShiftPressed == false){
+                m_ShiftPressed = true;
+                m_movingspeed = FAST_SPEED; 
+            }else{
+                m_ShiftPressed = false;
+                m_movingspeed = BASIC_SPEED;
+            }
+            proccessed = true;
+            break;
+            default:
+            //Do Nothing
+              break;
+               
+        }
     }
 
+    // Mouse handle
     if(e.type == InputType::LMousePressed) {
     	m_mouseCaptured = true;
     	win.setCursorMode(CursorMode::Free);
@@ -70,8 +125,6 @@ EventResult Camera::processEvent( InputEvent& e , Window& win)
     // Mouse
     if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
     {
-        //slog(-e.mouseInput.x, " // ", -e.mouseInput.y);
-        //slog(m_direction.x, " // ", m_direction.y, " // ", m_direction.z);
     	turn_side(-e.mouseInput.x / 300.0f);
     	turn_upDown(-e.mouseInput.y / 50.0f);
     }
@@ -151,4 +204,23 @@ void Camera::reset_camera()
 {
     m_position = Vec3f(0.0f, 0.0f, 10.0f);
     m_direction = Vec3f(0.0f, 0.0f, -1.0f);
+}
+
+void Camera::update()
+{
+    if(m_wPressed){
+        move_forward();
+    }else if(m_sPressed){
+        move_backward();
+    }
+    if(m_aPressed){
+        move_left();
+    }else if(m_dPressed){
+        move_right();
+    }
+    if(m_SpacePressed){
+        move_up();
+    }else if(m_CtrlPressed){
+        move_down();
+    }  
 }
