@@ -1,5 +1,5 @@
 GAME_CPP := $(wildcard game/*.cpp)
-GAME_HPP := $(wildcard game/*.Hpp)
+GAME_HPP := $(wildcard game/*.hpp)
 GAME_OBJ := $(GAME_CPP:game/%.cpp=obj/%.obj)
 EXE_FILE := app
 

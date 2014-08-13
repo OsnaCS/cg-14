@@ -3,9 +3,10 @@
 #include "Chunk.hpp"
 #include "lumina/lumina.hpp"
 
+#include <array>
+
 /**
  * @brief Graphical representation of Chunk
- * 
  */
 class ChunkView {
 public:

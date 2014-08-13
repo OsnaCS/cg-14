@@ -32,7 +32,7 @@ Mat4<float> Camera::get_matrix(){
 
 Mat4<float> Camera::get_ProjectionMatrix(Window& w){
        Vec2i s = w.getSize();
-		return projectionMatrix(float(s[0]/s[1]), 1.0f, 0.01f, 1000.0f);
+		return projectionMatrix(0.785f, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
 };
 
 EventResult Camera::processEvent( InputEvent& e , Window& win)
