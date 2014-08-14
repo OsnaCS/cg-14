@@ -8,7 +8,17 @@
 
 class Camera
 {
- 
+ struct Movement {
+     bool wPressed;
+     bool sPressed;
+     bool aPressed;
+     bool dPressed;
+     bool SpacePressed;
+     bool CtrlPressed;
+     bool ShiftPressed;
+
+ };
+
 public:
 
 	Camera();
@@ -61,12 +71,6 @@ private:
     lumina::Vec3f m_up;
     float m_movingspeed;
     bool m_mouseCaptured;
-    bool m_wPressed;
-    bool m_sPressed;
-    bool m_aPressed;
-    bool m_dPressed;
-    bool m_SpacePressed;
-    bool m_CtrlPressed;
-  	bool m_ShiftPressed;
-      
+    Movement m_movedKeys;
+
 };

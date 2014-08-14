@@ -13,14 +13,15 @@ Camera::Camera() :
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_mouseCaptured(false)
-    ,m_wPressed(false)
-    ,m_sPressed(false)
-    ,m_aPressed(false)
-    ,m_dPressed(false)
-    ,m_SpacePressed(false)
-    ,m_CtrlPressed(false)
-    ,m_ShiftPressed(false)
+
 {
+    m_movedKeys.wPressed = false;
+    m_movedKeys.sPressed = false;
+    m_movedKeys.aPressed = false;
+    m_movedKeys.dPressed = false;
+    m_movedKeys.SpacePressed = false;
+    m_movedKeys.CtrlPressed = false;
+    m_movedKeys.ShiftPressed = false;
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
 }
 
@@ -37,78 +38,79 @@ Mat4f Camera::get_ProjectionMatrix(Window& w)
 
 EventResult Camera::processEvent( const InputEvent& e, Window& win)
 {
+    bool proccessed = false;
+
     //Key Pressed and Released
     if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
-        bool proccessed = false;
+
         switch( (KeyCode)(e.keyInput.key))
         {
             case KeyCode::W :
-            if(m_wPressed == false){
-                m_wPressed = true;
+            if(m_movedKeys.wPressed == false){
+                m_movedKeys.wPressed = true;
             }else{
-                m_wPressed = false;
+                m_movedKeys.wPressed = false;
             }
             proccessed = true;
             break;
 
             case KeyCode::S :
-            if(m_sPressed == false){
-                m_sPressed = true;
+            if(m_movedKeys.sPressed == false){
+                m_movedKeys.sPressed = true;
             }else{
-                m_sPressed = false;
+                m_movedKeys.sPressed = false;
             }
             proccessed = true;
             break;
 
             case KeyCode::A :
-            if(m_aPressed == false){
-                m_aPressed = true;
+            if(m_movedKeys.aPressed == false){
+                m_movedKeys.aPressed = true;
             }else{
-                m_aPressed = false;
+                m_movedKeys.aPressed = false;
             }
             proccessed = true;
             break;
 
             case KeyCode::D :
-            if(m_dPressed == false){
-                m_dPressed = true;
+            if(m_movedKeys.dPressed == false){
+                m_movedKeys.dPressed = true;
             }else{
-                m_dPressed = false;
+                m_movedKeys.dPressed = false;
             }
             proccessed = true;
             break;
 
             case KeyCode::Space :
-            if(m_SpacePressed == false){
-                m_SpacePressed = true;
+            if(m_movedKeys.SpacePressed == false){
+                m_movedKeys.SpacePressed = true;
             }else{
-                m_SpacePressed = false;
+                m_movedKeys.SpacePressed = false;
             }
             proccessed = true;
             break;
 
             case KeyCode::Control :
-            if(m_CtrlPressed == false){
-                m_CtrlPressed = true;
+            if(m_movedKeys.CtrlPressed == false){
+                m_movedKeys.CtrlPressed = true;
             }else{
-                m_CtrlPressed = false;
+                m_movedKeys.CtrlPressed = false;
             }
             proccessed = true;
             break;
             case KeyCode::Shift :
-            if(m_ShiftPressed == false){
-                m_ShiftPressed = true;
+            if(m_movedKeys.ShiftPressed == false){
+                m_movedKeys.ShiftPressed = true;
                 m_movingspeed = FAST_SPEED; 
             }else{
-                m_ShiftPressed = false;
+                m_movedKeys.ShiftPressed = false;
                 m_movingspeed = BASIC_SPEED;
             }
             proccessed = true;
             break;
             default:
             //Do Nothing
-              break;
-               
+              break;             
         }
     }
 
@@ -129,6 +131,9 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
     	turn_upDown(-e.mouseInput.y / 50.0f);
     }
 
+    if ( proccessed ) {
+        return EventResult::Processed;
+    }
 
     return EventResult::Skipped;
 }
@@ -208,19 +213,19 @@ void Camera::reset_camera()
 
 void Camera::update()
 {
-    if(m_wPressed){
+    if(m_movedKeys.wPressed){
         move_forward();
-    }else if(m_sPressed){
+    }else if(m_movedKeys.sPressed){
         move_backward();
     }
-    if(m_aPressed){
+    if(m_movedKeys.aPressed){
         move_left();
-    }else if(m_dPressed){
+    }else if(m_movedKeys.dPressed){
         move_right();
     }
-    if(m_SpacePressed){
+    if(m_movedKeys.SpacePressed){
         move_up();
-    }else if(m_CtrlPressed){
+    }else if(m_movedKeys.CtrlPressed){
         move_down();
     }  
 }
