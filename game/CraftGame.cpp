@@ -97,35 +97,42 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
+		// Chuncks anzeigen, d.h. zeichnen lassen
         Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
         ChunkView cV1(currentChunk, Vec2i(0, 0));
-
         cV1.draw(hot);
+
+		currentChunk = m_map.getChunk(Vec2i(-1, 0));
         ChunkView cV2(currentChunk, Vec2i(-1, 0));
-
         cV2.draw(hot);
+
+        currentChunk = m_map.getChunk(Vec2i(1, 0));
         ChunkView cV3(currentChunk, Vec2i(1, 0));
-
         cV3.draw(hot);
+
+        currentChunk = m_map.getChunk(Vec2i(0, -1));
         ChunkView cV4(currentChunk, Vec2i(0, -1));
-
         cV4.draw(hot);
-        ChunkView cV5(currentChunk, Vec2i(0, 1));
 
+        currentChunk = m_map.getChunk(Vec2i(0, 1));
+        ChunkView cV5(currentChunk, Vec2i(0, 1));
         cV5.draw(hot);
 
-        /*        ChunkView cV6(currentChunk, Vec2i(1, 1));
-
+        currentChunk = m_map.getChunk(Vec2i(1, 1));
+        ChunkView cV6(currentChunk, Vec2i(1, 1));
         cV6.draw(hot);
-                ChunkView cV7(currentChunk, Vec2i(-1, 1));
 
+        currentChunk = m_map.getChunk(Vec2i(-1, 1));
+        ChunkView cV7(currentChunk, Vec2i(-1, 1));
         cV7.draw(hot);
-                ChunkView cV8(currentChunk, Vec2i(1, -1));
 
+        currentChunk = m_map.getChunk(Vec2i(1, -1));
+        ChunkView cV8(currentChunk, Vec2i(1, -1));
         cV8.draw(hot);
-                ChunkView cV9(currentChunk, Vec2i(-1, -1));
 
-        cV9.draw(hot);*/
+        currentChunk = m_map.getChunk(Vec2i(-1, -1));
+        ChunkView cV9(currentChunk, Vec2i(-1, -1));
+        cV9.draw(hot);
 
       });
     });
