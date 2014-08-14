@@ -16,7 +16,7 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 		hotprog.uniform["u_transform"] = projMat * viewMat;
 		hotprog.uniform["u_light"] = 1.0f;
 		hotprog.draw(m_sphere, PrimitiveType::TriangleStrip);
-		hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
+	//	hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
 
 	});
 
@@ -70,48 +70,48 @@ void Environment::init()
 
 	// double alpha = 2 * PI / n;
 
-  m_sun.create(3 + 3, 4, 5);//n*(n/2-1)
-  m_sun.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot)
-  {
+  // m_sun.create(3 + 3, 4, 5);//n*(n/2-1)
+  // m_sun.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot)
+  // {
 
-  	hot.vertex[0].set(Vec3f(1, 1, 20), Vec2f(0,0));
-  	hot.vertex[1].set(Vec3f(2, 1, 20), Vec2f(0,0));
-  	hot.vertex[2].set(Vec3f(1, 2, 20) , Vec2f(0,0));
-  	hot.vertex[3].set(Vec3f(2, 2, 20), Vec2f(0,0));
+  // 	hot.vertex[0].set(Vec3f(1, 1, 20), Vec2f(0,0));
+  // 	hot.vertex[1].set(Vec3f(2, 1, 20), Vec2f(0,0));
+  // 	hot.vertex[2].set(Vec3f(1, 2, 20) , Vec2f(0,0));
+  // 	hot.vertex[3].set(Vec3f(2, 2, 20), Vec2f(0,0));
 
-		// for(int k = 0; k < n; k++)
-		// {
+		// // for(int k = 0; k < n; k++)
+		// // {
 
-		// 	double phi = k * alpha;
-		// 	for(int l = 1; l < 2; l++)
-		// 	{		
+		// // 	double phi = k * alpha;
+		// // 	for(int l = 1; l < 2; l++)
+		// // 	{		
 
-		// 		double theta = l * alpha;
+		// // 		double theta = l * alpha;
 
-		// 		hot.vertex[k+(l/2-1)].set(Vec3f(1+sin(theta) * cos(phi), 1+sin(theta) * sin(phi), 1+cos(theta)), Vec2f(1,1));
-  //   		hot.vertex[k+(l/2-1)+1].set(Vec3f(1+sin(theta) * cos(phi + alpha), 1+sin(theta) * sin(phi + alpha), 1+cos(theta)), Vec2f(1,1));
-  //   		hot.vertex[k+(l/2-1)+2].set(Vec3f(1+sin(theta + alpha) * cos(phi + alpha), 1+sin(theta + alpha) * sin(phi + alpha), 1+cos(theta + alpha)) , Vec2f(1,1));
-  //   		hot.vertex[k+(l/2-1)+3].set(Vec3f(1+sin(theta + alpha) * cos(phi), 1+sin(theta + alpha) * sin(phi), 1+cos(theta + alpha)), Vec2f(1,1));
+		// // 		hot.vertex[k+(l/2-1)].set(Vec3f(1+sin(theta) * cos(phi), 1+sin(theta) * sin(phi), 1+cos(theta)), Vec2f(1,1));
+  // //   		hot.vertex[k+(l/2-1)+1].set(Vec3f(1+sin(theta) * cos(phi + alpha), 1+sin(theta) * sin(phi + alpha), 1+cos(theta)), Vec2f(1,1));
+  // //   		hot.vertex[k+(l/2-1)+2].set(Vec3f(1+sin(theta + alpha) * cos(phi + alpha), 1+sin(theta + alpha) * sin(phi + alpha), 1+cos(theta + alpha)) , Vec2f(1,1));
+  // //   		hot.vertex[k+(l/2-1)+3].set(Vec3f(1+sin(theta + alpha) * cos(phi), 1+sin(theta + alpha) * sin(phi), 1+cos(theta + alpha)), Vec2f(1,1));
 				
-  // 			hot.vertex[0].set(Vec3f(1, 1, 20), Vec2f(0,0));
-  // 			hot.vertex[1].set(Vec3f(2, 1, 20), Vec2f(0,0));
-  // 			hot.vertex[2].set(Vec3f(1, 2, 20) , Vec2f(0.5,1));
-  // 			hot.vertex[3].set(Vec3f(2, 2, 20), Vec2f(1,1));
+  // // 			hot.vertex[0].set(Vec3f(1, 1, 20), Vec2f(0,0));
+  // // 			hot.vertex[1].set(Vec3f(2, 1, 20), Vec2f(0,0));
+  // // 			hot.vertex[2].set(Vec3f(1, 2, 20) , Vec2f(0.5,1));
+  // // 			hot.vertex[3].set(Vec3f(2, 2, 20), Vec2f(1,1));
 
-  // 			hot.index[k+(l/2-1)] = 0;//k+(l/2-1);
-  // 			hot.index[k+(l/2-1)+1] = 1;//k+(l/2-1)+1;
-  // 			hot.index[k+(l/2-1)+2] = 3;//k+(l/2-1)+3;
-  // 			hot.index[k+(l/2-1)+3] = 2;//k+(l/2-1)+2;
-  // 			hot.index[k+(l/2-1)+4] = 0;//k+(l/2-1);
-  // 			hot.index[k+(l/2-1)+5] = k+(l/2-1)+2;
-  // 			hot.index[k+(l/2-1)+6] = k+(l/2-1)+1;
-  // 			hot.index[k+(k/2-1)+4] = GLIndex::PrimitiveRestart;
+  // // 			hot.index[k+(l/2-1)] = 0;//k+(l/2-1);
+  // // 			hot.index[k+(l/2-1)+1] = 1;//k+(l/2-1)+1;
+  // // 			hot.index[k+(l/2-1)+2] = 3;//k+(l/2-1)+3;
+  // // 			hot.index[k+(l/2-1)+3] = 2;//k+(l/2-1)+2;
+  // // 			hot.index[k+(l/2-1)+4] = 0;//k+(l/2-1);
+  // // 			hot.index[k+(l/2-1)+5] = k+(l/2-1)+2;
+  // // 			hot.index[k+(l/2-1)+6] = k+(l/2-1)+1;
+  // // 			hot.index[k+(k/2-1)+4] = GLIndex::PrimitiveRestart;
 
-		// 	}
+		// // 	}
 
-		// }
+		// // }
 
-  });
+  // });
 
 }
 

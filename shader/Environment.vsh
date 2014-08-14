@@ -9,7 +9,7 @@ uniform mat4 u_transform;
 out VertexData
 {
 
-	vec2 coord;
+	vec3 coord;
 
 } outData;
 
@@ -18,6 +18,6 @@ void main()
 
 	gl_Position = u_transform * vec4(i_windowpos , 1);
 
-	outData.coord = i_coord;
+	outData.coord = i_windowpos;
 
 }
