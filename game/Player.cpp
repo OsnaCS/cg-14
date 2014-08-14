@@ -169,8 +169,8 @@ void Player::turn_upDown(float deltaY)
 
 void Player::update()
 {
-    //Fallen - > Wenn Luft unter dem Spieler, fallen lassen
-    Vec3i pos = Vec3i(static_cast<int>(m_position.x),static_cast<int>(m_position.y),static_cast<int>(m_position.z) );
+    
+    Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
     //TODO
     //Check for too much high // to less high
 
