@@ -3,6 +3,7 @@
 #include "lumina/lumina.hpp"
 #include "Camera.hpp"
 #include "Map.hpp"
+#include "Environment.hpp"
 
 class CraftGame {
 public:
@@ -16,6 +17,7 @@ private:
   bool m_running;
   Camera m_camera;
   Map m_map;
+  Environment m_envir;
 
   void run(lumina::HotRenderContext& hotContext);
 

@@ -17,6 +17,7 @@ CraftGame::CraftGame() {
 }
 
 void CraftGame::init() {
+
   // configure window
   m_window.setTitle("CG Praktikum 2014 :)");
   m_window.setVersionHint(3, 3);
@@ -50,6 +51,8 @@ void CraftGame::start() {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
+
+  m_envir.init();
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -91,6 +94,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+      m_envir.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
       // prime program to use it
       p.prime([&](HotProgram& hot) {
 
