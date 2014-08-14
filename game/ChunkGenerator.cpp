@@ -37,7 +37,7 @@ void ChunkGenerator::chunkGeneration(Map& m, Vec3i spectator_pos) {
             // auffüllen:
             for(int k = 0; k < 128; k++) {
               if(k == noise) {
-                m.getChunk({x, z}).setBlockType({abs(i % 16), k, abs(j % 16)}, BlockType::Grass);
+                m.getChunk({x, z}).setBlockType({abs(i % 16), k, abs(j % 16)}, BlockType::Wood);
               } else if(k <= noise && k >= noise - 3) {
                 m.getChunk({x, z}).setBlockType({abs(i % 16), k, abs(j % 16)}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
               } else if(k < (noise - 3) && k >= noise - 10) {
