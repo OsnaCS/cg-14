@@ -24,16 +24,18 @@ Camera::Camera() :
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
 }
 
-Mat4<float> Camera::get_matrix(){
+Mat4f Camera::get_matrix()
+{
     return viewMatrix(m_position,m_direction,m_up);
 }
 
-Mat4<float> Camera::get_ProjectionMatrix(Window& w){
-       Vec2i s = w.getSize();
-		return projectionMatrix(0.785f, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
+Mat4f Camera::get_ProjectionMatrix(Window& w)
+{
+     Vec2i s = w.getSize();
+    return projectionMatrix(0.785f, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
 };
 
-EventResult Camera::processEvent( InputEvent& e , Window& win)
+EventResult Camera::processEvent( const InputEvent& e, Window& win)
 {
     //Key Pressed and Released
     if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
@@ -224,7 +226,9 @@ void Camera::update()
 }
 
 //Update Camera from position and Direction of the player
-void Camera::updateFromPlayer(Vec3f pos, Vec3f dir){
-m_position = pos;
-m_position.y += 1;
+void Camera::updateFromPlayer(Vec3f pos, Vec3f dir)
+{
+    m_position = pos;
+    m_position.y += 1; // this is to increase the eye position (as height) of the player
+    m_direction = dir;
 }
