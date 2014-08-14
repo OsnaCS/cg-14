@@ -4,7 +4,7 @@ class SimplexNoise
 {
 public:	
 	// 2D simplex noise
-	static double noise(double m_xin, double m_yin);
+	static double noise(double m_xin, double m_yin, int m_seed);
 
 private:
 	// Inner class to speed up gradient computations

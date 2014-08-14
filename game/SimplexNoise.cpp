@@ -8,7 +8,7 @@ using namespace std;
 
 
 
-double SimplexNoise::noise(double m_xin, double m_yin) {
+double SimplexNoise::noise(double m_xin, double m_yin, int m_seed) {
 	// Skewing and unskewing factors for dimensions
 	const double m_F2 = 0.5 * (sqrt(3.0) - 1.0);
 	const double m_G2 = (3.0 - sqrt(3.0)) / 6.0;
@@ -34,7 +34,7 @@ double SimplexNoise::noise(double m_xin, double m_yin) {
   	vector<short> m_perm(512);
   	vector<short> m_permMod12(512);
   	for(int i = 0; i < 512; i++) {
-  		m_perm[i] = m_p[i & 255];
+  		m_perm[i] = m_p[(i + m_seed) & 255];
   		m_permMod12[i] = (short)(m_perm[i] % 12);
   	}
 
