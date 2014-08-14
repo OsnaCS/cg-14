@@ -2,13 +2,15 @@
 
 out vec4 o_color;
 
-in VertexData{
+in VertexData
+{
 
 	vec3 color;
 
 } inData;
 
-void main(){
+void main()
+{
 
 	o_color = vec4(inData.color,1);
 

@@ -6,13 +6,15 @@ layout(location = 1) in vec3 i_color;
 uniform float u_light;
 uniform mat4 u_transform;
 
-out VertexData{
+out VertexData
+{
 
 	vec3 color;
 
-	} outData;
+} outData;
 
-void main(){
+void main()
+{
 
 	gl_Position = u_transform * vec4(i_windowpos , 1);
 
