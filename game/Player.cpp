@@ -5,6 +5,8 @@ using namespace lumina;
 
 const float BASIC_SPEED = 0.3f; 
 const float FAST_SPEED = 0.8f;
+const float FALL_SPEED = -0.03f;
+const float TIME_STEP  = 1.0f;
 
 Player::Player() : //Map m
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
@@ -18,13 +20,16 @@ Player::Player() : //Map m
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
+    ,m_hunger(3)
+    ,m_health(0)
+    ,m_yMovementspeed(0.0f)
 {
-	//m_pos = {0,0,0};
-	m_health = 3;
-	m_hunger = 0;
-	m_velocity_x = 0;
-  m_velocity_z = 0;
-  //m_map = m; 
+  //Do Nothing
+}
+
+void Player::setMap(Map& map)
+{
+  m_map = map;
 }
 
 EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
@@ -164,6 +169,12 @@ void Player::turn_upDown(float deltaY)
 
 void Player::update()
 {
+    //Fallen - > Wenn Luft unter dem Spieler, fallen lassen
+    Vec3i pos = Vec3i(static_cast<int>(m_position.x),static_cast<int>(m_position.y),static_cast<int>(m_position.z) );
+    //TODO
+    //Check for too much high // to less high
+
+    
     if(m_wPressed){
         move_forward();
     }else if(m_sPressed){
@@ -174,11 +185,21 @@ void Player::update()
     }else if(m_dPressed){
         move_right();
     }
-    if(m_SpacePressed){
+
+    if( pos.y>= 0 & pos.y<=127 ){
+      if(m_map.getBlockType(pos) == BlockType::Air){
+        m_yMovementspeed = max(-1.0f, m_yMovementspeed + FALL_SPEED) ;
+      }else{
+        m_yMovementspeed = 0;
+      }
+      if(m_SpacePressed){
         move_up();
-    }else if(m_CtrlPressed){
+      }else if(m_CtrlPressed){
         move_down();
     }  
+      m_position.y += m_yMovementspeed*TIME_STEP;
+    }
+
 }
 
 Vec3f Player::getPosition(){
@@ -220,10 +241,13 @@ void Player::move_backward()
 
 void Player::move_up() //Jump
 {
-    //m_position.y += m_movingspeed;
+  
+  if(m_yMovementspeed == 0){
+     m_yMovementspeed += 1.0f;
+  } 
 }
 
 void Player::move_down()
 {
-    //m_position.y -= m_movingspeed;
+//    m_position.y -= m_movingspeed;
 }

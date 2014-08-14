@@ -11,9 +11,10 @@ using namespace std;
 
 CraftGame::CraftGame() {
   m_running = true;
-
+  
   ChunkGenerator cg;
   cg.chunkGeneration(m_map,{0,0,0});
+  m_player.setMap(m_map);
 
 }
 

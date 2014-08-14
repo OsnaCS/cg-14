@@ -11,8 +11,8 @@ class Player {
 public:
 
 	//Konstruktor
-	Player(Map m);
 	Player();
+	void setMap(Map& map);
 
 	//getter-Methoden
   Vec3f getPosition();
@@ -41,28 +41,33 @@ public:
 	//ggf. Inventar
 
 private:
+	//Methods
 	void move_left();
-    void move_right();
-    void move_forward();
-    void move_backward();
-    void move_up();
-    void move_down();
+  void move_right();
+  void move_forward();
+  void move_backward();
+  void move_up();
+  void move_down();
 
+  //3D Atributes
 	Vec3f m_position;
 	Vec3f m_direction;
+	Map m_map;
+	
+	//Playeratributes
 	int m_health;
 	int m_hunger;
-	int m_velocity_x;
-	int m_velocity_z;
-	Map m_map;
-	  float m_movingspeed;
-    bool m_mouseCaptured;
-    bool m_wPressed;
-    bool m_sPressed;
-    bool m_aPressed;
-    bool m_dPressed;
-		bool m_SpacePressed;
-    bool m_CtrlPressed;
-  	bool m_ShiftPressed;
+
+	//Movement
+	float m_movingspeed;
+	float m_yMovementspeed;
+  bool m_mouseCaptured;
+  bool m_wPressed;
+  bool m_sPressed;
+  bool m_aPressed;
+  bool m_dPressed;
+	bool m_SpacePressed;
+  bool m_CtrlPressed;
+  bool m_ShiftPressed;
 	//Inventar m_inventar;
 };
