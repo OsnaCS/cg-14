@@ -1,6 +1,5 @@
 #include "CraftGame.hpp"
 #include "ChunkView.hpp"
-#include "ChunkGenerator.hpp"
 
 #include <functional>
 #include <chrono>
@@ -10,10 +9,6 @@ using namespace std;
 
 CraftGame::CraftGame() {
   m_running = true;
-
-  ChunkGenerator cg;
-  cg.chunkGeneration(m_map,{0,0,0});
-
 }
 
 void CraftGame::init() {
@@ -69,6 +64,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   uint counter = 0;
 
+  // the chunk where the player/the camera is in
+  Vec2i activeChunk = m_map.getChunkPos(m_camera.get_position());
+  Vec2i oldChunk = activeChunk;
+
+  // generate the first chunks
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
     auto diff = chrono::system_clock::now() - now;
@@ -80,6 +82,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     }
 
     now = chrono::system_clock::now();
+
+    // update activeChunk and generate new chunks
+    activeChunk = m_map.getChunkPos(m_camera.get_position());
+    if (oldChunk != activeChunk) {
+      oldChunk = activeChunk;
+      m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+    }
 
     // poll events
     m_window.update();
@@ -97,35 +106,14 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
-        Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
-        ChunkView cV1(currentChunk, Vec2i(0, 0));
+        for(int x = activeChunk.x - 2; x <= activeChunk.x + 2; x++) {
+          for(int z = activeChunk.y - 2; z <= activeChunk.y + 2; z++) {
 
-        cV1.draw(hot);
-        ChunkView cV2(currentChunk, Vec2i(-1, 0));
-
-        cV2.draw(hot);
-        ChunkView cV3(currentChunk, Vec2i(1, 0));
-
-        cV3.draw(hot);
-        ChunkView cV4(currentChunk, Vec2i(0, -1));
-
-        cV4.draw(hot);
-        ChunkView cV5(currentChunk, Vec2i(0, 1));
-
-        cV5.draw(hot);
-
-        /*        ChunkView cV6(currentChunk, Vec2i(1, 1));
-
-        cV6.draw(hot);
-                ChunkView cV7(currentChunk, Vec2i(-1, 1));
-
-        cV7.draw(hot);
-                ChunkView cV8(currentChunk, Vec2i(1, -1));
-
-        cV8.draw(hot);
-                ChunkView cV9(currentChunk, Vec2i(-1, -1));
-
-        cV9.draw(hot);*/
+            Chunk& currentChunk = m_map.getChunk(Vec2i(x, z));
+            ChunkView cV1(currentChunk, Vec2i(x, z));
+            cV1.draw(hot);
+          }
+        }
 
       });
     });
