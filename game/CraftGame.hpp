@@ -3,6 +3,7 @@
 #include "lumina/lumina.hpp"
 #include "Camera.hpp"
 #include "Map.hpp"
+#include "ChunkGenerator.hpp"
 
 class CraftGame {
 public:
@@ -13,6 +14,7 @@ public:
 
 private:
   lumina::Window m_window;
+  ChunkGenerator m_chunkGenerator;
   bool m_running;
   Camera m_camera;
   Map m_map;

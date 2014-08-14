@@ -5,7 +5,6 @@
 #include "Chunk.hpp"
 #include "Map.hpp"
 
-
 using namespace std;
 
 class ChunkGenerator {
