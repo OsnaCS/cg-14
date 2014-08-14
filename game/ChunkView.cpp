@@ -1,7 +1,7 @@
 #include "ChunkView.hpp"
 
-ChunkView::ChunkView(Chunk& chunk, Vec2i index)
-  : m_chunk(chunk), m_index(index) {
+ChunkView::ChunkView(Chunk& chunk, Vec2i index, Map& map)
+  : m_chunk(chunk), m_index(index), m_map(map) {
   updateView();
 }
 
@@ -45,11 +45,15 @@ void ChunkView::updateView() {
 
         if(block != BlockType::Air) {
 
-          addBoxToSeq(hotSeq, j, k, block, chunkOffset, pos);
+          Vec3f cubePos(chunkOffset.x + pos.x, pos.y, chunkOffset.y + pos.z);
 
-          // Indices erhöhen
-		      j += 24;
-		      k += 30;
+          if (isBoxVisible(cubePos)) {
+            addBoxToSeq(hotSeq, j, k, block, cubePos);
+
+            // Indices erhöhen
+            j += 24;
+            k += 30;
+          }
         }
       }
     });
@@ -58,11 +62,30 @@ void ChunkView::updateView() {
   }
 }
 
-void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType& block, Vec2i& chunkOffset, Vec3i& pos) {
+bool ChunkView::isBoxVisible(Vec3f& cubePos) {
+
+  Vec3i top(cubePos.x, cubePos.y + 1, cubePos.z);
+  Vec3i bottom(cubePos.x, cubePos.y - 1, cubePos.z);
+  Vec3i left(cubePos.x - 1, cubePos.y, cubePos.z);
+  Vec3i right(cubePos.x + 1, cubePos.y, cubePos.z);
+  Vec3i front(cubePos.x, cubePos.y, cubePos.z + 1);
+  Vec3i back(cubePos.x, cubePos.y, cubePos.z - 1);
+
+  if ((m_map.exists(top) && m_map.getBlockType(top) != BlockType::Air) &&
+      (m_map.exists(bottom) && m_map.getBlockType(bottom) != BlockType::Air) &&
+      (m_map.exists(left) && m_map.getBlockType(left) != BlockType::Air) &&
+      (m_map.exists(right) && m_map.getBlockType(right) != BlockType::Air) &&
+      (m_map.exists(front) && m_map.getBlockType(front) != BlockType::Air) &&
+      (m_map.exists(back) && m_map.getBlockType(back) != BlockType::Air)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType& block, Vec3f& cubePos) {
   Color8A color = getColor(block);
   Vec3f c(color.r / 255.f, color.g / 255.f, color.b / 255.f);
-
-  Vec3f cubePos(chunkOffset.x + pos.x, pos.y, chunkOffset.y + pos.z);
 
   float s = 0.5f;
 
