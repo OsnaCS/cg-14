@@ -75,9 +75,6 @@ double SimplexNoise::noise(double m_xin, double m_yin, int m_seed) {
     int m_gi0 = m_permMod12[m_ii + m_perm[m_jj]];
     int m_gi1 = m_permMod12[m_ii + m_i1 + m_perm[m_jj + m_j1]];
     int m_gi2 = m_permMod12[m_ii + 1 + m_perm[m_jj + 1]];
-
-    // cout << m_gi0 << m_gi1 << m_gi2 << endl;
-    cout << m_perm[m_jj] << endl;
     // Calculate the contribution from the three corners
     double m_t0 = 0.5 - m_x0 * m_x0 - m_y0 * m_y0;
     if(m_t0 < 0) {

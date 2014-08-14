@@ -15,7 +15,7 @@ using namespace std;
 //Perlin Noise mit Koeffizienten > 1 multipliziert ergibt höhere Steigung
 ChunkGenerator::ChunkGenerator() {
   // Random Seed
-  srand(time(0) + clock() + random());               Zufallsgenerator initialisieren 
+  srand(time(0) + clock() + random());  // Zufallsgenerator initialisieren 
   m_seed = rand() % 512;
 
   m_octave = 3;
