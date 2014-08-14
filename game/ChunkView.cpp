@@ -1,7 +1,13 @@
 #include "ChunkView.hpp"
 
-ChunkView::ChunkView(Chunk& chunk, Vec2i index, Map& map)
-  : m_chunk(chunk), m_index(index), m_map(map) {
+ChunkView::ChunkView() {
+
+}
+
+void ChunkView::init(Vec2i index, Map& map) {
+  m_index = index;
+  m_map = &map;
+
   updateView();
 }
 
@@ -16,7 +22,7 @@ void ChunkView::updateView() {
   	for(Vec3i pos : Vec3i(16, 16, 16)) {
 
   		pos.y += i * 16;
-      auto block = m_chunk.getBlockType(pos);
+      auto block = m_map->getChunk(m_index).getBlockType(pos);
 
 	    if(block != BlockType::Air) {
 	      blockCount++;
@@ -41,7 +47,7 @@ void ChunkView::updateView() {
 
         pos.y += i * 16;
 
-        auto block = m_chunk.getBlockType(pos);
+        auto block = m_map->getChunk(m_index).getBlockType(pos);
 
         if(block != BlockType::Air) {
 
@@ -71,12 +77,12 @@ bool ChunkView::isBoxVisible(Vec3f& cubePos) {
   Vec3i front(cubePos.x, cubePos.y, cubePos.z + 1);
   Vec3i back(cubePos.x, cubePos.y, cubePos.z - 1);
 
-  if ((m_map.exists(top) && m_map.getBlockType(top) != BlockType::Air) &&
-      (m_map.exists(bottom) && m_map.getBlockType(bottom) != BlockType::Air) &&
-      (m_map.exists(left) && m_map.getBlockType(left) != BlockType::Air) &&
-      (m_map.exists(right) && m_map.getBlockType(right) != BlockType::Air) &&
-      (m_map.exists(front) && m_map.getBlockType(front) != BlockType::Air) &&
-      (m_map.exists(back) && m_map.getBlockType(back) != BlockType::Air)) {
+  if ((m_map->exists(top) && m_map->getBlockType(top) != BlockType::Air) &&
+      (m_map->exists(bottom) && m_map->getBlockType(bottom) != BlockType::Air) &&
+      (m_map->exists(left) && m_map->getBlockType(left) != BlockType::Air) &&
+      (m_map->exists(right) && m_map->getBlockType(right) != BlockType::Air) &&
+      (m_map->exists(front) && m_map->getBlockType(front) != BlockType::Air) &&
+      (m_map->exists(back) && m_map->getBlockType(back) != BlockType::Air)) {
     return false;
   } else {
     return true;

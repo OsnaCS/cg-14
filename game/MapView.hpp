@@ -3,21 +3,20 @@
 #include <map>
 
 #include "ChunkView.hpp"
+#include "Map.hpp"
+#include "Camera.hpp"
 
 class MapView
 {
-	
+
 public:
 
-	MapView();
-	void addChunkView(Vec2i pos);
-	ChunkView& getChunkView(Vec2i pos);
+	MapView(Map& map, Camera& cam);
+	void draw(HotProgram& hotProg);
 
-private: 
-	// Map with all Chunks
-	map<Vec2i, Chunk> m_map;
+private:
 
-	//Name of the Map
-	string m_name;
-
+	map<Vec2i, ChunkView> m_mapView;
+	Map& m_map;
+	Camera& m_cam;
 };
