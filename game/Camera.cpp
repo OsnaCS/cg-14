@@ -38,7 +38,6 @@ Mat4f Camera::get_ProjectionMatrix(Window& w)
 
 EventResult Camera::processEvent( const InputEvent& e, Window& win)
 {
-    bool proccessed = false;
 
     //Key Pressed and Released
     if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
@@ -51,7 +50,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.wPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::S :
@@ -60,7 +59,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.sPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::A :
@@ -69,7 +68,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.aPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::D :
@@ -78,7 +77,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.dPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::Space :
@@ -87,7 +86,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.SpacePressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::Control :
@@ -96,7 +95,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
             }else{
                 m_movedKeys.CtrlPressed = false;
             }
-            proccessed = true;
+
             break;
             case KeyCode::Shift :
             if(m_movedKeys.ShiftPressed == false){
@@ -106,7 +105,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
                 m_movedKeys.ShiftPressed = false;
                 m_movingspeed = BASIC_SPEED;
             }
-            proccessed = true;
+
             break;
             default:
             //Do Nothing
@@ -131,10 +130,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
     	turn_upDown(-e.mouseInput.y / 50.0f);
     }
 
-    if ( proccessed ) {
-        return EventResult::Processed;
-    }
-
+    // we process this event after update() is called..
     return EventResult::Skipped;
 }
 
