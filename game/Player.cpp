@@ -5,8 +5,9 @@ using namespace lumina;
 
 const float BASIC_SPEED = 0.3f; 
 const float FAST_SPEED = 0.8f;
-const float FALL_SPEED = -0.03f;
+const float FALL_SPEED = -0.06f;
 const float TIME_STEP  = 1.0f;
+const float JUMP_SPEED = 0.6;
 
 Player::Player() : //Map m
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
@@ -203,7 +204,8 @@ void Player::update()
 }
 
 Vec3f Player::getPosition(){
-  return m_position;
+  return Vec3f(m_position.x, m_position.y+1.0f, m_position.z);
+//  return m_position;
 }
 
 Vec3f Player::getDirection(){
@@ -227,23 +229,25 @@ void Player::move_right()
 }
 
 void Player::move_forward()
-{
-   m_position.x += m_movingspeed*m_direction.x;
-   m_position.z += m_movingspeed*m_direction.z;
+{  // Calculate the movement by dividing the y part to the x and z in ratio
+   m_position.x += m_movingspeed*(m_direction.x+(m_direction.x/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+   m_position.z += m_movingspeed*(m_direction.z+(m_direction.z/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+  // m_position.z += m_movingspeed*m_direction.z;
 }
 
 
 void Player::move_backward()
 {
-   m_position.x -= m_movingspeed*m_direction.x;
-   m_position.z -= m_movingspeed*m_direction.z;
+   // Calculate the movement by dividing the y part to the x and z in ratio
+   m_position.x -= m_movingspeed*(m_direction.x+(m_direction.x/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+   m_position.z -= m_movingspeed*(m_direction.z+(m_direction.z/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+  
 }
-
 void Player::move_up() //Jump
 {
   
   if(m_yMovementspeed == 0){
-     m_yMovementspeed += 1.0f;
+     m_yMovementspeed += JUMP_SPEED;
   } 
 }
 
