@@ -12,21 +12,20 @@ public:
 
 	//Konstruktor
 	Player(Map m);
+	Player();
 
 	//getter-Methoden
-  Vec3i getPos(){
-		return m_pos;
-	}
-	int getHealth(){
-		return m_health;
-	}
-	int getHunger(){
-		return m_hunger;
-	}
+  Vec3f getPosition();
+	int getHealth();
+	int getHunger();
+  void turn_side(float deltaX);
+  void turn_upDown(float deltaY);
+  void update();
+	Vec3f getDirection();
 
 	//Zum Bewegen
 	//ggf. Aufnehmen, Ablegen, Abbauen, Aufbauen
-	EventResult onEvent(lumina::InputEvent e);
+  lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode );
 
 	//Updated Health
 	//Fallen und Hunger verursacht Schaden
@@ -42,11 +41,28 @@ public:
 	//ggf. Inventar
 
 private:
-	Vec3i m_pos;
+	void move_left();
+    void move_right();
+    void move_forward();
+    void move_backward();
+    void move_up();
+    void move_down();
+
+	Vec3f m_position;
+	Vec3f m_direction;
 	int m_health;
 	int m_hunger;
 	int m_velocity_x;
 	int m_velocity_z;
 	Map m_map;
+	  float m_movingspeed;
+    bool m_mouseCaptured;
+    bool m_wPressed;
+    bool m_sPressed;
+    bool m_aPressed;
+    bool m_dPressed;
+		bool m_SpacePressed;
+    bool m_CtrlPressed;
+  	bool m_ShiftPressed;
 	//Inventar m_inventar;
 };
