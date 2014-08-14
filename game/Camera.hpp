@@ -29,7 +29,7 @@ public:
 	Vec3f getPosition() {
 		return m_position;
 	}
-
+    void updateFromPlayer(Vec3f pos, Vec3f dir);
 		void update();
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
@@ -47,6 +47,7 @@ private:
     void turn_side(float deltaX);
     void turn_upDown(float deltaY);
     void reset_camera();
+
 
   
 	lumina::Vec3<float> m_position;

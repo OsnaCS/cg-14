@@ -9,7 +9,7 @@ const float BASIC_SPEED = 0.3f;
 const float FAST_SPEED = 3.0f;
 
 Camera::Camera() :
-    m_position(Vec3f(0.0f, 0.0f, 10.0f))
+    m_position(Vec3f(0.0f, 80.0f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_mouseCaptured(false)
@@ -25,8 +25,6 @@ Camera::Camera() :
 }
 
 Mat4<float> Camera::get_matrix(){
-    //slog("Pos ", m_position);
-    //slog("Dir ", m_direction);
     return viewMatrix(m_position,m_direction,m_up);
 }
 
@@ -223,4 +221,10 @@ void Camera::update()
     }else if(m_CtrlPressed){
         move_down();
     }  
+}
+
+//Update Camera from position and Direction of the player
+void Camera::updateFromPlayer(Vec3f pos, Vec3f dir){
+m_position = pos;
+m_position.y += 1;
 }
