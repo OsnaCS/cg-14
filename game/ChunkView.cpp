@@ -84,10 +84,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   float s = 0.5f;
 
   // -- positive z
-  hotSeq.vertex[0 + vertexIndex].set(cubePos + Vec3f(-s, s, s), c, south);
-  hotSeq.vertex[1 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), c, south + Vec2f(0, 1/8.f));
-  hotSeq.vertex[2 + vertexIndex].set(cubePos + Vec3f(s, s, s), c, south + Vec2f(1/8.f, 0));
-  hotSeq.vertex[3 + vertexIndex].set(cubePos + Vec3f(s, -s, s), c, south + Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[0 + vertexIndex].set(cubePos + Vec3f(-s, s, s), Vec3f(0,0,1), south);
+  hotSeq.vertex[1 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), Vec3f(0,0,1), south + Vec2f(0, 1/8.f));
+  hotSeq.vertex[2 + vertexIndex].set(cubePos + Vec3f(s, s, s), Vec3f(0,0,1), south + Vec2f(1/8.f, 0));
+  hotSeq.vertex[3 + vertexIndex].set(cubePos + Vec3f(s, -s, s), Vec3f(0,0,1), south + Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[0 + indexIndex] = 0 + vertexIndex;
   hotSeq.index[1 + indexIndex] = 1 + vertexIndex;
@@ -96,10 +96,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[4 + indexIndex] = GLIndex::PrimitiveRestart;
 
   // -- positive x
-  hotSeq.vertex[4 + vertexIndex].set(cubePos + Vec3f(s, s, s), c,east);
-  hotSeq.vertex[5 + vertexIndex].set(cubePos + Vec3f(s, -s, s), c, east+Vec2f(0, 1/8.f));
-  hotSeq.vertex[6 + vertexIndex].set(cubePos + Vec3f(s, s, -s), c, east+Vec2f(1/8.f, 0));
-  hotSeq.vertex[7 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), c, east+Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[4 + vertexIndex].set(cubePos + Vec3f(s, s, s), Vec3f(1,0,0),east);
+  hotSeq.vertex[5 + vertexIndex].set(cubePos + Vec3f(s, -s, s), Vec3f(1,0,0), east+Vec2f(0, 1/8.f));
+  hotSeq.vertex[6 + vertexIndex].set(cubePos + Vec3f(s, s, -s), Vec3f(1,0,0), east+Vec2f(1/8.f, 0));
+  hotSeq.vertex[7 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), Vec3f(1,0,0), east+Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[5 + indexIndex] = 4 + vertexIndex;
   hotSeq.index[6 + indexIndex] = 5 + vertexIndex;
@@ -108,10 +108,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[9 + indexIndex] = GLIndex::PrimitiveRestart;
 
   // -- negative z
-  hotSeq.vertex[8 + vertexIndex].set(cubePos + Vec3f(s, s, -s), c, north);
-  hotSeq.vertex[9 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), c, north+Vec2f(0, 1/8.f));
-  hotSeq.vertex[10 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), c, north+Vec2f(1/8.f, 0));
-  hotSeq.vertex[11 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), c, north+Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[8 + vertexIndex].set(cubePos + Vec3f(s, s, -s), Vec3f(0,0,-1), north);
+  hotSeq.vertex[9 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), Vec3f(0,0,-1), north+Vec2f(0, 1/8.f));
+  hotSeq.vertex[10 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), Vec3f(0,0,-1), north+Vec2f(1/8.f, 0));
+  hotSeq.vertex[11 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), Vec3f(0,0,-1), north+Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[10 + indexIndex] = 8 + vertexIndex;
   hotSeq.index[11 + indexIndex] = 9 + vertexIndex;
@@ -120,10 +120,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[14 + indexIndex] = GLIndex::PrimitiveRestart;
 
   // -- negative x
-  hotSeq.vertex[12 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), c, west);
-  hotSeq.vertex[13 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), c, west+Vec2f(0, 1/8.f));
-  hotSeq.vertex[14 + vertexIndex].set(cubePos + Vec3f(-s, s, s), c, west+Vec2f(1/8.f, 0));
-  hotSeq.vertex[15 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), c, west+Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[12 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), Vec3f(-1,0,0), west);
+  hotSeq.vertex[13 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), Vec3f(-1,0,0), west+Vec2f(0, 1/8.f));
+  hotSeq.vertex[14 + vertexIndex].set(cubePos + Vec3f(-s, s, s), Vec3f(-1,0,0), west+Vec2f(1/8.f, 0));
+  hotSeq.vertex[15 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), Vec3f(-1,0,0), west+Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[15 + indexIndex] = 12 + vertexIndex;
   hotSeq.index[16 + indexIndex] = 13 + vertexIndex;
@@ -132,10 +132,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[19 + indexIndex] = GLIndex::PrimitiveRestart;
 
   // -- positive y
-  hotSeq.vertex[16 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), c, top);
-  hotSeq.vertex[17 + vertexIndex].set(cubePos + Vec3f(-s, s, s), c, top+Vec2f(0, 1/8.f));
-  hotSeq.vertex[18 + vertexIndex].set(cubePos + Vec3f(s, s, -s), c, top+Vec2f(1/8.f, 0));
-  hotSeq.vertex[19 + vertexIndex].set(cubePos + Vec3f(s, s, s), c, top+Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[16 + vertexIndex].set(cubePos + Vec3f(-s, s, -s), Vec3f(0,1,0), top);
+  hotSeq.vertex[17 + vertexIndex].set(cubePos + Vec3f(-s, s, s), Vec3f(0,1,0), top+Vec2f(0, 1/8.f));
+  hotSeq.vertex[18 + vertexIndex].set(cubePos + Vec3f(s, s, -s), Vec3f(0,1,0), top+Vec2f(1/8.f, 0));
+  hotSeq.vertex[19 + vertexIndex].set(cubePos + Vec3f(s, s, s), Vec3f(0,1,0), top+Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[20 + indexIndex] = 16 + vertexIndex;
   hotSeq.index[21 + indexIndex] = 17 + vertexIndex;
@@ -144,10 +144,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[24 + indexIndex] = GLIndex::PrimitiveRestart;
 
   // -- negative y
-  hotSeq.vertex[20 + vertexIndex].set(cubePos + Vec3f(s, -s, s), c, bottom);
-  hotSeq.vertex[21 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), c, bottom+Vec2f(0, 1/8.f));
-  hotSeq.vertex[22 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), c, bottom+Vec2f(1/8.f, 0));
-  hotSeq.vertex[23 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), c, bottom+Vec2f(1/8.f, 1/8.f));
+  hotSeq.vertex[20 + vertexIndex].set(cubePos + Vec3f(s, -s, s), Vec3f(0,-1,0), bottom);
+  hotSeq.vertex[21 + vertexIndex].set(cubePos + Vec3f(-s, -s, s), Vec3f(0,-1,0), bottom+Vec2f(0, 1/8.f));
+  hotSeq.vertex[22 + vertexIndex].set(cubePos + Vec3f(s, -s, -s), Vec3f(0,-1,0), bottom+Vec2f(1/8.f, 0));
+  hotSeq.vertex[23 + vertexIndex].set(cubePos + Vec3f(-s, -s, -s), Vec3f(0,-1,0), bottom+Vec2f(1/8.f, 1/8.f));
 
   hotSeq.index[25 + indexIndex] = 20 + vertexIndex;
   hotSeq.index[26 + indexIndex] = 21 + vertexIndex;
