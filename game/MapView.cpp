@@ -10,37 +10,50 @@ MapView::MapView(Map& map, Camera& cam)
 
 void MapView::init() {
 
-  ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version_better.jpg");
+  ImageBox image_box = loadJPEGImage("gfx/texture.jpg");
   m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
+
+  ImageBox image_box_normal = loadJPEGImage("gfx/normals2048.jpg");
+  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box_normal.data());
+  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_normalTexture.params.useMipMaps = true;
 
 }
 
 
 void MapView::draw(HotProgram& hotProg) {
 
-  m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-    Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+  TexCont cont;
+  cont.addTexture(0, m_colorTexture);
+  cont.addTexture(1, m_normalTexture);
 
-    for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-      for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+  hotProg.uniform["texture1"] = 0;
+  hotProg.uniform["normal_tex"] = 1;
 
-      	if(m_map.exists({x * 16, 0, z * 16})) {
+  cont.prime([&] (HotTexCont& hotCont){
 
-      		Vec2i chunkPos(x, z);
+      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-          if (isChunkVisible(chunkPos)) {
-            if(m_mapView.count(chunkPos) == 0) {
-              m_mapView[chunkPos].init(chunkPos, m_map);
+      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
+        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+
+          if(m_map.exists({x * 16, 0, z * 16})) {
+
+            Vec2i chunkPos(x, z);
+
+            if(isChunkVisible(chunkPos)) {
+              if(m_mapView.count(chunkPos) == 0) {
+                m_mapView[chunkPos].init(chunkPos, m_map);
+              }
+
+              m_mapView[chunkPos].draw(hotProg, hotCont);
             }
-
-            m_mapView[chunkPos].draw(hotProg, hotTex);
           }
         }
       }
-    }
-  });
+    });
 }
 
 bool MapView::isChunkVisible(Vec2i& chunkPos) {

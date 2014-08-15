@@ -26,4 +26,5 @@ private:
 	Map& m_map;
 	Camera& m_cam;
 	Tex2D m_colorTexture;
+	Tex2D m_normalTexture;
 };
