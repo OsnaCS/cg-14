@@ -5,6 +5,8 @@
 void Environment::draw(Mat4f viewMat, Mat4f projMat)
 {
 
+  static float a = 0;
+
 	m_program.prime([&](HotProgram& hotprog)
 	{
 
@@ -21,12 +23,29 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
   m_program2.prime([&](HotProgram& hotprog)
   {
 
+    a = a + 0.005;
+
+    if(a == 2*3.14)
+    {
+
+      a = 0;
+
+    }
+
+    float sWinkel = cos(a);
+    float cWinkel = sin(a);
+
+    hotprog.uniform["u_sinus"] = sWinkel;
+    hotprog.uniform["u_cosinus"] = cWinkel;
+
     viewMat.setColumn(3, Vec4f(0,0,0,1));
     Mat4f mat;
     mat.setToIdentity();
     mat.setDiagonal(Vec4f(2,2,2,1));
 
-    hotprog.uniform["u_transform"] = projMat * viewMat;
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,0,1), a));
+
+    hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
     hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
 
   });
@@ -81,14 +100,30 @@ void Environment::init()
   // create program and link the two shaders
   m_program2.create(vs2, fs2);
 
-  m_sun.create(3 + 3, 4);
+  m_sun.create(3 + 3, 8, 9);
   m_sun.prime<Vec3f, Vec3f>([](HotVertexSeq<Vec3f, Vec3f>& hot)
   {
 
-    hot.vertex[0].set(Vec3f(0.5, 4.5, 10), Vec3f(1,1,0));
-    hot.vertex[1].set(Vec3f(-0.5, 4.5, 10), Vec3f(1,1,0));
-    hot.vertex[2].set(Vec3f(0.5, 5.5, 10), Vec3f(1,1,0));
-    hot.vertex[3].set(Vec3f(-0.5, 5.5, 10), Vec3f(1,1,0));
+    hot.vertex[0].set(Vec3f(10, 4.5, 0.5), Vec3f(1,1,0));
+    hot.vertex[1].set(Vec3f(10, 4.5, -0.5), Vec3f(1,1,0));
+    hot.vertex[2].set(Vec3f(10, 5.5, 0.5), Vec3f(1,1,0));
+    hot.vertex[3].set(Vec3f(10, 5.5, -0.5), Vec3f(1,1,0));
+
+    hot.vertex[4].set(Vec3f(-10, -4.5, 0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[5].set(Vec3f(-10, -4.5, -0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[6].set(Vec3f(-10, -5.5, 0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[7].set(Vec3f(-10, -5.5, -0.5), Vec3f(0.75,0.75,0.75));
+
+    hot.index[0] = 0;
+    hot.index[1] = 1;
+    hot.index[2] = 2;
+    hot.index[3] = 3;
+    hot.index[4] = GLIndex::PrimitiveRestart;
+
+    hot.index[5] = 4;
+    hot.index[6] = 5;
+    hot.index[7] = 6;
+    hot.index[8] = 7;
 
   });
 
