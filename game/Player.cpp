@@ -13,6 +13,7 @@ Player::Player( Map& m) :
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
+    ,m_yMovementspeed(0.0f)
     ,m_mouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
@@ -21,19 +22,14 @@ Player::Player( Map& m) :
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
-    ,m_hunger(3)
-    ,m_health(0)
-    ,m_yMovementspeed(0.0f)
     ,m_map(m)
+
+
 {
-  //Do Nothing
+
 }
-/*
-void Player::setMap(Map& map)
-{
-  m_map = map;
-}
-*/
+
+
 EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 {
     //Key Pressed and Released

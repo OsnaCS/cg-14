@@ -50,24 +50,20 @@ private:
   void move_down();
 
   //3D Atributes
-	Vec3f m_position;
-	Vec3f m_direction;
-    Map& m_map;
-	
-	//Playeratributes
-	int m_health;
-	int m_hunger;
-
-	//Movement
-	float m_movingspeed;
-	float m_yMovementspeed;
+  Vec3f m_position;
+  Vec3f m_direction;
+  //Movement
+  float m_movingspeed;
+  float m_yMovementspeed;
   bool m_mouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
   bool m_aPressed;
   bool m_dPressed;
-	bool m_SpacePressed;
+  bool m_SpacePressed;
   bool m_CtrlPressed;
   bool m_ShiftPressed;
-	//Inventar m_inventar;
+
+  Map& m_map;
+
 };
