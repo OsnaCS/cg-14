@@ -86,20 +86,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   m_envir.init();
   m_mapView.init();
-  // load and compile vertex and fragment shader
-  VShader vs;
-  vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
-  FShader fs;
-  fs.compile(loadShaderFromFile("shader/CraftGame.fsh"));
-
-  // create program and link the two shaders
-  Program p;
-  p.create(vs, fs);
-
-  p.perFragProc.enableDepthTest();
-  p.perFragProc.enableDepthWrite();
-  p.perFragProc.setDepthFunction(DepthFunction::Less);
-  p.primitiveProc.enableCulling();
 
   auto now = chrono::system_clock::now();
 
@@ -147,14 +133,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
-      // prime program to use it
-      p.prime([&](HotProgram& hot) {
-
-        hot.uniform["u_view"] = this->m_camera.get_matrix();
-        hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
-
-        m_mapView.draw(hot);
-      });
+      m_mapView.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
     });
 
     // swap buffer

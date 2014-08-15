@@ -12,7 +12,7 @@ class MapView
 public:
 
 	MapView(Map& map, Camera& cam);
-	void draw(HotProgram& hotProg);
+	void draw(Mat4f viewMat, Mat4f projMat);
 	void init();
 
 	/**
@@ -26,4 +26,5 @@ private:
 	Map& m_map;
 	Camera& m_cam;
 	Tex2D m_colorTexture;
+	Program m_program;
 };

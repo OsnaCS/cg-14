@@ -15,31 +15,46 @@ void MapView::init() {
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
 
+  VShader vs;
+  vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
+  FShader fs;
+  fs.compile(loadShaderFromFile("shader/CraftGame.fsh"));
+
+  m_program.create(vs, fs);
+  m_program.perFragProc.enableDepthTest();
+  m_program.perFragProc.enableDepthWrite();
+  m_program.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_program.primitiveProc.enableCulling();
 }
 
+void MapView::draw(Mat4f viewMat, Mat4f projMat) {
 
-void MapView::draw(HotProgram& hotProg) {
+  m_program.prime([&](HotProgram& hot) {
 
-  m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-    Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+    hot.uniform["u_view"] = viewMat;
+    hot.uniform["u_projection"] = projMat;
 
-    for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-      for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+    m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
+      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-      	if(m_map.exists({x * 16, 0, z * 16})) {
+      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
+        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
 
-      		Vec2i chunkPos(x, z);
+          if(m_map.exists({x * 16, 0, z * 16})) {
 
-          if (isChunkVisible(chunkPos)) {
-            if(m_mapView.count(chunkPos) == 0) {
-              m_mapView[chunkPos].init(chunkPos, m_map);
+            Vec2i chunkPos(x, z);
+
+            if (isChunkVisible(chunkPos)) {
+              if(m_mapView.count(chunkPos) == 0) {
+                m_mapView[chunkPos].init(chunkPos, m_map);
+              }
+
+              m_mapView[chunkPos].draw(hot, hotTex);
             }
-
-            m_mapView[chunkPos].draw(hotProg, hotTex);
           }
         }
       }
-    }
+    });
   });
 }
 
