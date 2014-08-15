@@ -23,10 +23,9 @@ ChunkGenerator::ChunkGenerator() {
 }
 
 void ChunkGenerator::chunkGeneration(Map& m, Vec3i spectator_pos) {
-
   Vec2i chunkPos = m.getChunkPos(spectator_pos);
-  for(int x = chunkPos.x - 2; x <= chunkPos.x + 2; x++) {
-    for(int z = chunkPos.y - 2; z <= chunkPos.y + 2; z++) {
+  for(int x = chunkPos.x - 4; x <= chunkPos.x + 4; x++) {
+    for(int z = chunkPos.y - 4; z <= chunkPos.y + 4; z++) {
       if(!m.exists({x * 16, 0, z * 16})) {
         m.addChunk({x, z});
         for(int i = x * 16; i < (x * 16) + 16; i++) {

@@ -1,5 +1,4 @@
 #include "CraftGame.hpp"
-#include "ChunkView.hpp"
 
 #include <functional>
 #include <chrono>
@@ -7,16 +6,45 @@
 using namespace lumina;
 using namespace std;
 
-CraftGame::CraftGame() {
+CraftGame::CraftGame()
+    :m_player(NULL), m_mapView(m_map, m_camera)
+{
   m_running = true;
+  ChunkGenerator cg;
+  cg.chunkGeneration(m_map,{0,0,0});
 }
 
+CraftGame::~CraftGame()
+{
+  stop();
+
+}
+
+void CraftGame::stop()
+{
+    // C++0x allow to double delete null pointer but some old compiler might not allow.
+    // Therefore, we have to protect double deletion.
+    if ( m_player !=NULL ) {
+        delete m_player;
+        m_player = NULL;
+    }
+}
+
+
 void CraftGame::init() {
+
   // configure window
   m_window.setTitle("CG Praktikum 2014 :)");
   m_window.setVersionHint(3, 3);
+  m_cheatmode = false;
+
+  if (m_player==NULL) {
+      m_player = new Player( m_map );
+  }
 
   // add event callback (capture by reference
+  m_window.addEventCallback(
+    [&](InputEvent e) { return m_player->processEvent(e, m_window, m_cheatmode); });
   m_window.addEventCallback(
     [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
   m_window.addEventCallback([&](InputEvent e) {
@@ -24,6 +52,16 @@ void CraftGame::init() {
     // key was Escape -> set m_running to false to stop program
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
       m_running = false;
+      return EventResult::Processed;
+    }
+    // if the keyInpuit is k
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K) {
+      if(m_cheatmode){
+        m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+        m_cheatmode = false;
+      }else{
+        m_cheatmode = true;
+      }
       return EventResult::Processed;
     }
     return EventResult::Skipped;
@@ -45,6 +83,8 @@ void CraftGame::start() {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
+
+  m_envir.init();
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -92,7 +132,12 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // poll events
     m_window.update();
-    m_camera.update();
+    if(m_cheatmode){
+      m_camera.update();
+    }else{
+      m_player->update();
+      m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+    }
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
@@ -100,21 +145,14 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+      m_envir.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
       // prime program to use it
       p.prime([&](HotProgram& hot) {
 
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
-        for(int x = activeChunk.x - 2; x <= activeChunk.x + 2; x++) {
-          for(int z = activeChunk.y - 2; z <= activeChunk.y + 2; z++) {
-
-            Chunk& currentChunk = m_map.getChunk(Vec2i(x, z));
-            ChunkView cV1(currentChunk, Vec2i(x, z));
-            cV1.draw(hot);
-          }
-        }
-
+        m_mapView.draw(hot);
       });
     });
 
