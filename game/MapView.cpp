@@ -1,5 +1,7 @@
 #include "MapView.hpp"
 
+#include <math.h>
+
 MapView::MapView(Map& map, Camera& cam)
 : m_map(map), m_cam(cam) {
 
@@ -9,8 +11,8 @@ void MapView::draw(HotProgram& hotProg) {
 
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - 4; x <= activeChunk.x + 4; x++) {
-    for(int z = activeChunk.y - 4; z <= activeChunk.y + 4; z++) {
+  for(int x = activeChunk.x - 10; x <= activeChunk.x + 10; x++) {
+    for(int z = activeChunk.y - 10; z <= activeChunk.y + 10; z++) {
 
     	if(m_map.exists({x * 16, 0, z * 16})) {
 
@@ -30,22 +32,20 @@ void MapView::draw(HotProgram& hotProg) {
 
 bool MapView::isChunkVisible(Vec2i& chunkPos) {
 
-  //float viewAngle = m_cam.getViewAngle();
   Vec2f lookDirection(m_cam.get_direction().x, m_cam.get_direction().z);
+  Vec2i offsetDirection(round(lookDirection.x), round(lookDirection.y));
   Vec3i playerWorldPos = Vec3i(static_cast<int>(round(m_cam.getPosition().x)), static_cast<int>(round(m_cam.getPosition().y)), static_cast<int>(round(m_cam.getPosition().z)));
   Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos);
 
-  Vec2i checkVector = chunkPos - playerChunkPos;
+  // TODO: Winkel hat zu wenig "Spiel"
+  Vec2f checkVector = chunkPos - (playerChunkPos - offsetDirection);
   checkVector.normalize();
+  float alpha = acos((checkVector.x * lookDirection.x) + (checkVector.y * lookDirection.y)) * 180.0 / M_PI;
+  float viewAngleDegree = m_cam.getViewAngle() * 180.0 / M_PI;
 
-
-
-  if ((checkVector.x * lookDirection.x) + (checkVector.y * lookDirection.y) >= 0) {
-
+  if (alpha < viewAngleDegree + 20) {
     return true;
-
   }
 
-  // TODO: Richtig funktionieren muss es!
-  return true;
+  return false;
 }

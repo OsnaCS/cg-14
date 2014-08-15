@@ -54,6 +54,10 @@ public:
         m_movingspeed = movingspeed;
     }
 
+    float getViewAngle() {
+        return m_ViewAngle;
+    }
+
 private:
     void move_left();
     void move_right();
