@@ -7,7 +7,8 @@
 using namespace lumina;
 using namespace std;
 
-CraftGame::CraftGame() {
+CraftGame::CraftGame()
+ : m_mapView(m_map, m_camera) {
   m_running = true;
 }
 
@@ -106,15 +107,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
-        for(int x = activeChunk.x - 2; x <= activeChunk.x + 2; x++) {
-          for(int z = activeChunk.y - 2; z <= activeChunk.y + 2; z++) {
-
-            Chunk& currentChunk = m_map.getChunk(Vec2i(x, z));
-            ChunkView cV1(currentChunk, Vec2i(x, z));
-            cV1.draw(hot);
-          }
-        }
-
+        m_mapView.draw(hot);
       });
     });
 

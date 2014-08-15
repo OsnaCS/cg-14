@@ -30,12 +30,18 @@ public:
 		return m_position;
 	}
 
-		void update();
+	void update();
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
     };
 
-    lumina::EventResult processEvent( lumina::InputEvent& e, Window& win );
+    lumina::EventResult processEvent( lumina::InputEvent& e, Window& win);
+
+    float getViewAngle() {
+      return m_ViewAngle;
+    }
+
+  
  		
 private:
     void move_left();
@@ -61,5 +67,6 @@ private:
 		bool m_SpacePressed;
     bool m_CtrlPressed;
   	bool m_ShiftPressed;
+    float m_ViewAngle;
       
 };
