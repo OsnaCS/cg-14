@@ -25,4 +25,14 @@ public:
 private:
   long m_seed;
   int m_octave;
+
+  /**
+   * @param map Map
+   * @param x x-Wert des Blockes in Weltkoordinaten
+   * @param z z-Wert des Blockes in Weltkoordinaten 
+   * @param xi x-Wert des Blockes in Chunckkoordinaten
+   * @param zj z-Wert des Blockes in Chunckkoordinaten
+   * @param noise Höhenwert des zu setzenden Blockes
+   */
+  void setBlockHeight(Map& m, int x, int z, int xi, int zj, int noise);
 };

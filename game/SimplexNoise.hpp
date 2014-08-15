@@ -6,6 +6,15 @@ public:
 	// 2D simplex noise
 	static double noise(double m_xin, double m_yin, int m_seed);
 
+	/**
+   * Gibt den Simplex-Noise-Funktionswert zurueck im Intervall [m_c,m_d] 
+ 	 * @param m_c Intervallanfang
+ 	 * @param m_d Intervallende
+ 	 * @param m_simpNoise Wert aus SimplexNoise im Intervall [-1,1]
+ 	 * @return Wert zwischen m_c und m_d 
+ 	 */
+	static int noiseInt(int m_c, int m_d, double m_simpNoise);
+
 private:
 	// Inner class to speed up gradient computations
 	// (array access is a lot slower than member access)
