@@ -1,7 +1,6 @@
 #include "ChunkView.hpp"
 #include "lumina/lumina.hpp"
-#include "lumina/io/ImageJPEG.hpp"
-Tex2D ChunkView::s_texture;
+
 
 ChunkView::ChunkView() {
 
@@ -16,12 +15,6 @@ void ChunkView::init(Vec2i index, Map& map) {
 
 void ChunkView::updateView() {
 
-  if(s_texture.nativeHandle()==0){
-    ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version_better.jpg");
-    s_texture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
-    s_texture.params.filterMode = TexFilterMode::Trilinear;
-    s_texture.params.useMipMaps = true;
-  }
   auto chunkOffset = m_index * 16;
 
   for(int i = 0; i < 8; i++) {
@@ -184,13 +177,11 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[29 + indexIndex] = GLIndex::PrimitiveRestart;
 }
 
-void ChunkView::draw(HotProgram& hotProg) {
-  s_texture.prime(0, [&](HotTex2D& hotTex) {
-    for(VertexSeq& sequence : m_chunkSequences) {
-      if(sequence) {
-        hotProg.draw(hotTex, sequence, PrimitiveType::TriangleStrip);
-      }
-   	}
- });
+void ChunkView::draw(HotProgram& hotProg, HotTex2D& hotTex) {
+  for(VertexSeq& sequence : m_chunkSequences) {
+    if(sequence) {
+      hotProg.draw(hotTex, sequence, PrimitiveType::TriangleStrip);
+    }
+  }
 }
 

@@ -34,7 +34,7 @@ void CraftGame::stop()
 void CraftGame::init() {
 
   // configure window
-  m_window.setTitle("CG Praktikum 2014 :)");
+  m_window.setTitle("CraftGame ComputerGrafikPraktikum 2014");
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
 
@@ -68,7 +68,7 @@ void CraftGame::init() {
   });
 
   // resize window
-  m_window.resize(Vec2i(1280, 1024));
+  m_window.resize(Vec2i(1280, 720));
 }
 
 void CraftGame::start() {
@@ -85,6 +85,7 @@ void CraftGame::start() {
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   m_envir.init();
+  m_mapView.init();
   // load and compile vertex and fragment shader
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
