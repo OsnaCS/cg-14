@@ -11,7 +11,7 @@ ChunkView::ChunkView(Chunk& chunk, Vec2i index)
 void ChunkView::updateView() {
 
   if(s_texture.nativeHandle()==0){
-    ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version.jpg");
+    ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version_better.jpg");
     s_texture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
     s_texture.params.filterMode = TexFilterMode::Trilinear;
     s_texture.params.useMipMaps = true;
