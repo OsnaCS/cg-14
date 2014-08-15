@@ -14,6 +14,11 @@ public:
 	MapView(Map& map, Camera& cam);
 	void draw(HotProgram& hotProg);
 
+	/**
+	* Checks if a chunk is visible
+	*/
+	bool isChunkVisible(Vec2i& chunkPos);
+
 private:
 
 	map<Vec2i, ChunkView> m_mapView;

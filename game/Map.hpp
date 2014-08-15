@@ -96,7 +96,6 @@ public:
 	*/
 	void loadWorld(string chunkname);
 
-
 	//map<Vec2i, Chunk> loadWorld("WeltDatei");
 
 private: 

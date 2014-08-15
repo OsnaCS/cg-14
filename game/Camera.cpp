@@ -20,6 +20,7 @@ Camera::Camera() :
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
+    ,m_ViewAngle(0.785f)
 {
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
 }
@@ -32,7 +33,7 @@ Mat4<float> Camera::get_matrix(){
 
 Mat4<float> Camera::get_ProjectionMatrix(Window& w){
        Vec2i s = w.getSize();
-		return projectionMatrix(0.785f, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
+		return projectionMatrix(m_ViewAngle, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
 };
 
 EventResult Camera::processEvent( InputEvent& e , Window& win)
