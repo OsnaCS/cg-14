@@ -9,7 +9,7 @@ const float FALL_SPEED = -0.06f;
 const float TIME_STEP  = 1.0f;
 const float JUMP_SPEED = 0.6;
 
-Player::Player() : //Map m
+Player::Player( Map& m) :
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
@@ -24,15 +24,16 @@ Player::Player() : //Map m
     ,m_hunger(3)
     ,m_health(0)
     ,m_yMovementspeed(0.0f)
+    ,m_map(m)
 {
   //Do Nothing
 }
-
+/*
 void Player::setMap(Map& map)
 {
   m_map = map;
 }
-
+*/
 EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 {
     //Key Pressed and Released

@@ -11,8 +11,8 @@ class Player {
 public:
 
 	//Konstruktor
-	Player();
-	void setMap(Map& map);
+    Player(Map& m);
+    //void setMap(Map& map);
 
 	//getter-Methoden
   Vec3f getPosition();
@@ -52,7 +52,7 @@ private:
   //3D Atributes
 	Vec3f m_position;
 	Vec3f m_direction;
-	Map m_map;
+    Map& m_map;
 	
 	//Playeratributes
 	int m_health;
