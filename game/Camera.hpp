@@ -4,13 +4,35 @@
 #include "lumina/input/InputEvent.hpp"
 #include <algorithm> 
 
-using namespace lumina;
 
-class Camera{
- 
+
+class Camera
+{
+ struct Movement {
+     bool wPressed;
+     bool sPressed;
+     bool aPressed;
+     bool dPressed;
+     bool SpacePressed;
+     bool CtrlPressed;
+     bool ShiftPressed;
+
+ };
 
 public:
+
 	Camera();
+
+    lumina::EventResult processEvent( const lumina::InputEvent& e, lumina::Window& win );
+
+    lumina::Mat4f get_matrix();
+
+    lumina::Mat4f get_ProjectionMatrix(lumina::Window& w);
+
+    void updateFromPlayer(lumina::Vec3f pos, lumina::Vec3f dir);
+
+    void update();
+
 
     lumina::Vec3f get_position(){
 			return m_position;
@@ -20,23 +42,18 @@ public:
 			return m_direction;
     }
 
-	lumina::Mat4<float> get_matrix();
-	lumina::Mat4<float> get_ProjectionMatrix(Window& w);
-	void setPosition(Vec3f position) {
+
+    void setPosition(lumina::Vec3f position) {
 		m_position = position;
 	}
 
-	Vec3f getPosition() {
+    lumina::Vec3f getPosition() {
 		return m_position;
 	}
-
-		void update();
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
-    };
+    }
 
-    lumina::EventResult processEvent( lumina::InputEvent& e, Window& win );
- 		
 private:
     void move_left();
     void move_right();
@@ -47,19 +64,12 @@ private:
     void turn_side(float deltaX);
     void turn_upDown(float deltaY);
     void reset_camera();
-
   
-	lumina::Vec3<float> m_position;
-	lumina::Vec3<float> m_direction;
-	lumina::Vec3<float> m_up;
+    lumina::Vec3f m_position;
+    lumina::Vec3f m_direction;
+    lumina::Vec3f m_up;
     float m_movingspeed;
     bool m_mouseCaptured;
-    bool m_wPressed;
-    bool m_sPressed;
-    bool m_aPressed;
-    bool m_dPressed;
-		bool m_SpacePressed;
-    bool m_CtrlPressed;
-  	bool m_ShiftPressed;
-      
+    Movement m_movedKeys;
+    float m_ViewAngle;
 };

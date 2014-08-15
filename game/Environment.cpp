@@ -14,7 +14,6 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 		mat.setDiagonal(Vec4f(2,2,2,1));
 
 		hotprog.uniform["u_transform"] = projMat * viewMat;
-		hotprog.uniform["u_light"] = 1.0f;
 		hotprog.draw(m_sphere, PrimitiveType::TriangleStrip);
 
 	});
@@ -28,7 +27,6 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
     mat.setDiagonal(Vec4f(2,2,2,1));
 
     hotprog.uniform["u_transform"] = projMat * viewMat;
-    hotprog.uniform["u_light"] = 1.0f;
     hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
 
   });

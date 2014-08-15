@@ -1,6 +1,4 @@
 #include "CraftGame.hpp"
-#include "ChunkView.hpp"
-#include "ChunkGenerator.hpp"
 
 #include <functional>
 #include <chrono>
@@ -8,21 +6,45 @@
 using namespace lumina;
 using namespace std;
 
-CraftGame::CraftGame() {
+CraftGame::CraftGame()
+    :m_player(NULL), m_mapView(m_map, m_camera)
+{
   m_running = true;
-
   ChunkGenerator cg;
   cg.chunkGeneration(m_map,{0,0,0});
+}
+
+CraftGame::~CraftGame()
+{
+  stop();
 
 }
+
+void CraftGame::stop()
+{
+    // C++0x allow to double delete null pointer but some old compiler might not allow.
+    // Therefore, we have to protect double deletion.
+    if ( m_player !=NULL ) {
+        delete m_player;
+        m_player = NULL;
+    }
+}
+
 
 void CraftGame::init() {
 
   // configure window
   m_window.setTitle("CG Praktikum 2014 :)");
   m_window.setVersionHint(3, 3);
+  m_cheatmode = false;
+
+  if (m_player==NULL) {
+      m_player = new Player( m_map );
+  }
 
   // add event callback (capture by reference
+  m_window.addEventCallback(
+    [&](InputEvent e) { return m_player->processEvent(e, m_window, m_cheatmode); });
   m_window.addEventCallback(
     [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
   m_window.addEventCallback([&](InputEvent e) {
@@ -30,6 +52,16 @@ void CraftGame::init() {
     // key was Escape -> set m_running to false to stop program
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
       m_running = false;
+      return EventResult::Processed;
+    }
+    // if the keyInpuit is k
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K) {
+      if(m_cheatmode){
+        m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+        m_cheatmode = false;
+      }else{
+        m_cheatmode = true;
+      }
       return EventResult::Processed;
     }
     return EventResult::Skipped;
@@ -72,6 +104,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   uint counter = 0;
 
+  // the chunk where the player/the camera is in
+  Vec2i activeChunk = m_map.getChunkPos(m_camera.get_position());
+  Vec2i oldChunk = activeChunk;
+
+  // generate the first chunks
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
     auto diff = chrono::system_clock::now() - now;
@@ -84,9 +123,21 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     now = chrono::system_clock::now();
 
+    // update activeChunk and generate new chunks
+    activeChunk = m_map.getChunkPos(m_camera.get_position());
+    if (oldChunk != activeChunk) {
+      oldChunk = activeChunk;
+      m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+    }
+
     // poll events
     m_window.update();
-    m_camera.update();
+    if(m_cheatmode){
+      m_camera.update();
+    }else{
+      m_player->update();
+      m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+    }
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
@@ -101,43 +152,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
 
-		// Chuncks anzeigen, d.h. zeichnen lassen
-        Chunk& currentChunk = m_map.getChunk(Vec2i(0, 0));
-        ChunkView cV1(currentChunk, Vec2i(0, 0));
-        cV1.draw(hot);
-
-		currentChunk = m_map.getChunk(Vec2i(-1, 0));
-        ChunkView cV2(currentChunk, Vec2i(-1, 0));
-        cV2.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(1, 0));
-        ChunkView cV3(currentChunk, Vec2i(1, 0));
-        cV3.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(0, -1));
-        ChunkView cV4(currentChunk, Vec2i(0, -1));
-        cV4.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(0, 1));
-        ChunkView cV5(currentChunk, Vec2i(0, 1));
-        cV5.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(1, 1));
-        ChunkView cV6(currentChunk, Vec2i(1, 1));
-        cV6.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(-1, 1));
-        ChunkView cV7(currentChunk, Vec2i(-1, 1));
-        cV7.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(1, -1));
-        ChunkView cV8(currentChunk, Vec2i(1, -1));
-        cV8.draw(hot);
-
-        currentChunk = m_map.getChunk(Vec2i(-1, -1));
-        ChunkView cV9(currentChunk, Vec2i(-1, -1));
-        cV9.draw(hot);
-
+        m_mapView.draw(hot);
       });
     });
 

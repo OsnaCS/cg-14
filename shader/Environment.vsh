@@ -3,7 +3,6 @@
 layout(location = 0) in vec3 i_windowpos;
 layout(location = 1) in vec2 i_coord;
 
-uniform float u_light;
 uniform mat4 u_transform;
 
 out VertexData
