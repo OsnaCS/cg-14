@@ -87,10 +87,10 @@ void Environment::init()
   m_sun.prime<Vec3f, Vec3f>([](HotVertexSeq<Vec3f, Vec3f>& hot)
   {
 
-    hot.vertex[0].set(Vec3f(0.5, -0.5, 20), Vec3f(1,1,0));
-    hot.vertex[1].set(Vec3f(-0.5, -0.5, 20), Vec3f(1,1,0));
-    hot.vertex[2].set(Vec3f(0.5, 0.5, 20), Vec3f(1,1,0));
-    hot.vertex[3].set(Vec3f(-0.5, 0.5, 20), Vec3f(1,1,0));
+    hot.vertex[0].set(Vec3f(0.5, 4.5, 10), Vec3f(1,1,0));
+    hot.vertex[1].set(Vec3f(-0.5, 4.5, 10), Vec3f(1,1,0));
+    hot.vertex[2].set(Vec3f(0.5, 5.5, 10), Vec3f(1,1,0));
+    hot.vertex[3].set(Vec3f(-0.5, 5.5, 10), Vec3f(1,1,0));
 
   });
 

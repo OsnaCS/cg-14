@@ -16,7 +16,7 @@ out VertexData
 void main()
 {
 
-	gl_Position = u_transform * vec4(i_windowpos , 1);
+	gl_Position = u_transform * vec4(i_windowpos, 1);
 
 	outData.coord = i_windowpos;
 
