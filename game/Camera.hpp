@@ -50,7 +50,6 @@ public:
     lumina::Vec3f getPosition() {
 		return m_position;
 	}
-
     void set_movingspeed(float movingspeed) {
         m_movingspeed = movingspeed;
     }
@@ -72,5 +71,5 @@ private:
     float m_movingspeed;
     bool m_mouseCaptured;
     Movement m_movedKeys;
-
+    float m_ViewAngle;
 };
