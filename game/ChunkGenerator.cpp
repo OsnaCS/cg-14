@@ -36,7 +36,7 @@ void ChunkGenerator::chunkGeneration(Map& m, Vec3i spectatorPos) {
             double m_frequency = 0.01;
             double simpNoise = SimplexNoise::noise(m_frequency * xi, m_frequency * zj, m_seed);
             // Umrechnen von Intervall [-1,1] in Intervall [c,d]
-            int noise = SimplexNoise::noiseInt(60, 78, simpNoise);
+            int noise = SimplexNoise::noiseInt(72, 79, simpNoise);
 
             setBlockHeight(m, x, z, xi, zj, noise);
           }
