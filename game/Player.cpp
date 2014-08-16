@@ -171,6 +171,7 @@ void Player::update()
     Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
     //TODO
     //Check for too much high // to less high
+    //https://pbs.twimg.com/profile_images/2529775225/image.jpg
 
     
     if(m_wPressed){
