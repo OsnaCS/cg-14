@@ -73,5 +73,5 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
     return true;
   }
 
-  return false;
+  return true;
 }
