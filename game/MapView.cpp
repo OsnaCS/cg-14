@@ -25,6 +25,48 @@ void MapView::init() {
   m_program.perFragProc.enableDepthWrite();
   m_program.perFragProc.setDepthFunction(DepthFunction::Less);
   m_program.primitiveProc.enableCulling();
+
+  VShader normalVS;
+  normalVS.compile(loadShaderFromFile("shader/MapViewNormalPass.vsh"));
+  FShader normalFS;
+  normalFS.compile(loadShaderFromFile("shader/MapViewNormalPass.fsh"));
+
+  m_normalPass.create(normalVS, normalFS);
+  m_normalPass.perFragProc.enableDepthTest();
+  m_normalPass.perFragProc.enableDepthWrite();
+  m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_normalPass.primitiveProc.enableCulling();
+}
+
+void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
+
+  m_normalPass.prime([&](HotProgram& hot) {
+
+    hot.uniform["u_view"] = viewMat;
+    hot.uniform["u_projection"] = projMat;
+
+    m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
+      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+
+      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
+        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+
+          if(m_map.exists({x * 16, 0, z * 16})) {
+
+            Vec2i chunkPos(x, z);
+
+            if (isChunkVisible(chunkPos)) {
+              if(m_mapView.count(chunkPos) == 0) {
+                m_mapView[chunkPos].init(chunkPos, m_map);
+              }
+
+              m_mapView[chunkPos].draw(hot, hotTex);
+            }
+          }
+        }
+      }
+    });
+  });
 }
 
 void MapView::draw(Mat4f viewMat, Mat4f projMat) {

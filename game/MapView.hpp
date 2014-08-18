@@ -13,6 +13,7 @@ public:
 
 	MapView(Map& map, Camera& cam);
 	void draw(Mat4f viewMat, Mat4f projMat);
+	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
 	void init();
 
 	/**
@@ -27,4 +28,5 @@ private:
 	Camera& m_cam;
 	Tex2D m_colorTexture;
 	Program m_program;
+	Program m_normalPass;
 };
