@@ -94,3 +94,4 @@ void Environment::init()
 
 }
 
+void Environment::setDayLength(float sec) { m_dayLength = sec; }

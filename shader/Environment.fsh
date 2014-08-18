@@ -2,6 +2,13 @@
 
 #define PI 3.1415926535897932384626433832795
 
+uniform vec3 c0 = vec3(0, 0, 1);
+uniform vec3 c1 = vec3(0.75, 0.75, 1);
+uniform vec3 c2 = vec3(1,0,1);
+uniform vec3 c3 = vec3(0.75, 0.75, 1);
+uniform vec3 c4 = vec3(0.75, 0.75, 1);
+uniform vec3 c5 = vec3(1, 1, 1);
+
 out vec4 o_color;
 
 in VertexData { vec3 coord; }
@@ -9,12 +16,7 @@ inData;
 
 void main() {
 	o_color= vec4(0,1,0,1);
-  vec3 c0 = vec3(0, 0, 1);
-  vec3 c1 = vec3(0.75, 0.75, 1);
-  vec3 c2 = vec3(1,0,1);
-  vec3 c3 = vec3(0.75, 0.75, 1);
-  vec3 c4 = vec3(0.75, 0.75, 1);
-  vec3 c5 = vec3(1, 1, 1);
+
 
   vec3 planevec1 = inData.coord;
   planevec1.y = 0;

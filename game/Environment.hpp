@@ -13,11 +13,15 @@ public:
 
   void init();
 
+  void setDayLength(float sec);
+
 private:
 
   VertexSeq m_sphere;
   VertexSeq m_sun;
   Program m_program;
   Program m_program2;
+  float m_dayLength;
+  float m_time;
 
 };
