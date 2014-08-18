@@ -7,7 +7,7 @@ Environment::Environment() : m_dayLength(10), m_time(0) {}
 void Environment::draw(Mat4f viewMat, Mat4f projMat)
 {
 
-  static float a = 0;
+  float a = 0;
 
 	m_program.prime([&](HotProgram& hotprog)
 	{
@@ -32,14 +32,8 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
   m_program2.prime([&](HotProgram& hotprog)
   {
 
-    a = a + 0.005;
+    a = m_time * 3.14 / m_dayLength;
 
-    if(a == 2*3.14)
-    {
-
-      a = 0;
-
-    }
 
     float sWinkel = cos(a);
     float cWinkel = sin(a);
@@ -152,12 +146,32 @@ void Environment::update(float delta){
 void Environment::setDayLength(float sec) { m_dayLength = sec; }
 
 Vec3f Environment::getSunColor(){
-	float help = m_time;
+	float r, g, b;
+	float help;
 
-	if(m_time > 5){
-		help = 10 - m_time;
+	r=0;
+	g=0;
+	b=0;
+	if(m_time > 0.75 * m_dayLength){
+		help = m_time - 0.75 * m_dayLength;
+		help = help /(m_dayLength/4);
+		r = 1;
+		g = 1 - help;
+		b = 0.5 * (1-help);
+	} else if(m_time > 0.5 * m_dayLength){
+		help = m_time - 0.5 * m_dayLength;
+		help = help /(m_dayLength/4);
+		r = 1;
+		g = help;
+		b = 0.5 * help;
+	} else if(m_time > 0.25 * m_dayLength){
+		help = m_time - 0.25 * m_dayLength;
+		help = help /(m_dayLength/4);
+		r = help;
+	} else{
+		help = m_time / (m_dayLength/4);
+		r = 1-help;
 	}
-
-	return Vec3f(1-help/5,1-help/5,0);
+	return Vec3f(r,g,b);
 
 }
