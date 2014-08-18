@@ -16,11 +16,11 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 		mat.setDiagonal(Vec4f(2,2,2,1));
 
 		hotprog.uniform["u_transform"] = projMat * viewMat;
-		hotprog.uniform["u_colorUp"] = Vec3f(1, 1, 1);
-		hotprog.uniform["u_colorWest"] = Vec3f(0, 1, 0);
-		hotprog.uniform["u_colorNorth"] = Vec3f(0, 1, 0);
-		hotprog.uniform["u_colorEast"] = Vec3f(0, 0, 1);
-		hotprog.uniform["u_colorSouth"] = Vec3f(0, 1, 0);
+		hotprog.uniform["u_colorUp"] = Vec3f(0, 0, 0.5);
+		hotprog.uniform["u_colorWest"] = Vec3f(0.2, 0, 0);
+		hotprog.uniform["u_colorNorth"] = Vec3f(0.2, 0, 0);
+		hotprog.uniform["u_colorEast"] = Vec3f(0.2, 0.2, 0.2);
+		hotprog.uniform["u_colorSouth"] = Vec3f(0.2, 0.2, 0.2);
 		hotprog.uniform["u_colorDown"] = Vec3f(0, 0, 0);
 
 		hotprog.draw(m_sphere, PrimitiveType::TriangleStrip);
