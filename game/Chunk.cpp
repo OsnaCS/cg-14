@@ -1,9 +1,11 @@
 #include "Chunk.hpp"
 #include "BlockType.hpp"
+#include "BiomeType.hpp"
 
 Chunk::Chunk()
  : m_blocks(16*16*128)
 {
+	//BiomeType chunkBiomeType;
 }
 
 void Chunk::setBlockType(Vec3i pos, BlockType type)
@@ -38,3 +40,19 @@ BlockType Chunk::getBlockType(Vec3i pos)
 	return m_blocks[pos.y*256 + pos.z*16 + pos.x];
 
 }
+
+void Chunk::setBiomeType(BiomeType type){
+    slog("IN SET BIOME TYPE");
+  chunkBiomeType = type;
+}
+
+BiomeType Chunk::getBiomeType(){
+  return chunkBiomeType;
+}
+
+
+
+
+
+
+

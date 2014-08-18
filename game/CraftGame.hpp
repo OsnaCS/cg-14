@@ -6,7 +6,7 @@
 #include "Map.hpp"
 #include "Environment.hpp"
 #include "MapView.hpp"
-#include "ChunkGenerator.hpp"
+#include "ChunkGenerator1.hpp"
 
 class CraftGame {
 public:
@@ -19,7 +19,7 @@ public:
 
 private:
   lumina::Window m_window;
-  ChunkGenerator m_chunkGenerator;
+  ChunkGenerator1 m_chunkGenerator;
   bool m_running;
   Camera m_camera;
   Player* m_player;
