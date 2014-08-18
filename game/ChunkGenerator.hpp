@@ -22,6 +22,8 @@ public:
 
   float interpolate(float a, float b, float x);
 
+  void setBiomes(Map& map, string biometype, int x, int y);
+
 private:
   long m_seed;
   int m_octave;

@@ -7,6 +7,7 @@
 #include "Map.hpp"
 #include <random>
 #include <math.h>
+#include <string>
 
 
 using namespace std;
@@ -19,28 +20,17 @@ ChunkGenerator::ChunkGenerator() {
   m_seed = rand() % 512;
 }
 
-void ChunkGenerator::chunkGeneration(Map& m, Vec3i spectatorPos) {
+void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos) {
 
   // chunkPos ist Position des Chunks, in dem der Spectator steht in Chunkkoordinaten
-  Vec2i chunkPos = m.getChunkPos(spectatorPos);
+  Vec2i chunkPos = map.getChunkPos(spectatorPos);
+  string flachland = "Flachland";
 
   for(int x = chunkPos.x - 2; x <= chunkPos.x + 2; x++) {
     for(int z = chunkPos.y - 2; z <= chunkPos.y + 2; z++) {
-      if(!m.exists({x * 16, 0, z * 16})) {
-        m.addChunk({x, z});
-        for(int xi = x * 16; xi < (x * 16) + 16; xi++) {
-          // Blöcke von oben nach unten (in Blockkoordinaten)
-          for(int zj = z * 16; zj < (z * 16) + 16; zj++) {
-            // Simplex Noise:
-            // Berechne Werte im Intervall [-1,1] mit Simplex Noise
-            double m_frequency = 0.01;
-            double simpNoise = SimplexNoise::noise(m_frequency * xi, m_frequency * zj, m_seed);
-            // Umrechnen von Intervall [-1,1] in Intervall [c,d]
-            int noise = SimplexNoise::noiseInt(72, 79, simpNoise);
-
-            setBlockHeight(m, x, z, xi, zj, noise);
-          }
-        }
+      if(!map.exists({x * 16, 0, z * 16})) {
+        map.addChunk({x, z});
+        setBiomes(map, flachland, x, z);
       }
     }
   }
@@ -66,5 +56,34 @@ void ChunkGenerator::setBlockHeight(Map& map, int x, int z, int xi, int zj, int 
     } else {
       map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Air); //  Über dem Noise-Wert gibt es nur Aip
     }
+  }
+}
+
+void ChunkGenerator::setBiomes(Map& map, string biometype, int x, int z) {
+
+  int biomeNumber = 0;
+  if (biometype == "Flachland"){
+    biomeNumber = 1;
+  }
+
+  switch(biomeNumber) {
+
+    case 1:
+      for(int xi = x * 16; xi < (x * 16) + 16; xi++) {
+        // Blöcke von oben nach unten (in Blockkoordinaten)
+        for(int zj = z * 16; zj < (z * 16) + 16; zj++) {
+          // Simplex Noise:
+          // Berechne Werte im Intervall [-1,1] mit Simplex Noise
+          double m_frequency = 0.01;
+          double simpNoise = SimplexNoise::noise(m_frequency * xi, m_frequency * zj, m_seed);
+          // Umrechnen von Intervall [-1,1] in Intervall [c,d]
+          int noise = SimplexNoise::noiseInt(72, 79, simpNoise);
+
+          setBlockHeight(map, x, z, xi, zj, noise);
+        }
+      }
+      break;
+    default:
+      break;
   }
 }
