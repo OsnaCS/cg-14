@@ -157,7 +157,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
         hot.uniform["u_view"] = this->m_camera.get_matrix();
         hot.uniform["u_projection"] = this->m_camera.get_ProjectionMatrix(m_window);
-        hot.uniform["u_lightsource"] = Vec3f(sin(sum*2),-1,cos(sum*2));
+        hot.uniform["u_lightRay"] = Vec3f(-1,-3,1);
 
         m_mapView.draw(hot);
     

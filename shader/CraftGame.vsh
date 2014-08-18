@@ -15,6 +15,7 @@ out VertexData {
 	vec2 uv;
 	vec3 normal;
 	vec3 tangent;
+	vec3 pos;
 } outData;
 
 void main() {
@@ -24,7 +25,9 @@ void main() {
   outData.uv = i_uv;
   outData.normal = i_normal;
   outData.tangent = i_tangent;
+  outData.pos = i_pos;
 
   // write gl_Position -> make OpenGL happy
   gl_Position = pipeline * vec4(i_pos, 1);
+  // outData.pos=gl_Position.xyz;
 }

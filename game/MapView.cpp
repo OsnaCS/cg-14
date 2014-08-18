@@ -31,6 +31,7 @@ void MapView::draw(HotProgram& hotProg) {
 
   hotProg.uniform["texture1"] = 0;
   hotProg.uniform["normal_tex"] = 1;
+  hotProg.uniform["u_eyePoint"]=m_cam.get_position();
 
   cont.prime([&] (HotTexCont& hotCont){
 
