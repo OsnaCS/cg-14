@@ -1,6 +1,8 @@
 #include "Environment.hpp"
 
-#include <math.h> 
+#include <math.h>
+
+Environment::Environment() : m_dayLength(10), m_time(0) {}
 
 void Environment::draw(Mat4f viewMat, Mat4f projMat)
 {
@@ -44,6 +46,7 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
     hotprog.uniform["u_sinus"] = sWinkel;
     hotprog.uniform["u_cosinus"] = cWinkel;
+    hotprog.uniform["u_color"] = getSunColor();
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
     Mat4f mat;
@@ -136,4 +139,25 @@ void Environment::init()
 
 }
 
+void Environment::update(float delta){
+
+	m_time += delta;
+
+	if(m_time > m_dayLength){
+		m_time -= m_dayLength;
+	}
+
+}
+
 void Environment::setDayLength(float sec) { m_dayLength = sec; }
+
+Vec3f Environment::getSunColor(){
+	float help = m_time;
+
+	if(m_time > 5){
+		help = 10 - m_time;
+	}
+
+	return Vec3f(1-help/5,1-help/5,0);
+
+}

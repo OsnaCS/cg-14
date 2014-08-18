@@ -132,6 +132,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // poll events
     m_window.update();
+    m_envir.update(s);
     if(m_cheatmode){
       m_camera.update();
     }else{

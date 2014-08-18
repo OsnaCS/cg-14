@@ -9,11 +9,17 @@ class Environment
 
 public:
 
+	Environment();
+
   void draw(Mat4f viewMat, Mat4f projMat);
 
   void init();
 
+  void update(float delta);
+
   void setDayLength(float sec);
+
+  Vec3f getSunColor();
 
 private:
 
