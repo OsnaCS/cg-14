@@ -10,8 +10,6 @@ CraftGame::CraftGame()
     :m_player(NULL), m_mapView(m_map, m_camera)
 {
   m_running = true;
-  ChunkGenerator cg;
-  cg.chunkGeneration(m_map,{0,0,0});
 }
 
 CraftGame::~CraftGame()
