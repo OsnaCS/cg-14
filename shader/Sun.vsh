@@ -22,6 +22,11 @@ void main()
 
 	gl_Position = u_transform * vec4(i_windowpos.x/**u_cosinus*/, i_windowpos.y/**u_sinus*/, i_windowpos.z, 1);
 
-	outData.color = i_color;
+	if(i_windowpos.y > 0){
 
+		outData.color = i_color;
+
+	} else{
+		outData.color = u_color;
+	}
 }

@@ -156,22 +156,23 @@ Vec3f Environment::getSunColor(){
 	if(m_time > 0.75 * m_dayLength){
 		help = m_time - 0.75 * m_dayLength;
 		help = help /(m_dayLength/4);
-		r = 1;
-		g = 1 - help;
-		b = 0.5 * (1-help);
+		r = 1 - help;
 	} else if(m_time > 0.5 * m_dayLength){
 		help = m_time - 0.5 * m_dayLength;
 		help = help /(m_dayLength/4);
 		r = 1;
-		g = help;
-		b = 0.5 * help;
+		g = 1 - help;
+		b = 0.5 * (1 - help);
 	} else if(m_time > 0.25 * m_dayLength){
 		help = m_time - 0.25 * m_dayLength;
 		help = help /(m_dayLength/4);
-		r = help;
+		r = 1;
+		g = help;
+		b= 0.5 * help;
+
 	} else{
 		help = m_time / (m_dayLength/4);
-		r = 1-help;
+		r = help;
 	}
 	return Vec3f(r,g,b);
 
