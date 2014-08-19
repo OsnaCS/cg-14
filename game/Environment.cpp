@@ -13,9 +13,9 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 	{
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
-		Mat4f mat;
-		mat.setToIdentity();
-		mat.setDiagonal(Vec4f(2,2,2,1));
+		// Mat4f mat;
+		// mat.setToIdentity();
+		// mat.setDiagonal(Vec4f(2,2,2,1));
 
 		hotprog.uniform["u_transform"] = projMat * viewMat;
 		hotprog.uniform["u_colorUp"] = getcUp();
@@ -32,20 +32,21 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
   m_program2.prime([&](HotProgram& hotprog)
   {
 
-    a = m_time * 2 * 3.14 / (m_dayLength);
+    a = m_time * 3.1415 * 2 / (m_dayLength);
 
 
-    float sWinkel = cos(a);
-    float cWinkel = sin(a);
+    float cWinkel = cos(a);
+    float sWinkel = sin(a);
+
 
     hotprog.uniform["u_sinus"] = sWinkel;
     hotprog.uniform["u_cosinus"] = cWinkel;
     hotprog.uniform["u_color"] = getSunColor();
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
-    Mat4f mat;
-    mat.setToIdentity();
-    mat.setDiagonal(Vec4f(2,2,2,1));
+    // Mat4f mat;
+    // mat.setToIdentity();
+    // mat.setDiagonal(Vec4f(2,2,2,1));
 
     Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,0,1), a));
 
@@ -108,15 +109,15 @@ void Environment::init()
   m_sun.prime<Vec3f, Vec3f>([](HotVertexSeq<Vec3f, Vec3f>& hot)
   {
 
-    hot.vertex[0].set(Vec3f(10, 4.5, 0.5), Vec3f(1,1,0));
-    hot.vertex[1].set(Vec3f(10, 4.5, -0.5), Vec3f(1,1,0));
-    hot.vertex[2].set(Vec3f(10, 5.5, 0.5), Vec3f(1,1,0));
-    hot.vertex[3].set(Vec3f(10, 5.5, -0.5), Vec3f(1,1,0));
+    hot.vertex[0].set(Vec3f(-0.5, -10, 0.5), Vec3f(1,1,0));
+    hot.vertex[1].set(Vec3f(-0.5, -10, -0.5), Vec3f(1,1,0));
+    hot.vertex[2].set(Vec3f(0.5, -10, 0.5), Vec3f(1,1,0));
+    hot.vertex[3].set(Vec3f(0.5, -10, -0.5), Vec3f(1,1,0));
 
-    hot.vertex[4].set(Vec3f(-10, -4.5, 0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[5].set(Vec3f(-10, -4.5, -0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[6].set(Vec3f(-10, -5.5, 0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[7].set(Vec3f(-10, -5.5, -0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[4].set(Vec3f(-0.5, 10, 0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[5].set(Vec3f(-0.5, 10, -0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[6].set(Vec3f(0.5, 10, 0.5), Vec3f(0.75,0.75,0.75));
+    hot.vertex[7].set(Vec3f(0.5, 10, -0.5), Vec3f(0.75,0.75,0.75));
 
     hot.index[0] = 0;
     hot.index[1] = 1;
@@ -191,7 +192,6 @@ Vec3f Environment::getcUp(){
 }
 
 Vec3f Environment::getcWest(){
-
 	float r, g, b, help;
 
   if(m_time > 0.75 * m_dayLength) {
@@ -259,7 +259,6 @@ Vec3f Environment::getcNorth(){
     return Vec3f(0.25 * help, 0.25 * help, 0.5 * help);
   }
 
-	return Vec3f(0,0,0);
 }
 
 Vec3f Environment::getcEast(){

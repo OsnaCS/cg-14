@@ -20,8 +20,8 @@ out VertexData
 void main()
 {
 
-	gl_Position = u_transform * vec4(i_windowpos.x*u_sinus, i_windowpos.y*u_cosinus, i_windowpos.z, 1);
+	gl_Position = u_transform * vec4(i_windowpos.x/**u_cosinus*/, i_windowpos.y/**u_sinus*/, i_windowpos.z, 1);
 
-	outData.color = u_color;
+	outData.color = i_color;
 
 }
