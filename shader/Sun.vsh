@@ -7,9 +7,6 @@ uniform float u_light;
 uniform mat4 u_transform;
 uniform vec3 u_color;
 
-uniform float u_sinus;
-uniform float u_cosinus;
-
 out VertexData
 {
 
@@ -20,13 +17,16 @@ out VertexData
 void main()
 {
 
-	gl_Position = u_transform * vec4(i_windowpos.x/**u_cosinus*/, i_windowpos.y/**u_sinus*/, i_windowpos.z, 1);
+	gl_Position = u_transform * vec4(i_windowpos.x, i_windowpos.y, i_windowpos.z, 1);
 
-	if(i_windowpos.y > 0){
+	if(i_windowpos.y > 0)
+	{
 
 		outData.color = i_color;
 
-	} else{
+	} 
+	else
+	{
 		outData.color = u_color;
 	}
 }
