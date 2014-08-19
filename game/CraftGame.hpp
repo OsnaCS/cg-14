@@ -29,7 +29,7 @@ private:
   MapView m_mapView;
 
   Tex2D m_gBufferNormal;
-  Tex2D m_gBufferPosition;
+  Tex2D m_gBufferDepth;
   FrameBuffer m_gBuffer;
   VertexSeq m_fullScreenQuad;
 

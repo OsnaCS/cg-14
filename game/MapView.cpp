@@ -44,6 +44,7 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 
     hot.uniform["u_view"] = viewMat;
     hot.uniform["u_projection"] = projMat;
+    hot.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
 
     m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
       Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());

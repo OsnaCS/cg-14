@@ -58,6 +58,10 @@ public:
         return m_ViewAngle;
     }
 
+    float getBackPlaneDistance() {
+        return m_backPlaneDistance;
+    }
+
 private:
     void move_left();
     void move_right();
@@ -76,4 +80,5 @@ private:
     bool m_mouseCaptured;
     Movement m_movedKeys;
     float m_ViewAngle;
+    float m_backPlaneDistance;
 };

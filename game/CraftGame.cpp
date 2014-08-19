@@ -94,10 +94,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Vec2i oldChunk = activeChunk;
 
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
-  m_gBufferPosition.create(m_window.getSize(), TexFormat::RGB8);
+  m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create();
   m_gBuffer.attachColor(0, m_gBufferNormal);
-  m_gBuffer.attachColor(1, m_gBufferPosition);
+  m_gBuffer.attachColor(1, m_gBufferDepth);
 
   m_fullScreenQuad.create(2, 4);
   m_fullScreenQuad.prime<Vec2f>([&](HotVertexSeq<Vec2f>& hotSeq) {
@@ -167,7 +167,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
-      m_gBufferNormal.prime(0, [&](HotTex2D& hotT) {
+      m_gBufferDepth.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });

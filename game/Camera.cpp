@@ -14,6 +14,7 @@ Camera::Camera() :
     ,m_movingspeed(0.3f)
     ,m_mouseCaptured(false)
     ,m_ViewAngle(0.785f)
+    ,m_backPlaneDistance(256.0f)
 {
     m_movedKeys.wPressed = false;
     m_movedKeys.sPressed = false;
@@ -33,7 +34,7 @@ Mat4f Camera::get_matrix()
 Mat4f Camera::get_ProjectionMatrix(Window& w)
 {
      Vec2i s = w.getSize();
-    return projectionMatrix(m_ViewAngle, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
+    return projectionMatrix(m_ViewAngle, static_cast<float>(s[0]) / s[1], 0.01f, m_backPlaneDistance);
 
 };
 
