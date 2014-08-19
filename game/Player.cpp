@@ -15,7 +15,7 @@ const float FREE_SPACE = 0.05f;
 const float BASIC_SPEED = 0.2f; 
 const float FAST_SPEED = 0.4f;
 const float FALL_SPEED = -0.03f;
-const float JUMP_SPEED = 0.4f;
+const float JUMP_SPEED = 0.6f;
 
 //Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;

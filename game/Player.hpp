@@ -51,7 +51,7 @@ public:
 
 private:
 	// Get the sign of the Movement
-	inline int get_sign(float x) {
+	int get_sign(float x) {
 		const float eps = 0.0001;	
 		return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
 	}
