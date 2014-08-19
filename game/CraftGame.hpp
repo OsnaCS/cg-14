@@ -10,18 +10,16 @@
 class CraftGame {
 public:
   CraftGame();
-  ~CraftGame();
 
   void init();
   void start();
-  void stop();
 
 private:
   lumina::Window m_window;
   ChunkGenerator m_chunkGenerator;
   bool m_running;
   Camera m_camera;
-  Player* m_player;
+  Player m_player;
   bool m_cheatmode;
   Map m_map;
   MapView m_mapView;
