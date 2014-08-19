@@ -32,7 +32,7 @@ int getUpperBound(BiomeType type) {
     case BiomeType::Desert:
       return 76;
     case BiomeType::DesertPlain:
-      return 75;
+      return 74;
     case BiomeType::Plains:
       return 74;
     case BiomeType::PlainForest:
@@ -40,7 +40,7 @@ int getUpperBound(BiomeType type) {
     case BiomeType::Forest:
       return 78;
     case BiomeType::Hillside:
-      return 83;
+      return 82;
     case BiomeType::Mountains:
       return 93;
     default:
