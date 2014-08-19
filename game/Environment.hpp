@@ -27,10 +27,13 @@ private:
 
   VertexSeq m_sphere;
   VertexSeq m_sun;
+  VertexSeq m_moon;
   Program m_program;
   Program m_program2;
   float m_dayLength;
   float m_time;
+  int m_day;
+  bool visible;
 
   Vec3f getcUp();
   Vec3f getcWest();
