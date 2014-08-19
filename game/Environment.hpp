@@ -30,4 +30,11 @@ private:
   float m_dayLength;
   float m_time;
 
+  Vec3f getcUp();
+  Vec3f getcWest();
+  Vec3f getcNorth();
+  Vec3f getcEast();
+  Vec3f getcSouth();
+  Vec3f getcDown();
+
 };

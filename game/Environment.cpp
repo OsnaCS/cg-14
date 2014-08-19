@@ -18,12 +18,12 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 		mat.setDiagonal(Vec4f(2,2,2,1));
 
 		hotprog.uniform["u_transform"] = projMat * viewMat;
-		hotprog.uniform["u_colorUp"] = Vec3f(0, 0, 0.5);
-		hotprog.uniform["u_colorWest"] = Vec3f(0.2, 0, 0);
-		hotprog.uniform["u_colorNorth"] = Vec3f(0.2, 0, 0);
-		hotprog.uniform["u_colorEast"] = Vec3f(0.2, 0.2, 0.2);
-		hotprog.uniform["u_colorSouth"] = Vec3f(0.2, 0.2, 0.2);
-		hotprog.uniform["u_colorDown"] = Vec3f(0, 0, 0);
+		hotprog.uniform["u_colorUp"] = getcUp();
+		hotprog.uniform["u_colorWest"] = getcWest();
+		hotprog.uniform["u_colorNorth"] = getcNorth();
+		hotprog.uniform["u_colorEast"] = getcEast();
+		hotprog.uniform["u_colorSouth"] = getcSouth();
+		hotprog.uniform["u_colorDown"] = getcDown();
 
 		hotprog.draw(m_sphere, PrimitiveType::TriangleStrip);
 
@@ -32,7 +32,7 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
   m_program2.prime([&](HotProgram& hotprog)
   {
 
-    a = m_time * 3.14 / m_dayLength;
+    a = m_time * 2 * 3.14 / (m_dayLength);
 
 
     float sWinkel = cos(a);
@@ -173,5 +173,134 @@ Vec3f Environment::getSunColor(){
 		r = 1-help;
 	}
 	return Vec3f(r,g,b);
+
+}
+
+
+Vec3f Environment::getcUp(){
+
+	float help = m_time;
+	if(m_time > 0.5 * m_dayLength){
+
+		help = m_dayLength - m_time; 
+
+	}
+
+	return Vec3f(0, 0, 0.7 * (help/5));
+
+}
+
+Vec3f Environment::getcWest(){
+
+	float r, g, b, help;
+
+  if(m_time > 0.75 * m_dayLength) {
+
+    help = m_time - 0.75 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    //(.5,0,0)
+    return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
+
+  } else if(m_time > 0.5 * m_dayLength) {
+
+    help = m_time - 0.5 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.75 - (0.5 * help), 0.75 - (0.5 * help), 1 - 0.5 * help);
+
+  } else if(m_time > 0.25 * m_dayLength) {
+
+    help = m_time - 0.25 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.5 + (0.25 * help), 0.75 * help, help);
+
+  } else {
+    help = m_time;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.5 * help, 0, 0);
+  }
+
+}
+
+Vec3f Environment::getcNorth(){
+
+	float r, g, b, help;
+
+  if(m_time > 0.75 * m_dayLength) {
+
+    help = m_time - 0.75 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    //(0,0,0.)
+    return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
+
+  } else if(m_time > 0.5 * m_dayLength) {
+
+    help = m_time - 0.5 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.75 - (0.5 * help), 0.75 - (0.5 * help), 1 - 0.5 * help);
+
+  } else if(m_time > 0.25 * m_dayLength) {
+
+    help = m_time - 0.25 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    //(0,0,0.5)
+    return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
+
+  } else {
+    help = m_time;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.25 * help, 0.25 * help, 0.5 * help);
+  }
+
+	return Vec3f(0,0,0);
+}
+
+Vec3f Environment::getcEast(){
+	float r, g, b, help;
+
+  if(m_time > 0.75 * m_dayLength) {
+
+    help = m_time - 0.75 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    //(.5,0,0)
+    return Vec3f(0.5 * (1 - help), 0, 0);
+
+  } else if(m_time > 0.5 * m_dayLength) {
+
+    help = m_time - 0.5 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.75 - (0.25 * help), 0.75 - (0.75 * help), 1 - help);
+
+  } else if(m_time > 0.25 * m_dayLength) {
+
+    help = m_time - 0.25 * m_dayLength;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
+
+  } else {
+    help = m_time;
+    help = help / (m_dayLength / 4);
+
+    return Vec3f(0.25 * help, 0.25 * help, 0.5 * help);
+  }
+}
+
+Vec3f Environment::getcSouth(){
+	return getcNorth();
+}
+
+Vec3f Environment::getcDown(){
+
+	return Vec3f(0,0,0);
 
 }
