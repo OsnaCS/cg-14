@@ -10,8 +10,8 @@ MapView::MapView(Map& map, Camera& cam)
 
 void MapView::init() {
 
-  ImageBox image_box = loadJPEGImage("gfx/texture.jpg");
-  m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
+  ImageBox image_box = loadJPEGImage("gfx/texture_small.jpg");
+  m_colorTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box.data());
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
 
@@ -48,8 +48,8 @@ void MapView::init() {
   // m_finalPass.perFragProc.setDepthFunction(DepthFunction::Lequal);
   // m_finalPass.primitiveProc.enableCulling();
 
-  ImageBox imageBoxNormal = loadJPEGImage("gfx/normals2048.jpg");
-  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGB8, imageBoxNormal.data());
+  ImageBox imageBoxNormal = loadJPEGImage("gfx/normals_small.jpg");
+  m_normalTexture.create(Vec2i(512,512), TexFormat::RGB8, imageBoxNormal.data());
   m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
   m_normalTexture.params.useMipMaps = true;
 }
