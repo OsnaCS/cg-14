@@ -7,6 +7,10 @@ Environment::Environment() : m_dayLength(10), m_time(0) {}
 void Environment::draw(Mat4f viewMat, Mat4f projMat)
 {
 
+	// Vec3f pos = getSunPos();
+	// slog("time: ", m_time);
+	// slog("pos: ", pos);
+
 	m_program.prime([&](HotProgram& hotprog)
 	{
 
@@ -285,6 +289,34 @@ Vec3f Environment::getSunColor()
 	return Vec3f(r,g,b);
 
 }
+
+float Environment::getSunIntensity(){
+
+	float help;
+
+	help = m_time / m_dayLength;
+
+	if(help>0.25 && help<0.75){
+
+		help -= 0.25;
+		if(help > 0.25){
+			help = 0.5 - help;
+		}
+
+		return help*3;
+
+	}
+	return 0.0;
+}
+
+Vec3f Environment::getSunPos(){
+
+	return Vec3f(sin(m_time*2*3.1415/m_dayLength),-cos(m_time*2*3.1415/m_dayLength),0);
+}
+
+
+
+
 
 
 Vec3f Environment::getcUp()

@@ -20,6 +20,8 @@ public:
   void setDayLength(float sec);
 
   Vec3f getSunColor();
+  float getSunIntensity();
+  Vec3f getSunPos();
 
 private:
 
