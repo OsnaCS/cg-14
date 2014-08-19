@@ -96,16 +96,16 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
-  m_gBuffer.create();
+  m_gBuffer.create(m_window.getSize());
   m_gBuffer.attachColor(0, m_gBufferNormal);
   m_gBuffer.attachColor(1, m_gBufferDepth);
 
   m_lBufferTex.create(m_window.getSize(), TexFormat::RGBA8);
-  m_lBuffer.create();
+  m_lBuffer.create(m_window.getSize());
   m_lBuffer.attachColor(0, m_lBufferTex);
 
   m_fBufferTex.create(m_window.getSize(), TexFormat::RGB8);
-  m_fBuffer.create();
+  m_fBuffer.create(m_window.getSize());
   m_fBuffer.attachColor(0, m_fBufferTex);
 
   m_fullScreenQuad.create(2, 4);
@@ -124,10 +124,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program tempP;
   tempP.create(tempVS, tempFS);
 
-  Tex2D zBuffer;
-  zBuffer.create(m_window.getSize(), TexFormat::D32);
-  m_gBuffer.attachDepth(zBuffer);
-  m_fBuffer.attachDepth(zBuffer);
+  RenderBuffer zBuf;
+  zBuf.create(m_window.getSize(), RenderBufferType::Depth32);
+
+  m_fBuffer.attachRenderBuffer(zBuf);
+  m_gBuffer.attachRenderBuffer(zBuf);
 
   // generate the first chunks
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
