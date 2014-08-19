@@ -7,48 +7,53 @@
 using namespace std;
 
 
+/** @Class Player 
+*/
 class Player {	
 public:
 
-	//Konstruktor
-    Player(Map& m);
-    //void setMap(Map& map);
+	//Constructor
+  Player(Map& m);
 
-	//getter-Methoden
-  Vec3f getPosition();
-	int getHealth();
-	int getHunger();
-  void turn_side(float deltaX);
-  void turn_upDown(float deltaY);
+  /** @brief Processing all actual movements
+  For every pressed key, the movement will be added and processed.
+  */
   void update();
+
+  /** @brief Get the direction of the Players view
+  		@return Vec3f direction The vector where the Player is looking at
+  */
 	Vec3f getDirection();
 
-	//Zum Bewegen
-	//ggf. Aufnehmen, Ablegen, Abbauen, Aufbauen
+  /** @brief Get the position of the Player
+  		@return Vec3f position Get the Position in 3D Space
+  */
+  Vec3f getPosition();
+
+  /** @brief Process all input Events by Mouse and Keyboard
+
+			Handle different Input:
+			W = Move forward
+			S = Move backward
+			A = Move left
+			D = Move right
+			Space = Jump
+			Mouse Movement = Turn Side // Turn Up and Down
+
+  		@param e Event that thows up in the Game (Keyboard or Mouseinput)
+  		@param win The current window for calculating the ratio of dimensions (for the View-Matrix)
+  		@param cheatmode True - No Changes in this class are allowed
+  										 False - Changes are allowed
+
+  		@return EventResult Give back the result of processing (Skipped/Processed)
+  */
   lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode );
 
-	//Updated Health
-	//Fallen und Hunger verursacht Schaden
-	//über Zeit wird Health regeneriert
-	void updateHealth();
-
-	//Updated Hunger
-	//Hunger wird nach Zeiteinheit berechnet:
-	//Wenn Hunger > 10, wird -0.5 Leben abgezogen
-	//Essbares senkt Hunger 
-	void updateHunger();
-
-	//ggf. Inventar
-
 private:
+	// Get the sign of the Movement
 	inline int get_sign(float x) {
-		float eps = 0.0001;
-		if (x > eps) 
-			return 1;
-		else if ( fabs(x) < eps) 
-			return 0;
-		else 
-			return -1;
+		const float eps = 0.0001;	
+		return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
 	}
 
 	//Methods
@@ -58,9 +63,16 @@ private:
   void move_backward();
   void move_up();
   void move_down();
+  
+  // Check the Delta of Movement and the Collision. Move in different Cases
   void movement();
-	bool collide(float x, float y, float z);
 
+  //Check the position for case of air (x/y/z coordinates)
+	bool collide(float x, float y, float z);
+ 
+  void turn_side(float deltaX);
+  void turn_upDown(float deltaY);
+  
   //3D Atributes
   Vec3f m_position;
   Vec3f m_direction;

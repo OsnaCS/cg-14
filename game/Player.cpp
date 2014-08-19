@@ -3,15 +3,23 @@
 using namespace std;
 using namespace lumina;
 
-const float BLOCK_DIFFERENCE_X = 0.5f;
-const float BLOCK_DIFFERENCE_Y = 0.5;
+//The Block has a radius of 0.5
+const float BLOCK_DIFFERENCE_X = 0.5f; 
+const float BLOCK_DIFFERENCE_Y = 0.5f;
 const float BLOCK_DIFFERENCE_Z = 0.5f;
-const float FREE_SPACE = 0.01f;
-const float BASIC_SPEED = 0.3f; 
-const float FAST_SPEED = 0.8f;
-const float FALL_SPEED = -0.06f;
+
+//To not collide into other blocks you have to stay at least away an amount of FREE_SPACE
+const float FREE_SPACE = 0.05f;
+
+//The Speeds are for normal walking, running, falling and Jumping
+const float BASIC_SPEED = 0.2f; 
+const float FAST_SPEED = 0.4f;
+const float FALL_SPEED = -0.03f;
+const float JUMP_SPEED = 0.4f;
+
+//Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;
-const float JUMP_SPEED = 0.6f;
+
 
 Player::Player( Map& m) :
     m_position(Vec3f(0.0f, 85.5f, 0.0f))
@@ -134,16 +142,6 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 
     return EventResult::Skipped;
 }
-/*
-   	//man fällt, wenn unter einem Air ist
-   	while(m_map.getBlockType(pos2) == BlockType::Air){
-   		m_pos = pos2;
-   		pos2 = {m_pos.x, m_pos.y-1, m_pos.z};    	
-   	}
-  }
-*/
-  //ggf. Aufnehmen, Ablegen, Abbauen, Aufbauen
-
 
 void Player::turn_side(float deltaX)
 {
@@ -193,20 +191,6 @@ void Player::update()
         move_down();
     }  
     movement();
-    /*
-
-    //Getting downward
-    if( pos.y>= 0 & pos.y<=127 ){
-      if(m_map.getBlockType(pos) == BlockType::Air && m_map.getBlockType(pos) == BlockType::Air){
-        m_yMovementspeed = max(-1.0f, m_yMovementspeed + FALL_SPEED) ;
-      }else{
-        m_yMovementspeed = 0;
-      }
-
-      m_position.y += m_yMovementspeed*TIME_STEP;
-    }
-    */
-
 }
 
 Vec3f Player::getPosition(){
@@ -259,29 +243,18 @@ void Player::move_up() //Jump
   } 
 }
 
+//No use anymore, because of falling to the ground by default
 void Player::move_down()
 {
 //    m_position.y -= m_movingspeed;
 }
 
+//Handle all Movements while checking for collision with Blocks
 void Player::movement()
 {
-  int xSign = 1; 
-  int zSign = 1;
-  int ySign = 1;
-  //Set the signs
-  if(m_xMovementspeed < 0){
-    xSign = -1;
-  }
-  if(m_yMovementspeed + FALL_SPEED < 0){
-    ySign = -1;
-  }
-  if(m_zMovementspeed < 0){
-    zSign = -1;
-  }
-
   Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
-  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+1*ySign)),static_cast<int>(round(m_position.z)) );
+  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?1:-1) )),
+              static_cast<int>(round(m_position.z)) );
   
   //Y-Movement
     if( pos.y>= 0 & pos.y<=127 ){
@@ -357,10 +330,22 @@ void Player::movement()
           //slog("Case 6: Movement are both bigger than delta");
           if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z )){
             if(!collide(pos.x, pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )){
-              //No collison, move freely in X and Z
-              //slog("Case 6-1: No Colliision in X and Z");
-              m_position.x += m_xMovementspeed;
-              m_position.z += m_zMovementspeed;
+              if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )){
+                //No collison, move freely in X and Z
+                //slog("Case 6-1: No Colliision in X and Z");
+                m_position.x += m_xMovementspeed;
+                m_position.z += m_zMovementspeed;
+              }else if(m_xMovementspeed > m_zMovementspeed){
+                m_position.x += m_xMovementspeed;
+                m_position.z += deltaZ * get_sign(m_zMovementspeed);
+              }else if(m_zMovementspeed > m_xMovementspeed){
+                m_position.z += m_zMovementspeed;
+                m_position.x += deltaX * get_sign(m_xMovementspeed);
+              }else{
+                //Same Movementspeed
+                m_position.x += deltaX * get_sign(m_xMovementspeed);
+                m_position.z += deltaZ * get_sign(m_zMovementspeed);
+              }
             }else{
               // only collision in Z and we can move freely in X
               m_position.x += m_xMovementspeed;
@@ -373,19 +358,20 @@ void Player::movement()
             // only collision in X and we can move freely in Z
               m_position.z += m_zMovementspeed;
               m_position.x += deltaX * get_sign(m_xMovementspeed);
+              //slog("Case 6-3: Only collide in X (Delta Both too big)");
             }else{
               //Collision in both, X and Z
               m_position.x += deltaX * get_sign(m_xMovementspeed);
               m_position.z += deltaZ * get_sign(m_zMovementspeed);
+              //slog("Case 6-4: Both collision");
             }
-            //slog("Case 6-3: Only collide in X (Delta Both too big)");
           }
         }
         
       }else{
-       // slog("Not in the air");
+        //slog("Not in the air");
       }
-      ///slog("-------------------------------------------------------------");
+      //slog("-------------------------------------------------------------");
   //}
     //slog(m_position.y);
     //Reset Movementspeed
