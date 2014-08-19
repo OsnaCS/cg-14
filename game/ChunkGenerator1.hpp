@@ -15,8 +15,6 @@ public:
   // generiert alle weiteren Chunks abhängig davon wo der Player hinläuft
   void chunkGeneration(Map& m, Vec3i player_pos);
 
-  void setBiomes(Map& map, Chunk chunk, int x, int y);
-
 
 private:
   long m_seed;
@@ -30,5 +28,8 @@ private:
    * @param zj z-Wert des Blockes in Chunckkoordinaten
    * @param noise Höhenwert des zu setzenden Blockes
    */
-  void setBlockHeight(Map& m, int x, int z, int xi, int zj, int noise);
+  void setBlockHeight(Map& m, BiomeType type, int x, int z, int xi, int zj, int noise);
+
+  void setBiomes(Map& map, Chunk chunk, int x, int y);
+
 };

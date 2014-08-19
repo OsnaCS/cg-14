@@ -5,7 +5,7 @@
 Chunk::Chunk()
  : m_blocks(16*16*128)
 {
-	//BiomeType chunkBiomeType;
+	BiomeType chunkBiomeType;
 }
 
 void Chunk::setBlockType(Vec3i pos, BlockType type)
@@ -27,7 +27,7 @@ void Chunk::setBlockType(Vec3i pos, BlockType type)
 BlockType Chunk::getBlockType(Vec3i pos)
 {
 
-	// y ist höhe 
+	// y ist Höhe 
 	if(pos.y > 127)
 	{
 		throw OutOfRangeEx("[Chunk] y value higher than 127");
@@ -42,7 +42,6 @@ BlockType Chunk::getBlockType(Vec3i pos)
 }
 
 void Chunk::setBiomeType(BiomeType type){
-    slog("IN SET BIOME TYPE");
   chunkBiomeType = type;
 }
 

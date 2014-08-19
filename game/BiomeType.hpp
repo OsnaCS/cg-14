@@ -4,13 +4,9 @@
 
 using namespace lumina;
 
-/**
-* Enumerates the differnet BlockTypes
-*/
 enum class BiomeType
 {
-	Plains, Forest, Desert, Mountains,
-
+	Desert, DesertPlain, Plains, PlainForest, Forest, Hillside, Mountains,
 
 	COUNT
 };
