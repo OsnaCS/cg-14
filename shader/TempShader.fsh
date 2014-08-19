@@ -10,5 +10,5 @@ in VertexData {
 uniform sampler2D tex;
 
 void main() {
-	o_color = texture(tex, inData.uv*2).xyz;
+	o_color = texture(tex, inData.uv).xyz;
 }

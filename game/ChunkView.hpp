@@ -13,7 +13,7 @@ class ChunkView {
 public:
 	ChunkView();
 	void init(Vec2i index, Map& map);
-	void draw(HotProgram& hotProg, HotTex2D& hotTex);
+	void draw(HotProgram& hotProg, HotTexCont& hotTex);
 	void updateView();
 
 private:

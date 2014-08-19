@@ -99,6 +99,14 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_gBuffer.attachColor(0, m_gBufferNormal);
   m_gBuffer.attachColor(1, m_gBufferDepth);
 
+  m_lBufferTex.create(m_window.getSize(), TexFormat::RGBA8);
+  m_lBuffer.create();
+  m_lBuffer.attachColor(0, m_lBufferTex);
+
+  m_fBufferTex.create(m_window.getSize(), TexFormat::RGB8);
+  m_fBuffer.create();
+  m_fBuffer.attachColor(0, m_fBufferTex);
+
   m_fullScreenQuad.create(2, 4);
   m_fullScreenQuad.prime<Vec2f>([&](HotVertexSeq<Vec2f>& hotSeq) {
     hotSeq.vertex[0] = Vec2f(-1, -1);
@@ -118,6 +126,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Tex2D zBuffer;
   zBuffer.create(m_window.getSize(), TexFormat::D32);
   m_gBuffer.attachDepth(zBuffer);
+  m_fBuffer.attachDepth(zBuffer);
 
   // generate the first chunks
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
@@ -153,6 +162,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix(m_window);
 
+    // first pass (geometry)
     m_gBuffer.prime([&](HotFrameBuffer& hotFB) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearColor(1, Color32fA(0, 0, 0, 1));
@@ -161,20 +171,31 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
     });
 
+    // second pass (lighting)
+    m_lBuffer.prime([&](HotFrameBuffer& hotFB) {
+      hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
+    });
+
+    // third pass (final)
+    m_fBuffer.prime([&](HotFrameBuffer& hotFB) {
+      hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
+      hotFB.clearDepth(1.f);
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix);
+    });
+
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
-      m_gBufferDepth.prime(0, [&](HotTex2D& hotT) {
+      m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });
       });
 
-      //m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.draw(viewMatrix, projectionMatrix);
+      // m_envir.draw(viewMatrix, projectionMatrix);
     });
 
     // swap buffer

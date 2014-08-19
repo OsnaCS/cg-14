@@ -36,67 +36,67 @@ void MapView::init() {
   m_normalPass.perFragProc.enableDepthWrite();
   m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_normalPass.primitiveProc.enableCulling();
+
+  // VShader finalVS;
+  // finalVS.compile(loadShaderFromFile("shader/MapViewFinalPass.vsh"));
+  // FShader finalFS;
+  // finalFS.compile(loadShaderFromFile("shader/MapViewFinalPass.fsh"));
+
+  // m_finalPass.create(finalVS, finalFS);
+  // m_finalPass.perFragProc.enableDepthTest();
+  // m_finalPass.perFragProc.enableDepthWrite(false);
+  // m_finalPass.perFragProc.setDepthFunction(DepthFunction::Lequal);
+  // m_finalPass.primitiveProc.enableCulling();
+}
+
+void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
+
+  Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+
+  for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
+    for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+
+      if(m_map.exists({x * 16, 0, z * 16})) {
+
+        Vec2i chunkPos(x, z);
+
+        if (isChunkVisible(chunkPos)) {
+          if(m_mapView.count(chunkPos) == 0) {
+            m_mapView[chunkPos].init(chunkPos, m_map);
+          }
+
+          m_mapView[chunkPos].draw(hotP, hotTexCont);
+        }
+      }
+    }
+  }
 }
 
 void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 
-  m_normalPass.prime([&](HotProgram& hot) {
+  m_normalPass.prime([&](HotProgram& hotP) {
 
-    hot.uniform["u_view"] = viewMat;
-    hot.uniform["u_projection"] = projMat;
-    hot.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
 
-    m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
-
-      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
-
-          if(m_map.exists({x * 16, 0, z * 16})) {
-
-            Vec2i chunkPos(x, z);
-
-            if (isChunkVisible(chunkPos)) {
-              if(m_mapView.count(chunkPos) == 0) {
-                m_mapView[chunkPos].init(chunkPos, m_map);
-              }
-
-              m_mapView[chunkPos].draw(hot, hotTex);
-            }
-          }
-        }
-      }
+    TexCont tempCont;
+    tempCont.prime([&](HotTexCont& hotTexCont) {
+      drawChunks(hotP, hotTexCont);
     });
   });
 }
 
-void MapView::draw(Mat4f viewMat, Mat4f projMat) {
+void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat) {
 
-  m_program.prime([&](HotProgram& hot) {
+  m_program.prime([&](HotProgram& hotP) {
 
-    hot.uniform["u_view"] = viewMat;
-    hot.uniform["u_projection"] = projMat;
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
 
     m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
-
-      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
-
-          if(m_map.exists({x * 16, 0, z * 16})) {
-
-            Vec2i chunkPos(x, z);
-
-            if (isChunkVisible(chunkPos)) {
-              if(m_mapView.count(chunkPos) == 0) {
-                m_mapView[chunkPos].init(chunkPos, m_map);
-              }
-
-              m_mapView[chunkPos].draw(hot, hotTex);
-            }
-          }
-        }
-      }
+      HotTexCont hotTexCont(hotTex);
+      drawChunks(hotP, hotTexCont);
     });
   });
 }

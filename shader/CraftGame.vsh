@@ -15,12 +15,11 @@ out VertexData {
 } outData;
 
 void main() {
-
-  mat4 pipeline = u_projection * u_view;
+  vec4 viewPosition = u_view * vec4(i_pos, 1);
 
   outData.uv = i_uv;
   outData.normal = i_normal;
 
   // write gl_Position -> make OpenGL happy
-  gl_Position = pipeline * vec4(i_pos, 1);
+  gl_Position = u_projection * viewPosition;
 }

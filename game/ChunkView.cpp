@@ -177,10 +177,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& ver
   hotSeq.index[29 + indexIndex] = GLIndex::PrimitiveRestart;
 }
 
-void ChunkView::draw(HotProgram& hotProg, HotTex2D& hotTex) {
+void ChunkView::draw(HotProgram& hotProg, HotTexCont& hotTexCont) {
   for(VertexSeq& sequence : m_chunkSequences) {
     if(sequence) {
-      hotProg.draw(hotTex, sequence, PrimitiveType::TriangleStrip);
+      hotProg.draw(hotTexCont, sequence, PrimitiveType::TriangleStrip);
     }
   }
 }
