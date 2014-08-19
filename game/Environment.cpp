@@ -29,7 +29,8 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
     float a = m_time * 3.1415 * 2 / (m_dayLength);
 
-    hotprog.uniform["u_color"] = getSunColor();
+    hotprog.uniform["u_sunColor"] = getSunColor();
+    hotprog.uniform["u_moonColor"] = Vec3f(0.75, 0.75, 0.75);
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
@@ -90,113 +91,127 @@ void Environment::init()
   // create program and link the two shaders
   m_program2.create(vs2, fs2);
 
-  m_sun.create(3 + 3, 24, 53);
-  m_sun.prime<Vec3f, Vec3f>([](HotVertexSeq<Vec3f, Vec3f>& hot)
+  m_sun.create(3, 34, 67);
+  m_sun.prime<Vec3f>([](HotVertexSeq<Vec3f>& hot)
   {
+  	// Sonne
+  	// 4 Ecken
+    hot.vertex[0].set(Vec3f( 0, -20, 1));
+    hot.vertex[1].set(Vec3f(-1, -20, 0));
+    hot.vertex[2].set(Vec3f( 1, -20, 0));
+    hot.vertex[3].set(Vec3f( 0, -20, -1));
 
-    // hot.vertex[0].set(Vec3f(-0.5, -10, 0.5), Vec3f(1,1,0));
-    // hot.vertex[1].set(Vec3f(-0.5, -10, -0.5), Vec3f(1,1,0));
-    // hot.vertex[2].set(Vec3f(0.5, -10, 0.5), Vec3f(1,1,0));
-    // hot.vertex[3].set(Vec3f(0.5, -10, -0.5), Vec3f(1,1,0));
+    // Mittelpunkt
+    hot.vertex[4].set(Vec3f(0, -20, 0));
 
-    // hot.vertex[4].set(Vec3f(-0.5, 10, 0.5), Vec3f(0.75,0.75,0.75));
-    // hot.vertex[5].set(Vec3f(-0.5, 10, -0.5), Vec3f(0.75,0.75,0.75));
-    // hot.vertex[6].set(Vec3f(0.5, 10, 0.5), Vec3f(0.75,0.75,0.75));
-    // hot.vertex[7].set(Vec3f(0.5, 10, -0.5), Vec3f(0.75,0.75,0.75));
+    // 12 Restecken
+    hot.vertex[5].set(Vec3f(  sin(3.1415/8)  , -20, cos(3.1415/8)));
+    hot.vertex[6].set(Vec3f(  sin(2*3.1415/8), -20, cos(2*3.1415/8)));
+    hot.vertex[7].set(Vec3f(  sin(3*3.1415/8), -20, cos(3*3.1415/8)));
+    hot.vertex[8].set(Vec3f(  cos(3.1415/8)  , -20, -sin(3.1415/8)));
+    hot.vertex[9].set(Vec3f(  cos(2*3.1415/8), -20, -sin(2*3.1415/8)));
+    hot.vertex[10].set(Vec3f( cos(3*3.1415/8), -20, -sin(3*3.1415/8)));
+    hot.vertex[11].set(Vec3f(-sin(3.1415/8)  , -20, -cos(3.1415/8)));
+    hot.vertex[12].set(Vec3f(-sin(2*3.1415/8), -20, -cos(2*3.1415/8)));
+    hot.vertex[13].set(Vec3f(-sin(3*3.1415/8), -20, -cos(3*3.1415/8)));
+    hot.vertex[14].set(Vec3f(-cos(3.1415/8)  , -20, sin(3.1415/8)));
+    hot.vertex[15].set(Vec3f(-cos(2*3.1415/8), -20, sin(2*3.1415/8)));
+    hot.vertex[16].set(Vec3f(-cos(3*3.1415/8), -20, sin(3*3.1415/8)));
 
-    // hot.index[0] = 0;
-    // hot.index[1] = 1;
-    // hot.index[2] = 2;
-    // hot.index[3] = 3;
-    // hot.index[4] = GLIndex::PrimitiveRestart;
+    // Mond
+  	// 4 Ecken
+    hot.vertex[17].set(Vec3f( 0, 20, 1) );
+    hot.vertex[18].set(Vec3f(-1, 20, 0) );
+    hot.vertex[19].set(Vec3f( 1, 20, 0) );
+    hot.vertex[20].set(Vec3f( 0, 20, -1));
 
-    // hot.index[5] = 4;
-    // hot.index[6] = 5;
-    // hot.index[7] = 6;
-    // hot.index[8] = 7;
+    // Mittelpunkt
+    hot.vertex[21].set(Vec3f(0, 20, 0));
 
+    // 12 Restecken
+    hot.vertex[5  + 17].set(Vec3f( sin(3.1415/8)  , 20, cos(3.1415/8))   );
+    hot.vertex[6  + 17].set(Vec3f( sin(2*3.1415/8), 20, cos(2*3.1415/8)) );
+    hot.vertex[7  + 17].set(Vec3f( sin(3*3.1415/8), 20, cos(3*3.1415/8)) );
+    hot.vertex[8  + 17].set(Vec3f( cos(3.1415/8)  , 20, -sin(3.1415/8))  );
+    hot.vertex[9  + 17].set(Vec3f( cos(2*3.1415/8), 20, -sin(2*3.1415/8)));
+    hot.vertex[10 + 17].set(Vec3f( cos(3*3.1415/8), 20, -sin(3*3.1415/8)));
+    hot.vertex[11 + 17].set(Vec3f(-sin(3.1415/8)  , 20, -cos(3.1415/8))  );
+    hot.vertex[12 + 17].set(Vec3f(-sin(2*3.1415/8), 20, -cos(2*3.1415/8)));
+    hot.vertex[13 + 17].set(Vec3f(-sin(3*3.1415/8), 20, -cos(3*3.1415/8)));
+    hot.vertex[14 + 17].set(Vec3f(-cos(3.1415/8)  , 20, sin(3.1415/8))   );
+    hot.vertex[15 + 17].set(Vec3f(-cos(2*3.1415/8), 20, sin(2*3.1415/8)) );
+    hot.vertex[16 + 17].set(Vec3f(-cos(3*3.1415/8), 20, sin(3*3.1415/8)) );
 
-    hot.vertex[0].set(Vec3f( -1.5, -30,  0.5), Vec3f(1,1,0));
-    hot.vertex[1].set(Vec3f( -1.5, -30, -0.5), Vec3f(1,1,0));
-    hot.vertex[2].set(Vec3f( -0.5, -30,  0.5), Vec3f(1,1,0));
-    hot.vertex[3].set(Vec3f( -0.5, -30, -0.5), Vec3f(1,1,0));
-    hot.vertex[4].set(Vec3f(  0.5, -30,  0.5), Vec3f(1,1,0));
-    hot.vertex[5].set(Vec3f( -0.5, -30,  0.5), Vec3f(1,1,0));
-    hot.vertex[6].set(Vec3f(  1.5, -30,  0.5), Vec3f(1,1,0));
-    hot.vertex[7].set(Vec3f(  1.5, -30, -0.5), Vec3f(1,1,0));
-    hot.vertex[8].set(Vec3f(  0.5, -30, -1.5), Vec3f(1,1,0));
-    hot.vertex[9].set(Vec3f( -0.5, -30, -1.5), Vec3f(1,1,0));
-    hot.vertex[10].set(Vec3f(-0.5, -30,  1.5), Vec3f(1,1,0));
-    hot.vertex[11].set(Vec3f( 0.5, -30,  1.5), Vec3f(1,1,0));
-
-    hot.vertex[12].set(Vec3f( -1.5, 30,  0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[13].set(Vec3f( -1.5, 30, -0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[14].set(Vec3f( -0.5, 30,  0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[15].set(Vec3f( -0.5, 30, -0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[16].set(Vec3f(  0.5, 30,  0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[17].set(Vec3f( -0.5, 30,  0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[18].set(Vec3f(  1.5, 30,  0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[19].set(Vec3f(  1.5, 30, -0.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[20].set(Vec3f(  0.5, 30, -1.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[21].set(Vec3f( -0.5, 30, -1.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[22].set(Vec3f( -0.5, 30,  1.5), Vec3f(0.75,0.75,0.75));
-    hot.vertex[23].set(Vec3f(  0.5, 30,  1.5), Vec3f(0.75,0.75,0.75));
 
     hot.index[0] = 0;
-    hot.index[1] = 1;
-    hot.index[2] = 2;
-    hot.index[3] = 3;
-    hot.index[4] = 4;
-    hot.index[5] = 5;
-    hot.index[6] = 6;
-    hot.index[7] = 7;
-    hot.index[8] = 8;
-    hot.index[9] = 5;
-    hot.index[10] = 7;
-    hot.index[11] = GLIndex::PrimitiveRestart; 
-    hot.index[12] = 8;
-    hot.index[13] = 9;
-    hot.index[14] = 5;
+    hot.index[1] = 5;
+    hot.index[2] = 4;
+    hot.index[3] = 6;
+    hot.index[4] = 7;
+    hot.index[5] = GLIndex::PrimitiveRestart;
+    hot.index[6] = 7;
+    hot.index[7] = 2;
+    hot.index[8] = 4;
+    hot.index[9] = 8;
+    hot.index[10] = 9;
+    hot.index[11] = GLIndex::PrimitiveRestart;
+    hot.index[12] = 9;
+    hot.index[13] = 10;
+    hot.index[14] = 4;
     hot.index[15] = 3;
-    hot.index[16] = 9;
-    hot.index[17] = 1;
-    hot.index[18] = GLIndex::PrimitiveRestart;
-    hot.index[19] = 0;
-    hot.index[20] = 10;
-    hot.index[21] = 2;
-    hot.index[22] = 11;
-    hot.index[23] = 4;
-    hot.index[24] = 6;
-    hot.index[25] = 11;
+    hot.index[16] = 11;
+    hot.index[17] = GLIndex::PrimitiveRestart;
+    hot.index[18] = 11;
+    hot.index[19] = 12;
+    hot.index[20] = 4;
+    hot.index[21] = 13;
+    hot.index[22] = 1;
+	  hot.index[23] = GLIndex::PrimitiveRestart;
+	  hot.index[24] = 1;
+	  hot.index[25] = 14;
+	  hot.index[26] = 4;
+	  hot.index[27] = 15;
+	  hot.index[28] = 16;
+	  hot.index[29] = GLIndex::PrimitiveRestart;
+    hot.index[30] = 16;
+    hot.index[31] = 0;
+    hot.index[32] = 4;
 
-    hot.index[26] = GLIndex::PrimitiveRestart; 
+	  hot.index[33] = GLIndex::PrimitiveRestart;
 
-    hot.index[27] = 0+12;
-    hot.index[28] = 1+12;
-    hot.index[29] = 2+12;
-    hot.index[30] = 3+12;
-    hot.index[31] = 4+12;
-    hot.index[32] = 5+12;
-    hot.index[33] = 6+12;
-    hot.index[34] = 7+12;
-    hot.index[35] = 8+12;
-    hot.index[36] = 5+12;
-    hot.index[37] = 7+12;
-    hot.index[38] = GLIndex::PrimitiveRestart; 
-    hot.index[39] = 8+12;
-    hot.index[40] = 9+12;
-    hot.index[41] = 5+12;
-    hot.index[42] = 3+12;
-    hot.index[43] = 9+12;
-    hot.index[44] = 1+12;
-    hot.index[45] = GLIndex::PrimitiveRestart;
-    hot.index[46] = 0+12;
-    hot.index[47] = 10+12;
-    hot.index[48] = 2+12;
-    hot.index[49] = 11+12;
-    hot.index[50] = 4+12;
-    hot.index[51] = 6+12;
-    hot.index[52] = 11+12;
+    hot.index[0+34]  =  0 + 17;
+    hot.index[1+34]  =  5 + 17;
+    hot.index[2+34]  =  4 + 17;
+    hot.index[3+34]  =  6 + 17;
+    hot.index[4+34]  =  7 + 17;
+    hot.index[5+34]  =  GLIndex::PrimitiveRestart;
+    hot.index[6+34]  =  7 + 17;
+    hot.index[7+34]  =  2 + 17;
+    hot.index[8+34]  =  4 + 17;
+    hot.index[9+34]  =  8 + 17;
+    hot.index[10+34] =  9 + 17;
+    hot.index[11+34] =  GLIndex::PrimitiveRestart;
+    hot.index[12+34] =  9 + 17;
+    hot.index[13+34] = 10 + 17;
+    hot.index[14+34] =  4 + 17;
+    hot.index[15+34] =  3 + 17;
+    hot.index[16+34] = 11 + 17;
+    hot.index[17+34] = GLIndex::PrimitiveRestart;
+    hot.index[18+34] = 11 + 17;
+    hot.index[19+34] = 12 + 17;
+    hot.index[20+34] =  4 + 17;
+    hot.index[21+34] = 13 + 17;
+    hot.index[22+34] =  1 + 17;
+	  hot.index[23+34] = GLIndex::PrimitiveRestart;
+	  hot.index[24+34] =  1 + 17;
+	  hot.index[25+34] = 14 + 17;
+	  hot.index[26+34] =  4 + 17;
+	  hot.index[27+34] = 15 + 17;
+	  hot.index[28+34] = 16 + 17;
+	  hot.index[29+34] = GLIndex::PrimitiveRestart;
+    hot.index[30+34] = 16 + 17;
+    hot.index[31+34] =  0 + 17;
+    hot.index[32+34] =  4 + 17;
 
   });
 
