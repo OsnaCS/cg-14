@@ -10,7 +10,7 @@ MapView::MapView(Map& map, Camera& cam)
 
 void MapView::init() {
 
-  ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version_better.jpg");
+  ImageBox image_box = loadJPEGImage("gfx/texture.jpg");
   m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
@@ -47,6 +47,11 @@ void MapView::init() {
   // m_finalPass.perFragProc.enableDepthWrite(false);
   // m_finalPass.perFragProc.setDepthFunction(DepthFunction::Lequal);
   // m_finalPass.primitiveProc.enableCulling();
+
+  ImageBox imageBoxNormal = loadJPEGImage("gfx/normals2048.jpg");
+  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGB8, imageBoxNormal.data());
+  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_normalTexture.params.useMipMaps = true;
 }
 
 void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
@@ -79,9 +84,11 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
     hotP.uniform["u_view"] = viewMat;
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
+    hotP.uniform["normalTex"] = 0;
 
-    TexCont tempCont;
-    tempCont.prime([&](HotTexCont& hotTexCont) {
+    TexCont cont;
+    cont.addTexture(0, m_normalTexture);
+    cont.prime([&](HotTexCont& hotTexCont) {
       drawChunks(hotP, hotTexCont);
     });
   });

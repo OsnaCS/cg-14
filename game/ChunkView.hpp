@@ -13,7 +13,7 @@ class ChunkView {
 public:
 	ChunkView();
 	void init(Vec2i index, Map& map);
-	void draw(HotProgram& hotProg, HotTexCont& hotTex);
+	void draw(HotProgram& hotProg, HotTexCont& hotCont);
 	void updateView();
 
 private:
@@ -21,6 +21,6 @@ private:
 	Map* m_map;
 	std::array<VertexSeq, 8> m_chunkSequences;
 
-	void addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType& block, Vec3f& cubePos);
+	void addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType& block, Vec3f& cubePos);
 	bool isBoxVisible(Vec3f& cubePos);
 };

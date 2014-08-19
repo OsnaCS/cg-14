@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <chrono>
+#include <cmath>
 
 using namespace lumina;
 using namespace std;
@@ -131,11 +132,15 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   // generate the first chunks
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
 
+  float sum = 0;
+
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
     auto diff = chrono::system_clock::now() - now;
     float s = chrono::duration_cast<chrono::milliseconds>(diff).count()
               / 1000.f;
+
+    sum += s;
 
     if(counter % 100 == 0) {
       slog("FPS:", 1 / s);
