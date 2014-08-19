@@ -41,6 +41,16 @@ public:
 	//ggf. Inventar
 
 private:
+	inline int get_sign(float x) {
+		float eps = 0.0001;
+		if (x > eps) 
+			return 1;
+		else if ( fabs(x) < eps) 
+			return 0;
+		else 
+			return -1;
+	}
+
 	//Methods
 	void move_left();
   void move_right();
@@ -48,13 +58,17 @@ private:
   void move_backward();
   void move_up();
   void move_down();
+  void movement();
+	bool collide(float x, float y, float z);
 
   //3D Atributes
   Vec3f m_position;
   Vec3f m_direction;
   //Movement
   float m_movingspeed;
+	float m_xMovementspeed;
   float m_yMovementspeed;
+  float m_zMovementspeed;
   bool m_mouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
