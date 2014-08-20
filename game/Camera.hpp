@@ -70,6 +70,10 @@ public:
         return m_screenRatio;
     }
 
+    Window& getWindow() {
+        return m_window;
+    }
+
 private:
     void move_left();
     void move_right();

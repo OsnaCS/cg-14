@@ -12,7 +12,7 @@ public:
 
 	Environment(Camera& camera);
   void draw(Mat4f viewMat, Mat4f projMat);
-  void drawLightingPass(Mat4f viewMat, Mat4f projMat);
+  void drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer);
   void init();
 
 private:

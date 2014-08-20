@@ -13,7 +13,7 @@ public:
 
 	MapView(Map& map, Camera& cam);
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
-	void drawFinalPass(Mat4f viewMat, Mat4f projMat);
+	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer);
 	void init();
 
 	/**

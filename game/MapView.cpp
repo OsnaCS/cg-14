@@ -37,16 +37,16 @@ void MapView::init() {
   m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_normalPass.primitiveProc.enableCulling();
 
-  // VShader finalVS;
-  // finalVS.compile(loadShaderFromFile("shader/MapViewFinalPass.vsh"));
-  // FShader finalFS;
-  // finalFS.compile(loadShaderFromFile("shader/MapViewFinalPass.fsh"));
+  VShader finalVS;
+  finalVS.compile(loadShaderFromFile("shader/MapViewFinalPass.vsh"));
+  FShader finalFS;
+  finalFS.compile(loadShaderFromFile("shader/MapViewFinalPass.fsh"));
 
-  // m_finalPass.create(finalVS, finalFS);
-  // m_finalPass.perFragProc.enableDepthTest();
-  // m_finalPass.perFragProc.enableDepthWrite(false);
-  // m_finalPass.perFragProc.setDepthFunction(DepthFunction::Lequal);
-  // m_finalPass.primitiveProc.enableCulling();
+  m_finalPass.create(finalVS, finalFS);
+  m_finalPass.perFragProc.enableDepthTest();
+  m_finalPass.perFragProc.enableDepthWrite();
+  m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_finalPass.primitiveProc.enableCulling();
 
   ImageBox imageBoxNormal = loadJPEGImage("gfx/normals_small.jpg");
   m_normalTexture.create(Vec2i(512,512), TexFormat::RGB8, imageBoxNormal.data());
@@ -94,16 +94,22 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   });
 }
 
-void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat) {
+void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer) {
 
-  m_program.prime([&](HotProgram& hotP) {
+  m_finalPass.prime([&](HotProgram& hotP) {
 
     hotP.uniform["u_view"] = viewMat;
     hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_winSize"] = m_cam.getWindow().getSize();
+    hotP.uniform["s_lightTexture"] = 0;
+    hotP.uniform["s_colorTexture"] = 1;
+    
+    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+      m_colorTexture.prime(1, [&](HotTex2D& hotTex) {
 
-    m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-      HotTexCont hotTexCont(hotTex);
-      drawChunks(hotP, hotTexCont);
+        HotTexCont hotTexCont(hotLightingTex, hotTex);
+        drawChunks(hotP, hotTexCont);
+      });
     });
   });
 }

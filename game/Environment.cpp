@@ -25,7 +25,6 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
   m_program2.prime([&](HotProgram& hotprog)
   {
-
     viewMat.setColumn(3, Vec4f(0,0,0,1));
     Mat4f mat;
     mat.setToIdentity();
@@ -33,17 +32,16 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
     hotprog.uniform["u_transform"] = projMat * viewMat;
     hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
-
   });
-
 }
 
-void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat) {
+void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
 
-    hotProg.uniform["u_view"] = viewMat;
-    hotProg.uniform["u_projection"] = projMat;
+    hotProg.uniform["normalTexture"] = 0;
+    hotProg.uniform["depthTexture"] = 1;
+    hotProg.uniform["u_cameraPos"] = m_camera.get_position();
 
     Vec3f direction = m_camera.get_direction().normalize();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -56,19 +54,25 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat) {
     viewUp = cross(vd, direction).normalize();
     float halfBackPlaneHeight = tan(viewAngle / 2) * backPlaneDistance;
     float halfBackPlaneWidth = screenRatio * halfBackPlaneHeight;
-    Vec3f backPlaneCenter = direction.normalize() * backPlaneDistance + m_camera.getPosition();
+    Vec3f backPlaneCenter = direction.normalize() * backPlaneDistance;
 
     VertexSeq backPlane;
     backPlane.create(3 + 3, 4);
 
-    backPlane.prime<Vec3f, Vec3f>([&](HotVertexSeq<Vec3f, Vec3f>& hotV) {
-      hotV.vertex[0].set(backPlaneCenter + (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth), Vec3f(1, 0, 0));
-      hotV.vertex[1].set(backPlaneCenter - (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth), Vec3f(0, 1, 0));
-      hotV.vertex[2].set(backPlaneCenter + (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth), Vec3f(0, 0, 1));
-      hotV.vertex[3].set(backPlaneCenter - (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth), Vec3f(0.5f, 0.5f, 0.5f));
+    backPlane.prime<Vec2f, Vec3f>([&](HotVertexSeq<Vec2f, Vec3f>& hotV) {
+      // oben rechts
+      hotV.vertex[0].set(Vec2f(1, 1), backPlaneCenter + (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth));
+      // unten rechts
+      hotV.vertex[1].set(Vec2f(1, -1), backPlaneCenter - (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth));
+      // oben links
+      hotV.vertex[2].set(Vec2f(-1, 1), backPlaneCenter + (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth));
+      // unten links
+      hotV.vertex[3].set(Vec2f(-1, -1), backPlaneCenter - (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth));
     });
 
-    hotProg.draw(backPlane, PrimitiveType::TriangleStrip);
+    gBuffer.prime([&](HotTexCont& hotTexCont) {
+      hotProg.draw(hotTexCont, backPlane, PrimitiveType::TriangleStrip);
+    });
   });
 }
 
@@ -137,5 +141,7 @@ void Environment::init()
   lightingFS.compile(loadShaderFromFile("shader/EnvironmentLightingPass.fsh"));
 
   m_lightingPass.create(lightingVS, lightingFS);
+  m_lightingPass.perFragProc.enableDepthTest();
+  m_lightingPass.perFragProc.setDepthFunction(DepthFunction::Greater);
 }
 
