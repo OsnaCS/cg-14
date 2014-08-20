@@ -32,4 +32,9 @@ private:
 
   void setBiomes(Map& map, Chunk chunk, int x, int y);
 
+  void setBirchTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setSpruceTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setCactusTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setPalmTree(Map& map, int x, int z, int xi, int zj, int noise);
+
 };

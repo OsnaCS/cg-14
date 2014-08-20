@@ -78,25 +78,34 @@ void ChunkGenerator1::setBiomes(Map& m, Chunk chunk, int x, int z) {
       // Umrechnen von Intervall [-1,1] in Intervall [c,d]
       int noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise);
 
-      setBlockHeight(m, type, x, z, xi, zj, noise);
+      // xi und zj umrechnen
+      int xii = xi%16;
+	    int zjj = zj%16;
+	    if(xii < 0) {
+	      xii += 16;
+	    }
+	    if(zjj % 16 < 0) {
+	      zjj += 16;
+	    }
+
+      setBlockHeight(m, type, x, z, xii, zjj, noise);
     }
   }
 }
 
 void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int xi, int zj, int noise) {
   for(int k = 0; k < 128; k++) {
-    xi = xi % 16;
-    zj = zj % 16;
-    if(xi % 16 < 0) {
-      xi += 16;
-    }
-    if(zj % 16 < 0) {
-      zj += 16;
-    }
-
     switch(type) {
       case BiomeType::Desert:
         if(k == noise) {
+        	// Bäume setzen
+          int treeDist = rand() % 10000;
+          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          	if(treeDist <= 20) {
+            	setCactusTree(map, x, z, xi, zj, noise);	
+          	}
+      		}
+      		// Boden erzeugen
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Sand);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Sand); //  Unter dem Noise-Wert gibt es nur Dirt
@@ -105,7 +114,14 @@ void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int
 
       case BiomeType::DesertPlain:
         if(k == noise) {
-          srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
+        	// Bäume setzen
+          int treeDist = rand() % 10000;
+          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          	if(treeDist <= 5) {
+            	setCactusTree(map, x, z, xi, zj, noise);	
+          	}
+      		}
+      		// Boden erzeugen
           int random = rand() % 512;
           if(random < 267){
             map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Sand);
@@ -117,6 +133,14 @@ void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int
 
         case BiomeType::Plains:
         if(k == noise) {
+        	// Bäume setzen
+          int treeDist = rand() % 10000;
+          if(xi >= 6 && xi <= 9 && zj >= 6 && zj <= 9) {
+          	if(treeDist <= 30) {
+            	setPalmTree(map, x, z, xi, zj, noise);	
+          	}
+      		}
+      		// Boden erzeugen
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
@@ -125,10 +149,18 @@ void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int
 
       case BiomeType::PlainForest:
         if(k == noise) {
-          // srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
-          // int random = rand() % 512;
-          // if(random < 100){ //Bäume setzen
-          map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Wood);
+        	// Bäume setzen
+          int treeDist = rand() % 10000;
+          if(xi >= 3 && xi <= 13 && zj >= 3 && zj <= 13) {
+          	if(treeDist <= 100) {
+            	setSpruceTree(map, x, z, xi, zj, noise);	
+          	}
+      			if(31 <= treeDist && treeDist <= 60) {
+      				setBirchTree(map, x, z, xi, zj, noise);	
+      			}
+      		}
+      		// Boden erzeugen
+          map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
         }
@@ -136,10 +168,18 @@ void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int
 
         case BiomeType::Forest:
         if(k == noise) {
-          // srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
-          // int random = rand() % 512;
-          // if(random < 200){ //Bäume setzen
-          map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Wood);
+          // Bäume setzen
+          int treeDist = rand() % 10000;
+          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          	if(treeDist <= 100) {
+            	setSpruceTree(map, x, z, xi, zj, noise);	
+          	}
+      			if(101 <= treeDist && treeDist <= 200) {
+      				setBirchTree(map, x, z, xi, zj, noise);	
+      			}
+      		}
+      		// Boden erzeugen
+          map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
         } 
@@ -175,10 +215,321 @@ void ChunkGenerator1::setBlockHeight(Map& map, BiomeType type, int x, int z, int
     if(k < (noise - 3) && k >= noise - 10) {
       map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
     } else if (k > noise || k < noise-10){
-      map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Air); //  Über dem Noise-Wert gibt es nur Air
+      // map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Air); //  Über dem Noise-Wert gibt es nur Air
     }
 
   }
 }
 
 
+void ChunkGenerator1::setBirchTree(Map& map, int x, int z, int xi, int zj, int noise) {
+	
+		// Baummstumpf
+    int k = noise + 1;
+
+    // Baummhöhe
+    int height = 3;
+
+    // Baumstamm
+    for(int l = 0; l <= height; l++) {
+    	map.getChunk({x, z}).setBlockType({xi, k+l, zj}, BlockType::Wood);
+    }
+
+    // 4th row
+   	k = k + height;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj+1}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj-1}, BlockType::Sand);
+
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-2}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+2}, BlockType::Sand);
+
+  	// 3rd row
+   	k++;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj+1}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj-1}, BlockType::Sand);
+
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-2}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+2}, BlockType::Sand);
+
+  	// 2nd row
+   	k++;;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+
+  	// 1st row
+   	k++;;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+
+  	// top row
+  	k++;
+		map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Sand);
+}
+
+
+void ChunkGenerator1::setSpruceTree(Map& map, int x, int z, int xi, int zj, int noise) {
+
+	// Baummstumpf
+    int k = noise + 1;
+
+    // Baummhöhe
+    int height = 2;
+
+    // Baumstamm
+    for(int l = 0; l <= height; l++) {
+    	map.getChunk({x, z}).setBlockType({xi, k+l, zj}, BlockType::Wood);
+    }
+
+    // 4th row
+   	k = k + height;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj+1}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj-1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+2, k+1, zj-1}, BlockType::Sand);
+
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj-2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj-2}, BlockType::Sand);
+
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj+2}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj+2}, BlockType::Sand);
+
+  	// 3rd row
+   	k++;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+
+  	// 2nd row
+   	k++;;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Sand);
+
+  	// 1st row
+   	k++;;
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::Sand);
+  	map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Sand);
+
+  	// top row
+  	k++;
+		map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Sand);
+}
+
+
+void ChunkGenerator1::setCactusTree(Map& map, int x, int z, int xi, int zj, int noise) {
+
+	// Baummstumpf
+  int k = noise + 1;
+
+  // Baummhöhe
+  int height = 7;
+
+  // Baumstamm
+  for(int l = 0; l <= height; l++) {
+  	map.getChunk({x, z}).setBlockType({xi, k+l, zj}, BlockType::Wood);
+  }
+
+  // 1st arm
+  k += 1;
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi+2, k, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi+2, k+1, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi+2, k+2, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi+2, k+3, zj}, BlockType::Wood);
+
+  // 2nd arm
+  map.getChunk({x, z}).setBlockType({xi, k+2, zj+1}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+2, zj+2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+3, zj+2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+4, zj+2}, BlockType::Wood);
+
+  // 3rd arm
+  map.getChunk({x, z}).setBlockType({xi, k+1, zj-1}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+1, zj-2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+2, zj-2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+3, zj-2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+4, zj-2}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi, k+5, zj-2}, BlockType::Wood);
+
+  // 4th arm
+  map.getChunk({x, z}).setBlockType({xi-1, k+4, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi-2, k+4, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi-2, k+5, zj}, BlockType::Wood);
+}
+
+
+void ChunkGenerator1::setPalmTree(Map& map, int x, int z, int xi, int zj, int noise) {
+	// Baummstumpf
+  int k = noise + 1;
+
+  // Baummhöhe
+  int height = 9;
+
+  // Baumstamm
+  for(int l = 0; l <= height; l++) {
+  	map.getChunk({x, z}).setBlockType({xi, k+l, zj}, BlockType::Wood);
+  }  
+
+  // 3th row
+  k = k + height - 1;
+  map.getChunk({x, z}).setBlockType({xi-4, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-5, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-6, k, zj}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi+4, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+5, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+6, k, zj}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi-4, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-5, k, zj-1}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi-4, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-5, k, zj+1}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi+4, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+5, k, zj-1}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi+4, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+5, k, zj+1}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj-4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi, k, zj-5}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi, k, zj-6}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj+4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi, k, zj+5}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi, k, zj+6}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj+4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj+5}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj+4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj+5}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-5}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj-4}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj-5}, BlockType::Sand);
+
+  // Coconuts
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj}, BlockType::Stone);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj}, BlockType::Stone);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-1}, BlockType::Stone);
+  map.getChunk({x, z}).setBlockType({xi, k, zj+1}, BlockType::Stone);
+
+
+  // 2nd row
+  k++;
+  map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Wood);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-2, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-3, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+2, k, zj}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+3, k, zj}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-2, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-3, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+2, k, zj-1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+3, k, zj-1}, BlockType::Sand);
+
+	map.getChunk({x, z}).setBlockType({xi, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-2, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-3, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+2, k, zj+1}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+3, k, zj+1}, BlockType::Sand);
+
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj-2}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-2}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj-2}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj+2}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj+2}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj+2}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj-3}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj-3}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj-3}, BlockType::Sand);
+
+  map.getChunk({x, z}).setBlockType({xi, k, zj+3}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi-1, k, zj+3}, BlockType::Sand);
+  map.getChunk({x, z}).setBlockType({xi+1, k, zj+3}, BlockType::Sand);
+
+  // 1st row
+  k++;
+  map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Sand);
+}
