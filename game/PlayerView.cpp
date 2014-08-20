@@ -4,6 +4,9 @@
 using namespace std;
 using namespace lumina;
 
+const float HEART_SIZE = 0.05f;
+const float HEART_POSY = -0.7f; 
+
 PlayerView::PlayerView(Player& player):
 m_player(player)
 {
@@ -14,54 +17,57 @@ void PlayerView::draw()
 
 	m_program.prime([&](HotProgram& hotprog)
 	{
-
-		//viewMat.setColumn(3, Vec4f(0,0,0,1));
-		//Mat4f mat;
-		//mat.setToIdentity();
-		//mat.setDiagonal(Vec4f(2,2,2,1));
-
-		//hotprog.uniform["u_transform"] = projMat * viewMat;
-		hotprog.draw(m_heartPanel, PrimitiveType::TriangleStrip);
-
+ 		m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
+			hotprog.draw(hotTex, m_heartPanel, PrimitiveType::TriangleStrip);
+		});
 	});
 }
 
 
 void PlayerView::init()
 {
+	//Initialize of the texture
+	ImageBox image_box = loadJPEGImage("gfx/hearts.jpeg");
+  m_colorTexture.create(Vec2i(256,128), TexFormat::RGB8, image_box.data());
+  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_colorTexture.params.useMipMaps = true;
 
 	VShader vs;
 	vs.compile(loadShaderFromFile("shader/HeartPanel.vsh"));
 	FShader fs;
 	fs.compile(loadShaderFromFile("shader/HeartPanel.fsh"));
 
-	constexpr float PI = 3.1415926;
-
   int activeHearts = m_player.getHearts();
   int maxHearts = m_player.getMaxHearts();
-  float changeX = maxHearts / 2.0f;
-  float heartWidth = changeX / 20 / changeX;
-  float nextHeart = 0.0f - changeX / 20;
+  float nextHeart = -(maxHearts / 2.0f) * HEART_SIZE;
 
   // create program and link the two shaders
 	m_program.create(vs, fs);
-  m_heartPanel.create(2 + 3, 4, 4);
-  m_heartPanel.prime<Vec2f, Vec3f>([&](HotVertexSeq<Vec2f, Vec3f>& hot)
+	m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
+	m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+	m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+  m_heartPanel.create(7, 4 * maxHearts, 5 * maxHearts);
+  m_heartPanel.prime<Vec2f, Vec3f, Vec2f>([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
   {
-  	slog(nextHeart);
- 		//for(int i = 0; i<maxHearts; i++){
-  	
-  	hot.vertex[0].set(Vec2f(nextHeart, -0.45f),  Vec3f(1,1,1));
-  	hot.vertex[1].set(Vec2f(nextHeart, -0.4f),  Vec3f(1,1,1));
-  	hot.vertex[2].set(Vec2f(nextHeart + 0.01f, -0.45f) , Vec3f(1,1,1));
-  	hot.vertex[3].set(Vec2f(nextHeart + 0.01f, -0.4f), Vec3f(1,1,1));
-		//}
+	  	for(int i = 0; i < maxHearts; i++){
+	  		if(activeHearts > i){
+			  	hot.vertex[0+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY), Vec3f(0,1,1), Vec2f(0.5,0));
+			  	hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.5,1));
+			  	hot.vertex[2+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY), Vec3f(1,1,0),Vec2f(1,0));
+			  	hot.vertex[3+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY - HEART_SIZE), Vec3f(1,0,1),Vec2f(1,1));
+		  	}else{
+			  	hot.vertex[0+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY), Vec3f(0,1,1), Vec2f(0.0,0));
+			  	hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.0,1));
+			  	hot.vertex[2+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY), Vec3f(1,1,0),Vec2f(0.5,0));
+			  	hot.vertex[3+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY - HEART_SIZE), Vec3f(1,0,1),Vec2f(0.5,1));
+		  	}
+	  		hot.index[0+ i * 5] = 0 + i * 4;
+	  		hot.index[1+ i * 5] = 1 + i * 4;
+	  		hot.index[2+ i * 5] = 2 + i * 4;
+	  		hot.index[3+ i * 5] = 3 + i * 4;
+	  		hot.index[4+ i * 5] = GLIndex::PrimitiveRestart;
+	  	}
 
-  	hot.index[0] = 0;
-  	hot.index[1] = 1;
-  	hot.index[2] = 2;
-  	hot.index[3] = 3;
-
-  });
-
+		});
 }

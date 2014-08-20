@@ -109,6 +109,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
     }
 
+    hotContext.getDefaultFrameBuffer().enableBlending(0);
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen

@@ -14,5 +14,6 @@ class PlayerView {
 		Player& m_player;
 	  VertexSeq m_heartPanel;
 	  Program m_program;
+	  Tex2D m_colorTexture;
 };
 

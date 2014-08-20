@@ -175,7 +175,7 @@ void Player::update()
     //TODO
     //Check for too much high // to less high
 
-    
+
     if(m_wPressed){
         move_forward();
     }else if(m_sPressed){
