@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(20), m_time(0), m_day(0), m_exactness(32) {
+: m_camera(camera), m_dayLength(6), m_time(0), m_day(0), m_exactness(32) {
 
 }
 
@@ -122,6 +122,7 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     hotProg.uniform["normalTexture"] = 0;
     hotProg.uniform["depthTexture"] = 1;
     hotProg.uniform["u_cameraPos"] = m_camera.get_position();
+    hotProg.uniform["u_lightRay"] = getSunPos();
 
     Vec3f direction = m_camera.get_direction().normalize();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -766,7 +767,7 @@ float Environment::getSunIntensity(){
 
 Vec3f Environment::getSunPos(){
 
-	return Vec3f(sin(m_time*2*3.1415/m_dayLength),-cos(m_time*2*3.1415/m_dayLength),0);
+	return -Vec3f(sin(m_time*2*3.1415/m_dayLength),-cos(m_time*2*3.1415/m_dayLength),0);
 }
 
 void Environment::setExactness(int e){

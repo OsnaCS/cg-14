@@ -5,6 +5,8 @@ layout(location = 0) out vec4 o_color;
 
 uniform sampler2D depthTexture;
 uniform sampler2D normalTexture;
+
+uniform vec3 u_lightRay;
 uniform vec3 u_cameraPos;
 
 in VertexData {
@@ -23,9 +25,8 @@ void main() {
 
 
 	// --------------- Diffuse Light --------------------
-	vec3 lightRay = vec3(1, -2, 1);
 	float diffuseIntensity;
-	float angle = (dot(lightRay, normal)/(length(lightRay)*length(normal))); 
+	float angle = (dot(u_lightRay, normal)/(length(u_lightRay)*length(normal))); 
 	
 	if(angle > 0) {
 		diffuseIntensity = 0;
@@ -34,6 +35,10 @@ void main() {
 		diffuseIntensity = abs(angle); 
 	}
 
+
+
+
+	// --------------- Specular Light --------------------
 
 
 	// --------------- Sum up light --------------------
