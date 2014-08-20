@@ -16,14 +16,15 @@ const float FREE_SPACE = 0.05f;
 //The Speeds are for normal walking, running, falling and Jumping
 const float BASIC_SPEED = 0.2f; 
 const float FAST_SPEED = 0.4f;
+
 const float FALL_SPEED = -0.03f;
-const float JUMP_SPEED = 0.6f;
+const float JUMP_SPEED = 0.5f;
 
 //Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;
 
 Player::Player( Map& m) :
-    m_position(Vec3f(0.0f, 80.5f, 0.0f))
+    m_position(Vec3f(0.0f, 78.5f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_xMovementspeed(0.0f)
@@ -204,7 +205,7 @@ void Player::update()
     }
 
     //Regain health (hearts)
-    if(m_passedFrames % 2000 == 0 && m_hearts != MAX_HEARTS){
+    if(m_passedFrames % 400 == 0 && m_hearts != MAX_HEARTS){
       m_hearts++;
     }
     //DEATH happens
@@ -310,6 +311,9 @@ void Player::movement()
             //the player takes damage equal to 2 powered by fallen-5
             if(m_fallen < -4){
               m_hearts -= pow(2, abs(m_fallen+5));
+              if(m_hearts<0){
+                m_hearts = 0;
+              }
             }
 
             //Reset Movementspeed
