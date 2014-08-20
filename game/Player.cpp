@@ -8,6 +8,7 @@ const float FAST_SPEED = 0.8f;
 const float FALL_SPEED = -0.06f;
 const float TIME_STEP  = 1.0f;
 const float JUMP_SPEED = 0.6;
+const int MAX_HEARTS = 10;
 
 Player::Player( Map& m) :
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
@@ -23,6 +24,8 @@ Player::Player( Map& m) :
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
     ,m_map(m)
+    ,m_hearts(MAX_HEARTS)
+
 
 
 {
@@ -251,4 +254,12 @@ void Player::move_up() //Jump
 void Player::move_down()
 {
 //    m_position.y -= m_movingspeed;
+}
+
+int Player::getHearts(){
+  return m_hearts;
+}
+
+int Player::getMaxHearts(){
+  return MAX_HEARTS;
 }

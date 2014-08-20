@@ -20,6 +20,9 @@ public:
 	int getHunger();
   void turn_side(float deltaX);
   void turn_upDown(float deltaY);
+  int getHearts();
+  int getMaxHearts();
+
   void update();
 	Vec3f getDirection();
 
@@ -65,5 +68,9 @@ private:
   bool m_ShiftPressed;
 
   Map& m_map;
+
+  int m_hearts;
+
+
 
 };

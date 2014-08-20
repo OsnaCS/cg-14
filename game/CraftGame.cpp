@@ -6,26 +6,14 @@
 using namespace lumina;
 using namespace std;
 
-CraftGame::CraftGame()
-    :m_player(NULL), m_mapView(m_map, m_camera)
+CraftGame::CraftGame() : 
+    m_player(m_map)
+    ,m_mapView(m_map, m_camera)
+    ,m_playerView(m_player)
+
+
 {
   m_running = true;
-}
-
-CraftGame::~CraftGame()
-{
-  stop();
-
-}
-
-void CraftGame::stop()
-{
-    // C++0x allow to double delete null pointer but some old compiler might not allow.
-    // Therefore, we have to protect double deletion.
-    if ( m_player !=NULL ) {
-        delete m_player;
-        m_player = NULL;
-    }
 }
 
 
@@ -36,13 +24,9 @@ void CraftGame::init() {
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
 
-  if (m_player==NULL) {
-      m_player = new Player( m_map );
-  }
-
   // add event callback (capture by reference
   m_window.addEventCallback(
-    [&](InputEvent e) { return m_player->processEvent(e, m_window, m_cheatmode); });
+    [&](InputEvent e) { return m_player.processEvent(e, m_window, m_cheatmode); });
   m_window.addEventCallback(
     [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
   m_window.addEventCallback([&](InputEvent e) {
@@ -55,7 +39,7 @@ void CraftGame::init() {
     // if the keyInpuit is k
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K) {
       if(m_cheatmode){
-        m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+        m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
         m_cheatmode = false;
       }else{
         m_cheatmode = true;
@@ -84,6 +68,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   m_envir.init();
   m_mapView.init();
+  m_playerView.init();
 
   auto now = chrono::system_clock::now();
 
@@ -120,8 +105,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     if(m_cheatmode){
       m_camera.update();
     }else{
-      m_player->update();
-      m_camera.updateFromPlayer(m_player->getPosition(), m_player->getDirection());
+      m_player.update();
+      m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
     }
 
     // we need the default FrameBuffer
@@ -132,6 +117,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       m_envir.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
       m_mapView.draw(m_camera.get_matrix(), m_camera.get_ProjectionMatrix(m_window));
+      m_playerView.draw();
     });
 
     // swap buffer
