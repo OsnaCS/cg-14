@@ -27,7 +27,11 @@ void ChunkView::updateView() {
       auto block = m_map->getChunk(m_index).getBlockType(pos);
 
 	    if(block != BlockType::Air) {
-	      blockCount++;
+
+        Vec3f cubePos(chunkOffset.x + pos.x, pos.y, chunkOffset.y + pos.z);
+        if (isBoxVisible(cubePos)) {
+          blockCount++;
+        }
 	    }
 	  }
 
