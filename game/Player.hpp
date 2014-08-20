@@ -97,6 +97,8 @@ private:
   Map& m_map;
 
   int m_hearts;
+  float m_fallen;
+  unsigned long m_passedFrames;
 
 
 

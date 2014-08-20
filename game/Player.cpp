@@ -23,7 +23,7 @@ const float JUMP_SPEED = 0.6f;
 //const float TIME_STEP  = 1.0f;
 
 Player::Player( Map& m) :
-    m_position(Vec3f(0.0f, 85.5f, 0.0f))
+    m_position(Vec3f(0.0f, 80.5f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_xMovementspeed(0.0f)
@@ -39,6 +39,8 @@ Player::Player( Map& m) :
     ,m_ShiftPressed(false)
     ,m_map(m)
     ,m_hearts(MAX_HEARTS)
+    ,m_fallen(0)
+    ,m_passedFrames(0)
 
 
 
@@ -194,6 +196,22 @@ void Player::update()
         move_down();
     }  
     movement();
+
+    //Handle "time in frames"
+    m_passedFrames++;
+    if(m_passedFrames == 100000){
+      m_passedFrames = 0;
+    }
+
+    //Regain health (hearts)
+    if(m_passedFrames % 2000 == 0 && m_hearts != MAX_HEARTS){
+      m_hearts++;
+    }
+    //DEATH happens
+    if(m_hearts==0){
+      m_position = Vec3f(0.0f, 80.5f, 0.0f);
+      m_hearts = MAX_HEARTS;
+    } 
 }
 
 Vec3f Player::getPosition(){
@@ -272,16 +290,33 @@ void Player::movement()
     if( pos.y>= 0 & pos.y<=127 ){
       if( !collide(pos.x, pos.y, pos.z) )
       {
+        //slog("Speed: ",m_yMovementspeed);
+        //slog("Fallen:", m_fallen);
+        //get fallen distance
+        if(m_yMovementspeed < 0){
+                  //slog("Fallen:", m_fallen);
+          m_fallen += m_yMovementspeed;
+        }
         if(!collide(posY.x, posY.y, posY.z)){
           m_yMovementspeed = max(-1.0f, m_yMovementspeed + FALL_SPEED) ;
           m_position.y += m_yMovementspeed;
         }else{
+          //Hit the floor
           float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;  
           if(m_yMovementspeed+FALL_SPEED < delta){
             m_yMovementspeed = -delta;
             m_position.y += m_yMovementspeed;
+            //If the distance fallen is bigger than 4, 
+            //the player takes damage equal to 2 powered by fallen-5
+            if(m_fallen < -4){
+              m_hearts -= pow(2, abs(m_fallen+5));
+            }
+
+            //Reset Movementspeed
             m_yMovementspeed = 0;
+            m_fallen = 0;
           } else{
+            //Freefall
             m_yMovementspeed += FALL_SPEED;
             m_position.y += m_yMovementspeed;  
           }

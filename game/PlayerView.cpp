@@ -14,7 +14,7 @@ m_player(player)
  
 void PlayerView::draw()
 {
-  updateHearts();
+  //updateHearts();
 	m_program.prime([&](HotProgram& hotprog)
 	{
  		m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
