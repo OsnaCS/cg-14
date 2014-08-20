@@ -163,6 +163,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // poll events
     m_window.update();
+    m_envir.update(s);
     if(m_cheatmode){
       m_camera.update();
     }else{
@@ -194,6 +195,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+      m_envir.draw(viewMatrix, projectionMatrix);
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex);
     });
 
@@ -203,13 +205,14 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+      
       m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });
       });
+      
 
-      // m_envir.draw(viewMatrix, projectionMatrix);
     });
 
     // swap buffer

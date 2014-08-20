@@ -16,6 +16,7 @@ void main()
 {
 
 	gl_Position = u_transform * vec4(i_windowpos, 1);
+	// gl_Position.z = 255;
 
 	outData.coord = i_windowpos;
 
