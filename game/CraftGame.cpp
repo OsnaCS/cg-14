@@ -8,7 +8,7 @@ using namespace lumina;
 using namespace std;
 
 CraftGame::CraftGame()
-    :m_player(NULL), m_mapView(m_map, m_camera)
+    :m_player(NULL), m_mapView(m_map, m_camera), m_envir(m_camera), m_camera(m_window)
 {
   m_running = true;
 }
@@ -166,7 +166,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     }
 
     auto viewMatrix = m_camera.get_matrix();
-    auto projectionMatrix = m_camera.get_ProjectionMatrix(m_window);
+    auto projectionMatrix = m_camera.get_ProjectionMatrix();
 
     // first pass (geometry)
     m_gBuffer.prime([&](HotFrameBuffer& hotFB) {
@@ -180,6 +180,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // second pass (lighting)
     m_lBuffer.prime([&](HotFrameBuffer& hotFB) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
+      
+      m_envir.drawLightingPass(viewMatrix, projectionMatrix);
     });
 
     // third pass (final)
@@ -195,7 +197,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
+      m_lBufferTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });

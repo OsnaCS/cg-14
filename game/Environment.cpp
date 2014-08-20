@@ -2,6 +2,11 @@
 
 #include <math.h> 
 
+Environment::Environment(Camera& camera)
+: m_camera(camera) {
+
+}
+
 void Environment::draw(Mat4f viewMat, Mat4f projMat)
 {
 
@@ -31,6 +36,40 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
   });
 
+}
+
+void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat) {
+
+  m_lightingPass.prime([&](HotProgram& hotProg) {
+
+    hotProg.uniform["u_view"] = viewMat;
+    hotProg.uniform["u_projection"] = projMat;
+
+    Vec3f direction = m_camera.get_direction().normalize();
+    float backPlaneDistance = m_camera.getBackPlaneDistance();
+    float viewAngle = m_camera.getViewAngle();
+    float screenRatio = m_camera.getScreenRatio();
+    Vec3f viewUp = m_camera.getViewUp();
+
+    // vector in the backplane
+    Vec3f vd = cross(direction, viewUp).normalize();
+    viewUp = cross(vd, direction).normalize();
+    float halfBackPlaneHeight = tan(viewAngle / 2) * backPlaneDistance;
+    float halfBackPlaneWidth = screenRatio * halfBackPlaneHeight;
+    Vec3f backPlaneCenter = direction.normalize() * backPlaneDistance + m_camera.getPosition();
+
+    VertexSeq backPlane;
+    backPlane.create(3 + 3, 4);
+
+    backPlane.prime<Vec3f, Vec3f>([&](HotVertexSeq<Vec3f, Vec3f>& hotV) {
+      hotV.vertex[0].set(backPlaneCenter + (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth), Vec3f(1, 0, 0));
+      hotV.vertex[1].set(backPlaneCenter - (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth), Vec3f(0, 1, 0));
+      hotV.vertex[2].set(backPlaneCenter + (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth), Vec3f(0, 0, 1));
+      hotV.vertex[3].set(backPlaneCenter - (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth), Vec3f(0.5f, 0.5f, 0.5f));
+    });
+
+    hotProg.draw(backPlane, PrimitiveType::TriangleStrip);
+  });
 }
 
 void Environment::init()
@@ -92,5 +131,11 @@ void Environment::init()
 
   });
 
+  VShader lightingVS;
+  lightingVS.compile(loadShaderFromFile("shader/EnvironmentLightingPass.vsh"));
+  FShader lightingFS;
+  lightingFS.compile(loadShaderFromFile("shader/EnvironmentLightingPass.fsh"));
+
+  m_lightingPass.create(lightingVS, lightingFS);
 }
 

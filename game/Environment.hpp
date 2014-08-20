@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lumina/lumina.hpp"
+#include "Camera.hpp"
 
 using namespace lum;
 
@@ -9,8 +10,9 @@ class Environment
 
 public:
 
+	Environment(Camera& camera);
   void draw(Mat4f viewMat, Mat4f projMat);
-
+  void drawLightingPass(Mat4f viewMat, Mat4f projMat);
   void init();
 
 private:
@@ -19,5 +21,6 @@ private:
   VertexSeq m_sun;
   Program m_program;
   Program m_program2;
-
+  Program m_lightingPass;
+  Camera& m_camera;
 };
