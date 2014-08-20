@@ -23,6 +23,8 @@ public:
   float getSunIntensity();
   Vec3f getSunPos();
 
+  void setExactness(int e);
+
 private:
 
   VertexSeq m_sphere;
@@ -33,7 +35,8 @@ private:
   float m_dayLength;
   float m_time;
   int m_day;
-  bool visible;
+  bool m_visible;
+  int m_exactness;
 
   Vec3f getcUp();
   Vec3f getcWest();
