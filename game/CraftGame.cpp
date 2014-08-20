@@ -23,7 +23,6 @@ void CraftGame::init() {
   m_window.setTitle("CraftGame ComputerGrafikPraktikum 2014");
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
-
   // add event callback (capture by reference
   m_window.addEventCallback(
     [&](InputEvent e) { return m_player.processEvent(e, m_window, m_cheatmode); });
