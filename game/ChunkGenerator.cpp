@@ -214,10 +214,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
     //untere Ebenen werden gleich generiert
     if(k < (noise - 3) && k >= noise - 10) {
       map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-    } else if (k > noise || k < noise-10){
-      // map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Air); //  Über dem Noise-Wert gibt es nur Air
     }
-
   }
 }
 
