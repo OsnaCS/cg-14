@@ -1,5 +1,6 @@
 #include "MapView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
+#include "ObjectLoader.hpp"
 
 #include <math.h>
 
@@ -52,6 +53,14 @@ void MapView::init() {
   m_normalTexture.create(Vec2i(512,512), TexFormat::RGB8, imageBoxNormal.data());
   m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
   m_normalTexture.params.useMipMaps = true;
+
+  ///////////////////////
+  // ImageBox imageBoxNormal = loadJPEGImage("gfx/pickaxe_texture.jpg");
+  // m_pickaxeTexture.create(Vec2i(645,646), TexFormat::RGB8, imageBoxNormal.data());
+  // m_pickaxeTexture.params.filterMode = TexFilterMode::Trilinear;
+  // m_pickaxeTexture.params.useMipMaps = true;
+
+  loadOBJ("gfx/pickaxe.obj");
 }
 
 void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
