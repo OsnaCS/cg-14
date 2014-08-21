@@ -21,6 +21,7 @@ private:
 	Map* m_map;
 	std::array<VertexSeq, 8> m_chunkSequences;
 
-	void addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType& block, Vec3f& cubePos);
-	bool isBoxVisible(Vec3f& cubePos);
+	void addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType blockType, Vec3i blockWorldPos);
+	int countVisibleFaces(Vec3i blockWorldPos);
+	bool isFaceVisible(Vec3i blockWorldPos, BlockSide side);
 };
