@@ -117,6 +117,7 @@ void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer) {
 bool MapView::isChunkVisible(Vec2i& chunkPos) {
 
   Vec2f lookDirection(m_cam.get_direction().x, m_cam.get_direction().z);
+  lookDirection.normalize();
   Vec2i offsetDirection(round(lookDirection.x), round(lookDirection.y));
   Vec3i playerWorldPos = Vec3i(static_cast<int>(round(m_cam.getPosition().x)), static_cast<int>(round(m_cam.getPosition().y)), static_cast<int>(round(m_cam.getPosition().z)));
   Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos);
@@ -131,5 +132,5 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
     return true;
   }
 
-  return true;
+  return false;
 }
