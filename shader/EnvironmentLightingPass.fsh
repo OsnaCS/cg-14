@@ -3,11 +3,11 @@
 // we need to output a color
 layout(location = 0) out vec4 o_color;
 
-uniform sampler2D depthTexture;
+// uniform sampler2D depthTexture;
 uniform sampler2D normalTexture;
 
 uniform vec3 u_lightRay;
-uniform vec3 u_cameraPos;
+// uniform vec3 u_cameraPos;
 
 in VertexData {
 	vec3 coordinates;
@@ -15,7 +15,7 @@ in VertexData {
 } inData;
 
 void main() {
-	vec3 pos = inData.coordinates * texture(depthTexture, inData.uv).r + u_cameraPos;
+	// vec3 pos = inData.coordinates * texture(depthTexture, inData.uv).r + u_cameraPos;
 	vec3 normal = texture(normalTexture, inData.uv).xyz;
 
 
