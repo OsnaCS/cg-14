@@ -42,71 +42,72 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
    	hotprog.uniform["u_color"] = Vec3f(0.75, 0.75, 0.75);
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
 
-    switch (m_day % 11)
-    {
+    hotprog.draw(m_moon, PrimitiveType::TriangleStrip);
+    // switch (m_day % 11)
+    // {
 
-    	case 0:
-    	{
-    		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 1:
-    	{
-    		hotprog.draw(m_moon1, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 2:
-    	{
-    		hotprog.draw(m_moon2, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 3:
-    	{
-    		hotprog.draw(m_moon3, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 4:
-    	{
-    		hotprog.draw(m_moon4, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 5:
-    	{
-    		hotprog.draw(m_moon5, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 6:
-    	{
-    		hotprog.draw(m_moon6, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 7:
-    	{
-    		hotprog.draw(m_moon7, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 8:
-    	{
-    		hotprog.draw(m_moon8, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 9:
-    	{
-    		hotprog.draw(m_moon9, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 10:
-    	{
-    		hotprog.draw(m_moon10, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	default:
-    	{
-    		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
-    		break;
-    	}
+    // 	case 0:
+    // 	{
+    // 		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 1:
+    // 	{
+    // 		hotprog.draw(m_moon1, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 2:
+    // 	{
+    // 		hotprog.draw(m_moon2, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 3:
+    // 	{
+    // 		hotprog.draw(m_moon3, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 4:
+    // 	{
+    // 		hotprog.draw(m_moon4, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 5:
+    // 	{
+    // 		hotprog.draw(m_moon5, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 6:
+    // 	{
+    // 		hotprog.draw(m_moon6, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 7:
+    // 	{
+    // 		hotprog.draw(m_moon7, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 8:
+    // 	{
+    // 		hotprog.draw(m_moon8, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 9:
+    // 	{
+    // 		hotprog.draw(m_moon9, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	case 10:
+    // 	{
+    // 		hotprog.draw(m_moon10, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
+    // 	default:
+    // 	{
+    // 		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
+    // 		break;
+    // 	}
     
-    }
+    // }
     
     hotprog.uniform["u_color"] = getSunColor();
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
@@ -205,24 +206,35 @@ void Environment::init()
   FShader fs2;
   fs2.compile(loadShaderFromFile("shader/Sun.fsh"));
 
+  VShader vs3;
+  FShader fs3;
+  vs3.compile(loadShaderFromFile("shader/Moon.vsh"));
+  fs3.compile(loadShaderFromFile("shader/Moon.fsh"));
+
   // create program and link the two shaders
-  m_program2.create(vs2, fs2);
+  m_program2.create(vs3, fs3);
+  m_program2.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_program2.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+  m_program2.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
 
-  m_moon.create(3, e+3);
-  m_moon.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
+  m_moon.create(3 + 2, 4);
+  m_moon.prime<Vec3f, Vec2f>([e](HotVertexSeq<Vec3f, Vec2f>& hot) {
 
-  	hot.vertex[0]. set(Vec3f(                   0, 20, 0                  ));
-    hot.vertex[1]. set(Vec3f(                   1, 20, 0                  ));
+    hot.vertex[0].set(Vec3f(1, 20, 1), Vec2f(1, 1));
+    hot.vertex[1].set(Vec3f(-1, 20, 1), Vec2f(-1, 1));
+    hot.vertex[2].set(Vec3f(1, 20, -1), Vec2f(1, -1));
+    hot.vertex[3].set(Vec3f(-1, 20, -1), Vec2f(-1, -1));
+  //   hot.vertex[0].set(Vec3f(0, 20, 0));
+  //   hot.vertex[1].set(Vec3f(1, 20, 0));
 
-    for(int i = 2; i < e+1; i++)
-    {
+  //   for(int i = 2; i < e+1; i++)
+  //   {
 
-    	hot.vertex[i]. set(Vec3f( cos((i-1) * 2 * PI /e), 20, sin((i-1) * 2 * PI /e)));
+  //   	hot.vertex[i]. set(Vec3f( cos((i-1) * 2 * PI /e), 20, sin((i-1) * 2 * PI /e)));
 
-    }
+  //   }
 
-		hot.vertex[e+1]. set(Vec3f(                   1, 20, 0                  ));
+		// hot.vertex[e+1]. set(Vec3f(                   1, 20, 0                  ));
 
   });
 

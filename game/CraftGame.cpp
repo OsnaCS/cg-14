@@ -184,7 +184,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex);
     });
 
-    // hotContext.getDefaultFrameBuffer().enableBlending(0);
+    hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
