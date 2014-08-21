@@ -10,8 +10,8 @@ MapView::MapView(Map& map, Camera& cam)
 
 void MapView::init() {
 
-  ImageBox image_box = loadJPEGImage("gfx/textures_craftgame_2nd_version_better.jpg");
-  m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGB8, image_box.data());
+  ImageBox image_box = loadJPEGImage("gfx/texture_small.jpg");
+  m_colorTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box.data());
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
 
@@ -25,35 +25,91 @@ void MapView::init() {
   m_program.perFragProc.enableDepthWrite();
   m_program.perFragProc.setDepthFunction(DepthFunction::Less);
   m_program.primitiveProc.enableCulling();
+
+  VShader normalVS;
+  normalVS.compile(loadShaderFromFile("shader/MapViewNormalPass.vsh"));
+  FShader normalFS;
+  normalFS.compile(loadShaderFromFile("shader/MapViewNormalPass.fsh"));
+
+  m_normalPass.create(normalVS, normalFS);
+  m_normalPass.perFragProc.enableDepthTest();
+  m_normalPass.perFragProc.enableDepthWrite();
+  m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_normalPass.primitiveProc.enableCulling();
+
+  VShader finalVS;
+  finalVS.compile(loadShaderFromFile("shader/MapViewFinalPass.vsh"));
+  FShader finalFS;
+  finalFS.compile(loadShaderFromFile("shader/MapViewFinalPass.fsh"));
+
+  m_finalPass.create(finalVS, finalFS);
+  m_finalPass.perFragProc.enableDepthTest();
+  m_finalPass.perFragProc.enableDepthWrite();
+  m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_finalPass.primitiveProc.enableCulling();
+
+  ImageBox imageBoxNormal = loadJPEGImage("gfx/normals_small.jpg");
+  m_normalTexture.create(Vec2i(512,512), TexFormat::RGB8, imageBoxNormal.data());
+  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_normalTexture.params.useMipMaps = true;
 }
 
-void MapView::draw(Mat4f viewMat, Mat4f projMat) {
+void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
 
-  m_program.prime([&](HotProgram& hot) {
+  Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-    hot.uniform["u_view"] = viewMat;
-    hot.uniform["u_projection"] = projMat;
+  for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
+    for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
 
-    m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
-      Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+      if(m_map.exists({x * 16, 0, z * 16})) {
 
-      for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-        for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+        Vec2i chunkPos(x, z);
 
-          if(m_map.exists({x * 16, 0, z * 16})) {
-
-            Vec2i chunkPos(x, z);
-
-            if (isChunkVisible(chunkPos)) {
-              if(m_mapView.count(chunkPos) == 0) {
-                m_mapView[chunkPos].init(chunkPos, m_map);
-              }
-
-              m_mapView[chunkPos].draw(hot, hotTex);
-            }
+        if (isChunkVisible(chunkPos)) {
+          if(m_mapView.count(chunkPos) == 0) {
+            m_mapView[chunkPos].init(chunkPos, m_map);
           }
+
+          m_mapView[chunkPos].draw(hotP, hotTexCont);
         }
       }
+    }
+  }
+}
+
+void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
+
+  m_normalPass.prime([&](HotProgram& hotP) {
+
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
+    hotP.uniform["normalTex"] = 0;
+
+    TexCont cont;
+    cont.addTexture(0, m_normalTexture);
+    cont.prime([&](HotTexCont& hotTexCont) {
+      drawChunks(hotP, hotTexCont);
+    });
+  });
+}
+
+void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer) {
+
+  m_finalPass.prime([&](HotProgram& hotP) {
+
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_winSize"] = m_cam.getWindow().getSize();
+    hotP.uniform["s_lightTexture"] = 0;
+    hotP.uniform["s_colorTexture"] = 1;
+    
+    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+      m_colorTexture.prime(1, [&](HotTex2D& hotTex) {
+
+        HotTexCont hotTexCont(hotLightingTex, hotTex);
+        drawChunks(hotP, hotTexCont);
+      });
     });
   });
 }

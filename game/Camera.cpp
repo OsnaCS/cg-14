@@ -8,12 +8,14 @@ using namespace std;
 const float BASIC_SPEED = 0.3f; 
 const float FAST_SPEED = 3.0f;
 
-Camera::Camera() :
+Camera::Camera(Window& window) :
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_mouseCaptured(false)
     ,m_ViewAngle(0.785f)
+    ,m_backPlaneDistance(256.0f)
+    ,m_window(window)
 {
     m_movedKeys.wPressed = false;
     m_movedKeys.sPressed = false;
@@ -23,6 +25,8 @@ Camera::Camera() :
     m_movedKeys.CtrlPressed = false;
     m_movedKeys.ShiftPressed = false;
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
+    Vec2i s = m_window.getSize();
+    m_screenRatio = static_cast<float>(s[0]) / s[1];
 }
 
 Mat4f Camera::get_matrix()
@@ -30,11 +34,9 @@ Mat4f Camera::get_matrix()
     return viewMatrix(m_position,m_direction,m_up);
 }
 
-Mat4f Camera::get_ProjectionMatrix(Window& w)
+Mat4f Camera::get_ProjectionMatrix()
 {
-     Vec2i s = w.getSize();
-    return projectionMatrix(m_ViewAngle, static_cast<float>(s[0]) / s[1], 0.01f, 1000.0f);
-
+    return projectionMatrix(m_ViewAngle, m_screenRatio, 0.01f, m_backPlaneDistance);
 };
 
 EventResult Camera::processEvent( const InputEvent& e, Window& win)

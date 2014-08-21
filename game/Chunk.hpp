@@ -3,6 +3,7 @@
 #include <vector>
 #include "lumina/lumina.hpp"
 #include "BlockType.hpp"
+#include "BiomeType.hpp"
 
 using namespace lum;
 using namespace std;
@@ -42,6 +43,13 @@ public:
 	// Vector to save the Blocktypes
 	vector<BlockType> m_blocks;
 
+// Sets BiomeType, gets chunk coordinates
+void setBiomeType(BiomeType type);
+
+// returns BiomeType, gets chunk coordinates
+BiomeType getBiomeType();
+
 	private:
 	
+	  BiomeType chunkBiomeType;
 };

@@ -2,6 +2,7 @@
 
 #include "lumina/lumina.hpp"
 #include "BlockType.hpp"
+#include "BiomeType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
 
@@ -14,25 +15,26 @@ public:
   // generiert alle weiteren Chunks abhängig davon wo der Player hinläuft
   void chunkGeneration(Map& m, Vec3i player_pos);
 
-  // berechnet den Perlin Noise Wert (eine randomisierte Höhe)
-  int perlinNoise(int x, int z);
-
-	float randomPos(Vec2i vector);
-  //float randomPos(int x, int z);
-
-  float interpolate(float a, float b, float x);
 
 private:
   long m_seed;
-  int m_octave;
+  long m_biome_seed;
 
   /**
    * @param map Map
    * @param x x-Wert des Blockes in Weltkoordinaten
    * @param z z-Wert des Blockes in Weltkoordinaten 
-   * @param xi x-Wert des Blockes in Chunckkoordinaten
+   * @param xi x-Wert des Blockes in Chunckkoordinaten,
    * @param zj z-Wert des Blockes in Chunckkoordinaten
    * @param noise Höhenwert des zu setzenden Blockes
    */
-  void setBlockHeight(Map& m, int x, int z, int xi, int zj, int noise);
+  void setBlockHeight(Map& m, BiomeType type, int x, int z, int xi, int zj, int noise);
+
+  void setBiomes(Map& map, Chunk chunk, int x, int y);
+
+  void setBirchTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setSpruceTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setCactusTree(Map& map, int x, int z, int xi, int zj, int noise);
+  void setPalmTree(Map& map, int x, int z, int xi, int zj, int noise);
+
 };

@@ -76,7 +76,14 @@ BlockType Map::getBlockType(Vec3i pos) {
   return m_map.at(pos2d).getBlockType(pos);
 }
 
-bool Map::exists(Vec3i pos) { return m_map.count(getChunkPos(pos)) > 0; }
+bool Map::exists(Vec3i pos) {
+
+  if (pos.y < 0 || pos.y > 127) {
+    return false;
+  }
+
+  return m_map.count(getChunkPos(pos)) > 0;
+}
 
 void Map::saveWorld() {
 

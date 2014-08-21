@@ -4,7 +4,7 @@
 #include "lumina/input/InputEvent.hpp"
 #include <algorithm> 
 
-
+using namespace lum;
 
 class Camera
 {
@@ -21,13 +21,13 @@ class Camera
 
 public:
 
-	Camera();
+	Camera(Window& window);
 
     lumina::EventResult processEvent( const lumina::InputEvent& e, lumina::Window& win );
 
     lumina::Mat4f get_matrix();
 
-    lumina::Mat4f get_ProjectionMatrix(lumina::Window& w);
+    lumina::Mat4f get_ProjectionMatrix();
 
     void updateFromPlayer(lumina::Vec3f pos, lumina::Vec3f dir);
 
@@ -58,6 +58,22 @@ public:
         return m_ViewAngle;
     }
 
+    float getBackPlaneDistance() {
+        return m_backPlaneDistance;
+    }
+
+    lumina::Vec3f getViewUp() {
+        return m_up;
+    }
+
+    float getScreenRatio() {
+        return m_screenRatio;
+    }
+
+    Window& getWindow() {
+        return m_window;
+    }
+
 private:
     void move_left();
     void move_right();
@@ -76,4 +92,7 @@ private:
     bool m_mouseCaptured;
     Movement m_movedKeys;
     float m_ViewAngle;
+    float m_backPlaneDistance;
+    float m_screenRatio;
+    Window& m_window;
 };
