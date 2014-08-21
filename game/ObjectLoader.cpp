@@ -2,11 +2,11 @@
 #include "lumina/lumina.hpp"
 
 #include <fstream>
-#include <string>
+
 
 using namespace std;
 
-void loadOBJ(string obj_name){
+VertexSeq loadOBJ(string obj_name){
 	// Liste der verschiedenen Vertices/Normalen/Texturkoordinaten
   vector<Vec3f> vertices;
   vector<Vec3f> normals;
@@ -84,6 +84,9 @@ void loadOBJ(string obj_name){
     for(int j = 0; j < index_count; j++) {
       hotObject.vertex[j].set(vertices[i_vertices[j] - 1], normals[i_normals[j] - 1], texture[i_texture[j] - 1]);
       hotObject.index[j] = j;
+
     }
   });
+
+  return object;
 }

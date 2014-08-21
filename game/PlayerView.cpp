@@ -1,5 +1,6 @@
 #include "PlayerView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
+#include "ObjectLoader.hpp"
 
 using namespace std;
 using namespace lumina;
@@ -12,7 +13,7 @@ m_player(player)
 {
 }
  
-void PlayerView::draw()
+void PlayerView::draw(Mat4f viewProjectionMatrix)
 {
   //updateHearts();
 	m_program.prime([&](HotProgram& hotprog)
@@ -21,6 +22,17 @@ void PlayerView::draw()
 			hotprog.draw(hotTex, updateHearts(), PrimitiveType::TriangleStrip);
 		});
 	});
+
+	//Show pickaxe
+	m_program2.prime([&](HotProgram& hotPickaxe){
+
+		hotPickaxe.uniform["u_transform"] = viewProjectionMatrix;
+
+		m_pickaxeTexture.prime(0, [&](HotTex2D& hotTex2){
+			hotPickaxe.draw(hotTex2, m_pickaxe, PrimitiveType::Triangle);
+		});
+	});
+
 }
 
 
@@ -42,6 +54,28 @@ void PlayerView::init()
 	m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
 	m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
 	m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+  // Pickaxe
+	//Initialize of the texture
+	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture512.jpg");
+  m_pickaxeTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box2.data());
+  m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
+  m_pickaxeTexture.params.useMipMaps = true;
+
+	VShader vs2;
+	vs2.compile(loadShaderFromFile("shader/Pickaxe.vsh"));
+	FShader fs2;
+	fs2.compile(loadShaderFromFile("shader/Pickaxe.fsh"));
+  // create program and link the two shaders
+	m_program2.create(vs2, fs2);
+	m_program2.perFragProc.enableDepthTest();
+	m_program2.perFragProc.setDepthFunction(DepthFunction::Less);
+
+	// m_program2.perFragProc.blendFuncRGB = BlendFunction::Add;
+	// m_program2.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+	// m_program2.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+	m_pickaxe = loadOBJ("gfx/pickaxe2.obj");
 	
 }
 

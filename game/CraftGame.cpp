@@ -197,7 +197,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         });
       });
 
-      m_playerView.draw();
+      m_playerView.draw(projectionMatrix * viewMatrix);
     });
 
     // swap buffer

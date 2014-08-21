@@ -2,7 +2,9 @@
 
 #include "lumina/lumina.hpp"
 
+#include <string>
+
 using namespace lumina;
 using namespace std;
 
-void loadOBJ(string file);
+VertexSeq loadOBJ(string file);
