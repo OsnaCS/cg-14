@@ -12,8 +12,12 @@ enum class BlockType
 	Air, Dirt, Wood, Stone, Water, Sand, Grass
 };
 
+// North := front side
+// South := back side
 enum class BlockSide{
-	Top, Bottom, North, South, West, East 
+	Top, Bottom, North, South, West, East,
+
+	COUNT
 };
 /**
 * returns the Color of the given Blocktype
