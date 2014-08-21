@@ -20,7 +20,7 @@ void main() {
 
 
 	// --------------- Ambient Light --------------------
-	float ambienteIntensity = 0.3;
+	float ambienteIntensity = 0.6;
 
 
 
@@ -40,18 +40,21 @@ void main() {
 	// --------------- Specular Light --------------------
 	float specularExponent = 8;
 	float specularPower = 0.5;
+	float specularIntensity = 1.0;
+
+/*
 
 	vec3 eyeRay = normalize(u_cameraPos - pos);				// from position to eye
 
 	vec3 reflected = (2 * dot(normal, u_lightRay) * normal) - u_lightRay;
 
 	//float specularAngle = cos(dot(eyeRay, reflected) / length(reflected)*length(eyeRay));
-	float specularAngle = cos(dot(normal, eyeRay));
-	// float specularAngle = cos((dot(reflected, eyeRay))/length(reflected));
-	// float specularIntensity = specularPower*pow(specularAngle,specularExponent);
-	float specularIntensity = specularAngle;
+	// float specularAngle = cos(dot(normal, eyeRay));
+	float specularAngle = cos((dot(reflected, eyeRay))/length(reflected));
+	float specularIntensity = specularPower*pow(specularAngle,specularExponent);
+	// float specularIntensity = specularAngle;
 
-
+*/
 
 	// --------------- Sum up light --------------------
 	vec3 totalIntensity = vec3(ambienteIntensity + diffuseIntensity);

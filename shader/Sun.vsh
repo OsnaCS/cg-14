@@ -17,7 +17,6 @@ void main()
 {
 
 	gl_Position = u_transform * vec4(i_windowpos.x, i_windowpos.y, i_windowpos.z, 1);
-	// gl_Position.z = 254;
 
 	outData.color = u_color;
 }

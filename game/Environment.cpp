@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(6), m_time(0), m_day(0), m_exactness(32) {
+: m_camera(camera), m_dayLength(20), m_time(0), m_day(0), m_exactness(32) {
 
 }
 
