@@ -53,6 +53,7 @@ void CraftGame::init() {
 }
 
 void CraftGame::start() {
+
   // open the window (we need to call init before!)
   m_window.open();
   // obtain and create render context
@@ -84,6 +85,8 @@ void CraftGame::updateComponents(float delta) {
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
+
+  //glViewport(0, 0, m_window.getSize().x, m_window.getSize().y);
 
   m_envir.init();
   m_mapView.init();
@@ -158,6 +161,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // first pass (geometry)
     m_gBuffer.prime([&](HotFrameBuffer& hotFB) {
+      glViewport(0, 0, m_window.getSize().x, m_window.getSize().y);
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
       hotFB.clearColor(1, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
@@ -167,6 +171,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // second pass (lighting)
     m_lBuffer.prime([&](HotFrameBuffer& hotFB) {
+      glViewport(0, 0, m_window.getSize().x, m_window.getSize().y);
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
 
       m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
@@ -174,6 +179,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // third pass (final)
     m_fBuffer.prime([&](HotFrameBuffer& hotFB) {
+      glViewport(0, 0, m_window.getSize().x, m_window.getSize().y);
       hotFB.clearColor(0, Color32fA(0, 0, 0, 1));
 
       // TODO: remove
@@ -188,6 +194,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
+      glViewport(0, 0, m_window.getSize().x*2, m_window.getSize().y*2);
+
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
