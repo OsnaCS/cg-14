@@ -28,10 +28,10 @@ void main(){
  	float xh, yh, zh;
   if(distance <= 1- 0.08 * u_pulse) {
   	xh = (1 - u_color.x) * 0.6;
-  	yh = (1 - u_color.y) * 0.6;
-  	zh = (1 - u_color.z) * 0.6;
+  	yh = (1 - u_color.y) * 0.4;
+  	zh = (1 - u_color.z) * 0.2;
     o_color = vec4(u_color.x + xh*distance, u_color.y + yh*distance, u_color.z + zh*distance, 1);
   } else {
-    o_color = vec4(u_color, 0.75 - (distance / 3));
+    o_color = vec4(u_color.x + distance / 18, u_color.y + distance / 36, u_color.z, 0.6 - (distance / 4));
   }
 }

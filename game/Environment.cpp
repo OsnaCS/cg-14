@@ -31,11 +31,11 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(0.5),cos(0.5)), a));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, -sin(0.5), cos(0.5)), a));
     
     float help = (m_time - static_cast<int>(m_time));
-    for(int i = 0; i< 3; i++){
-    	help *=2;
+    for(int i = 0; i< 1; i++){
+    	help +=help;
     	if(help > 1){
     		help = 2 - help;
    	 }
@@ -162,10 +162,10 @@ void Environment::init()
   m_sun.create(3 + 2, 4);
   m_sun.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot) {
     
-    hot.vertex[0].set(Vec3f( 1, -5*cos(0.5)+sin(0.5),5*sin(0.5)+cos(0.5)), Vec2f(2, 2));
-    hot.vertex[1].set(Vec3f(-1, -5*cos(0.5)+sin(0.5),5*sin(0.5)+cos(0.5)), Vec2f(-2, 2));
-    hot.vertex[2].set(Vec3f( 1, -5*cos(0.5)-sin(0.5),5*sin(0.5)-cos(0.5)), Vec2f(2, -2));
-    hot.vertex[3].set(Vec3f(-1, -5*cos(0.5)-sin(0.5),5*sin(0.5)-cos(0.5)), Vec2f(-2, -2));
+    hot.vertex[0].set(Vec3f( 1, -5*cos(0.5)-sin(0.5),-5*sin(0.5)+cos(0.5)), Vec2f( 3,  3));
+    hot.vertex[1].set(Vec3f(-1, -5*cos(0.5)-sin(0.5),-5*sin(0.5)+cos(0.5)), Vec2f(-3,  3));
+    hot.vertex[2].set(Vec3f( 1, -5*cos(0.5)+sin(0.5),-5*sin(0.5)-cos(0.5)), Vec2f( 3, -3));
+    hot.vertex[3].set(Vec3f(-1, -5*cos(0.5)+sin(0.5),-5*sin(0.5)-cos(0.5)), Vec2f(-3, -3));
 
   });
 
@@ -239,6 +239,7 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.75 * m_dayLength;
 		help = help /(m_dayLength/4);
 		r = 1 - help;
+		g = 0.3 - 0.3 * help;
 
 	} 
 	else if(m_time > 0.5 * m_dayLength) 
@@ -247,8 +248,8 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.5 * m_dayLength;
 		help = help /(m_dayLength/4);
 		r = 1;
-		g = 1 - help;
-		b = 0.5 * (1 - help);
+		g = 1 - 0.7 * help;
+		b = 0.75 * (1 - help);
 
 	} 
 	else if(m_time > 0.25 * m_dayLength) 
@@ -257,8 +258,8 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.25 * m_dayLength;
 		help = help /(m_dayLength/4);
 		r = 1;
-		g = help;
-		b= 0.5 * help;
+		g = 0.3 + 0.7 * help;
+		b= 0.75 * help;
 
 	} 
 	else 
@@ -266,6 +267,7 @@ Vec3f Environment::getSunColor()
 
 		help = m_time / (m_dayLength/4);
 		r = help;
+		g = 0.3 * help;
 
 	}
 
@@ -279,11 +281,11 @@ float Environment::getSunIntensity(){
 
 	help = m_time / m_dayLength;
 
-	if(help>0.25 && help<0.75){
+	if(help>0.2 && help<0.8){
 
-		help -= 0.25;
-		if(help > 0.25){
-			help = 0.5 - help;
+		help -= 0.2;
+		if(help > 0.3){
+			help = 0.6 - help;
 		}
 
 		return help*3;
@@ -346,7 +348,7 @@ Vec3f Environment::getcWest()
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    return Vec3f(0.5 + (0.25 * help), 0.75 * help, help);
+    return Vec3f(0.5 + (0.25 * help), 0.2 + 0.55 * help, help);
 
   } 
   else 
@@ -354,9 +356,8 @@ Vec3f Environment::getcWest()
     help = m_time;
     help = help / (m_dayLength / 4);
 
-    return Vec3f(0.5 * help, 0, 0);
+    return Vec3f(0.5 * help, 0.2 * help, 0);
   }
-
 }
 
 Vec3f Environment::getcNorth()
@@ -417,7 +418,7 @@ Vec3f Environment::getcEast()
     help = help / (m_dayLength / 4);
 
     //(.5,0,0)
-    return Vec3f(0.5 * (1 - help), 0, 0);
+    return Vec3f(0.5 * (1 - help), 0.2 * (1-help), 0);
 
   } 
   else if(m_time > 0.5 * m_dayLength) 
@@ -426,7 +427,7 @@ Vec3f Environment::getcEast()
     help = m_time - 0.5 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    return Vec3f(0.75 - (0.25 * help), 0.75 - (0.75 * help), 1 - help);
+    return Vec3f(0.75 - (0.25 * help), 0.75 - (0.55 * help), 1 - help);
 
   } 
   else if(m_time > 0.25 * m_dayLength) 

@@ -56,6 +56,9 @@ void main() {
 	if(phi >= 3){
 
     phi -= 3;
+    phi = 1 - phi;
+    phi *= phi;
+    phi = 1 - phi;
     c2 = u_colorSouth;
 		c3 = u_colorWest;
 
@@ -63,6 +66,7 @@ void main() {
 	else if(phi >= 2){
 
 		phi -= 2;
+		phi *= phi;
 		c2 = u_colorEast;
 		c3 = u_colorSouth;
 
@@ -70,18 +74,24 @@ void main() {
 	else if(phi >= 1){
 
 		phi -= 1;
+		phi = 1 - phi;
+		phi *= phi;
+		phi = 1 - phi;
 		c2 = u_colorNorth;
 		c3 = u_colorEast;
 
 	}
 	else if (phi >= 0){
 
+		phi *= phi;
 		c2 = u_colorWest;
 		c3 = u_colorNorth;
 	}
 
   vec3 res = mix(c2, c3, phi);
-
+  theta = 1 - theta;
+  theta *= theta;
+  theta = 1 - theta;
   res = mix(res, c1, theta);
   o_color = vec4(res, 1);
 
