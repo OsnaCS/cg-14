@@ -62,19 +62,19 @@ void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos, MapView& mapV
         setBiomes(map, chunk, x, z);
         
         Vec2i chuPos = Vec2i(x + 1, z);
-        if(mapView.exists(chuPos) {
+        if(mapView.exists(chuPos)) {
           mapView.deleteChunkView(chuPos);
         }
         chuPos = Vec2i(x - 1, z);
-        if(mapView.exists(chuPos) {
+        if(mapView.exists(chuPos)) {
           mapView.deleteChunkView(chuPos);
         }
         chuPos = Vec2i(x, z + 1);
-        if(mapView.exists(chuPos) {
+        if(mapView.exists(chuPos)) {
           mapView.deleteChunkView(chuPos);
         }
         chuPos = Vec2i(x, z - 1);
-        if(mapView.exists(chuPos) {
+        if(mapView.exists(chuPos)) {
           mapView.deleteChunkView(chuPos);
         }
       }
