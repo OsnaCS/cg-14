@@ -34,10 +34,13 @@ private:
   Tex2D m_gBufferDepth;
   FrameBuffer m_gBuffer;
   VertexSeq m_fullScreenQuad;
+  VertexSeq m_fullScreenQuad2;
   Tex2D m_lBufferTex;
   FrameBuffer m_lBuffer;
   Tex2D m_fBufferTex;
   FrameBuffer m_fBuffer;
+
+  Tex2D m_colorTexture;
 
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);

@@ -8,6 +8,7 @@ in VertexData {
 } inData;
 
 uniform sampler2D tex;
+
 uniform bool u_pause;
 
 void main() 

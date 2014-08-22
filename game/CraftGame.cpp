@@ -133,6 +133,12 @@ void CraftGame::updateComponents(float delta) {
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
+
+  ImageBox image_save = loadJPEGImage("gfx/save.jpg");
+  m_colorTexture.create(Vec2i(680,90), TexFormat::RGB8, image_save.data());
+  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_colorTexture.params.useMipMaps = true;
+
   m_envir.init();
   m_mapView.init();
   m_playerView.init();
@@ -164,6 +170,14 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotSeq.vertex[3] = Vec2f(1, 1);
   });
 
+  m_fullScreenQuad2.create(4, 4);
+  m_fullScreenQuad2.prime<Vec2f, Vec2f>([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
+    hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
+    hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
+    hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));
+    hotSeq.vertex[3].set(Vec2f(680.0/1280.0, 470.0/720.0),Vec2f(1, 1));
+  });
+
   VShader tempVS;
   tempVS.compile(loadShaderFromFile("shader/TempShader.vsh"));
   FShader tempFS;
@@ -171,6 +185,19 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   Program tempP;
   tempP.create(tempVS, tempFS);
+
+
+
+  VShader menüVS;
+  menüVS.compile(loadShaderFromFile("shader/Menü.vsh"));
+  FShader menüFS;
+  menüFS.compile(loadShaderFromFile("shader/Menü.fsh"));
+
+  Program pMenü;
+  pMenü.create(menüVS, menüFS);
+
+
+
 
   RenderBuffer zBuf;
   zBuf.create(m_window.getSize(), RenderBufferType::Depth32);
@@ -254,7 +281,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
-    hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
+    hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) 
+    {
       // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
@@ -266,16 +294,49 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         {
 
           hotP.uniform["u_pause"] = m_pause;
-          hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
 
+          hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
+       
+        });
+
+      });
+
+      // Für Blur
+      m_fBufferTex.prime(0, [&](HotTex2D& hotT)
+      // Für Textur
+      //m_colorTexture.prime(0, [&](HotTex2D& hotT)
+      {
+
+        pMenü.prime([&](HotProgram& hotP) 
+        {
+
+          if(m_pause)
+          {
+            hotP.uniform["u_offset"] = (float)0.0;
+
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-0.4;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-0.8;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-1.2;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+          }
+       
         });
 
       });
 
       m_playerView.draw();
+
     });
 
     // swap buffer
     hotContext.swapBuffer();
+
   }
 }
