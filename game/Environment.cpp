@@ -4,13 +4,11 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(20), m_time(0), m_day(0) {
+: m_camera(camera), m_dayLength(10), m_time(0), m_day(0) {
 
 }
 
-void Environment::draw(Mat4f viewMat, Mat4f projMat)
-{
-
+void Environment::draw(Mat4f viewMat, Mat4f projMat){
 	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
@@ -33,8 +31,16 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,0,1), a));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(0.5),cos(0.5)), a));
     
+    float help = (m_time - static_cast<int>(m_time));
+    for(int i = 0; i< 3; i++){
+    	help *=2;
+    	if(help > 1){
+    		help = 2 - help;
+   	 }
+  	}
+    hotprog.uniform["u_pulse"] = help;
     hotprog.uniform["u_color"] = getSunColor();
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
     hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
@@ -47,9 +53,10 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,0,1), a));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(0.5),cos(0.5)), a));
 
    	hotprog.uniform["u_color"] = Vec3f(0.75, 0.75, 0.75);
+   	hotprog.uniform["u_phase"] = m_phase;
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
     hotprog.draw(m_moon, PrimitiveType::TriangleStrip);
 
@@ -155,10 +162,10 @@ void Environment::init()
   m_sun.create(3 + 2, 4);
   m_sun.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot) {
     
-    hot.vertex[0].set(Vec3f(1, -15, 1), Vec2f(1, 1));
-    hot.vertex[1].set(Vec3f(-1, -15, 1), Vec2f(-1, 1));
-    hot.vertex[2].set(Vec3f(1, -15, -1), Vec2f(1, -1));
-    hot.vertex[3].set(Vec3f(-1, -15, -1), Vec2f(-1, -1));
+    hot.vertex[0].set(Vec3f( 1, -5*cos(0.5)+sin(0.5),5*sin(0.5)+cos(0.5)), Vec2f(2, 2));
+    hot.vertex[1].set(Vec3f(-1, -5*cos(0.5)+sin(0.5),5*sin(0.5)+cos(0.5)), Vec2f(-2, 2));
+    hot.vertex[2].set(Vec3f( 1, -5*cos(0.5)-sin(0.5),5*sin(0.5)-cos(0.5)), Vec2f(2, -2));
+    hot.vertex[3].set(Vec3f(-1, -5*cos(0.5)-sin(0.5),5*sin(0.5)-cos(0.5)), Vec2f(-2, -2));
 
   });
 
@@ -172,10 +179,10 @@ void Environment::init()
   m_moon.create(3 + 2, 4);
   m_moon.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot) {
 
-    hot.vertex[0].set(Vec3f(1, 20, 1), Vec2f(1, 1));
-    hot.vertex[1].set(Vec3f(-1, 20, 1), Vec2f(-1, 1));
-    hot.vertex[2].set(Vec3f(1, 20, -1), Vec2f(1, -1));
-    hot.vertex[3].set(Vec3f(-1, 20, -1), Vec2f(-1, -1));
+    hot.vertex[0].set(Vec3f( 1, 10*cos(0.5)+sin(0.5),-10*sin(0.5)+cos(0.5)), Vec2f(1, 1));
+    hot.vertex[1].set(Vec3f(-1, 10*cos(0.5)+sin(0.5),-10*sin(0.5)+cos(0.5)), Vec2f(-1, 1));
+    hot.vertex[2].set(Vec3f( 1, 10*cos(0.5)-sin(0.5),-10*sin(0.5)-cos(0.5)), Vec2f(1, -1));
+    hot.vertex[3].set(Vec3f(-1, 10*cos(0.5)-sin(0.5),-10*sin(0.5)-cos(0.5)), Vec2f(-1, -1));
 
   });
 
@@ -206,6 +213,7 @@ void Environment::update(float delta)
 		m_time -= m_dayLength;
 		m_day++;
 	}
+	m_phase = 4 * (m_day % 30 + (m_time / m_dayLength)) / 30;
 
 }
 

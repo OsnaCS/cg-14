@@ -38,6 +38,7 @@ private:
   float m_dayLength;
   float m_time;
   int m_day;
+  float m_phase;
 
   Vec3f getcUp();
   Vec3f getcWest();
