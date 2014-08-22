@@ -149,7 +149,7 @@ bool MapView::exists(Vec2i pos) {
 
 void MapView::clearMapView(Vec2i position) {
   auto it = m_mapView.begin();
-  auto pred = [&](std::pair<Vec2i, ChunkView&> entry) {
+  auto pred = [&](std::pair<const Vec2i, ChunkView>& entry) {
     Vec2i temp = entry.first - position;
     
     return temp.length() > 20;
