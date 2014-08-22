@@ -25,11 +25,11 @@ void main()
 
 	// we're gonna sample an "x-pattern"
 	// by doing the dot product, we get the luminacity of the pixel:
-	float lumaTL = dot(luma, texture2D(R_filterTexture, inData.uv.xy + (vec2(-1.0, -1.0) * texCoordOffset)).xyz);	// one pixel to the top-left side
-	float lumaTR = dot(luma, texture2D(R_filterTexture, inData.uv.xy + (vec2(1.0, -1.0) * texCoordOffset)).xyz); 	// pixel top-right
-	float lumaBL = dot(luma, texture2D(R_filterTexture, inData.uv.xy + (vec2(-1.0, 1.0) * texCoordOffset)).xyz); 	// pixel bottom-left
-	float lumaBR = dot(luma, texture2D(R_filterTexture, inData.uv.xy + (vec2(1.0, 1.0) * texCoordOffset)).xyz); 	// pixel bottom-right
-	float lumaM  = dot(luma, texture2D(R_filterTexture, inData.uv.xy).xyz); // take a tex2d of the filter texture & the rgb component (.xyz)
+	float lumaTL = dot(luma, texture(R_filterTexture, inData.uv.xy + (vec2(-1.0, -1.0) * texCoordOffset)).xyz);	// one pixel to the top-left side
+	float lumaTR = dot(luma, texture(R_filterTexture, inData.uv.xy + (vec2(1.0, -1.0) * texCoordOffset)).xyz); 	// pixel top-right
+	float lumaBL = dot(luma, texture(R_filterTexture, inData.uv.xy + (vec2(-1.0, 1.0) * texCoordOffset)).xyz); 	// pixel bottom-left
+	float lumaBR = dot(luma, texture(R_filterTexture, inData.uv.xy + (vec2(1.0, 1.0) * texCoordOffset)).xyz); 	// pixel bottom-right
+	float lumaM  = dot(luma, texture(R_filterTexture, inData.uv.xy).xyz); // take a tex2d of the filter texture & the rgb component (.xyz)
 
 
 	//determine the blur direction and whether or not this is an edge pixel (edge detection)
@@ -50,12 +50,12 @@ void main()
 	//do the blur
 	//get 2 samples :
 	vec3 result1 = (1.0/2.0) * (
-		texture2D(R_filterTexture, inData.uv.xy + (dir * vec2(1.0/3.0 - 0.5))).xyz + // direction as the amount; skale down by a certain amount(backwards on the direction)
-		texture2D(R_filterTexture, inData.uv.xy + (dir * vec2(2.0/3.0 - 0.5))).xyz);
+		texture(R_filterTexture, inData.uv.xy + (dir * vec2(1.0/3.0 - 0.5))).xyz + // direction as the amount; skale down by a certain amount(backwards on the direction)
+		texture(R_filterTexture, inData.uv.xy + (dir * vec2(2.0/3.0 - 0.5))).xyz);
 
 	vec3 result2 = result1 * (1.0/2.0) + (1.0/4.0) * (
-		texture2D(R_filterTexture, inData.uv.xy + (dir * vec2(0.0/3.0 - 0.5))).xyz +
-		texture2D(R_filterTexture, inData.uv.xy + (dir * vec2(3.0/3.0 - 0.5))).xyz);
+		texture(R_filterTexture, inData.uv.xy + (dir * vec2(0.0/3.0 - 0.5))).xyz +
+		texture(R_filterTexture, inData.uv.xy + (dir * vec2(3.0/3.0 - 0.5))).xyz);
 
 	float lumaMin = min(lumaM, min(min(lumaTL, lumaTR), min(lumaBL, lumaBR)));	// the smallest
 	float lumaMax = max(lumaM, max(max(lumaTL, lumaTR), max(lumaBL, lumaBR)));	// the greatest
