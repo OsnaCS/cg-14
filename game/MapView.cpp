@@ -118,12 +118,11 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
 
   Vec2f lookDirection(m_cam.get_direction().x, m_cam.get_direction().z);
   lookDirection.normalize();
-  Vec2i offsetDirection(round(lookDirection.x), round(lookDirection.y));
-  Vec3i playerWorldPos = Vec3i(static_cast<int>(round(m_cam.getPosition().x)), static_cast<int>(round(m_cam.getPosition().y)), static_cast<int>(round(m_cam.getPosition().z)));
-  Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos);
 
-  // TODO: Winkel hat zu wenig "Spiel"
-  Vec2f checkVector = chunkPos - (playerChunkPos - offsetDirection);
+  Vec3i playerWorldPos = vector_cast<int>(m_cam.getPosition() + Vec3f(.5f, .5f, .5f));
+  Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos - Vec3i(lookDirection.x * 32, 0, lookDirection.y * 32));
+
+  Vec2f checkVector = chunkPos - playerChunkPos;
   checkVector.normalize();
   float alpha = acos((checkVector.x * lookDirection.x) + (checkVector.y * lookDirection.y)) * 180.0 / M_PI;
   float viewAngleDegree = m_cam.getViewAngle() * 180.0 / M_PI;
