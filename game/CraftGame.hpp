@@ -36,6 +36,8 @@ private:
   FrameBuffer m_lBuffer;
   Tex2D m_fBufferTex;
   FrameBuffer m_fBuffer;
+  Tex2D m_fxaaTex;
+  FrameBuffer m_fxaaBuffer;
 
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);

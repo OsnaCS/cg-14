@@ -90,6 +90,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_playerView.init();
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
 
+  //
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create(m_window.getSize());
@@ -99,11 +100,26 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   gCont.addTexture(0, m_gBufferNormal);
   gCont.addTexture(1, m_gBufferDepth);
 
+  //
   m_lBufferTex.create(m_window.getSize(), TexFormat::RGBA8);
   m_lBufferTex.params.filterMode = TexFilterMode::Nearest;
   m_lBuffer.create(m_window.getSize());
   m_lBuffer.attachColor(0, m_lBufferTex);
 
+  //Texture for FXAA:
+  m_fxaaTex.create(m_window.getSize(), TexFormat::RGB8);
+  m_fxaaBuffer.create(m_window.getSize());
+  m_fxaaBuffer.attachColor(0,m_fxaaTex); //unterschiedliche attachmentpoints: weil rgb-textur ->"color"
+  
+  //creating the fxaa-program:
+  VShader fxaaVS;
+  fxaaVS.compile(loadShaderFromFile("shader/FXAAShader.vsh"));
+  FShader fxaaFS;
+  fxaaFS.compile(loadShaderFromFile("shader/FXAAShader.fsh"));
+  Program fxaaP;
+  fxaaP.create(fxaaVS, fxaaFS);
+
+  //
   m_fBufferTex.create(m_window.getSize(), TexFormat::RGB8);
   m_fBuffer.create(m_window.getSize());
   m_fBuffer.attachColor(0, m_fBufferTex);
@@ -116,11 +132,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotSeq.vertex[3] = Vec2f(1, 1);
   });
 
+  //
   VShader tempVS;
   tempVS.compile(loadShaderFromFile("shader/TempShader.vsh"));
   FShader tempFS;
   tempFS.compile(loadShaderFromFile("shader/TempShader.fsh"));
-
   Program tempP;
   tempP.create(tempVS, tempFS);
 
@@ -186,6 +202,18 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 
+    // fourth pass (FXAA)
+    m_fxaaBuffer.prime([&](HotFrameBuffer& hotFB) {
+      fxaaP.prime([&](HotProgram& hotP) {
+        // m_window.getSize() gives Vec2i back, cast to Vec2f and inverse
+        hotP.uniform["R_inverseFilterTextureSize"] = Vec2f(1/(m_window.getSize().x + 0.0f), 1/(m_window.getSize().y + 0.0f));
+        m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
+          hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
+        });      
+      });
+    });
+
+
     hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
@@ -194,7 +222,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
+      m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });
