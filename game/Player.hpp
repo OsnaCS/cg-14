@@ -4,7 +4,7 @@
 #include "BlockType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
-using namespace std;
+#include "PlayerAttributes.hpp"
 
 
 /** @Class Player 
@@ -15,9 +15,17 @@ public:
 	//Constructor
   Player(Map& m);
 
-	//getter-Methoden
-  int getHearts();
-  int getMaxHearts();
+  /**
+   * @brief getHearts Get current number of hearts indicating health of the players
+   * @return current number of hearts
+   */
+  inline int getHearts();
+
+  /**
+   * @brief getMaxHearts Maximum number of hearts to be initialized
+   * @return maximum number of hearts
+   */
+  inline int getMaxHearts() const;
 
   /** @brief Processing all actual movements
   For every pressed key, the movement will be added and processed.
@@ -95,11 +103,21 @@ private:
   bool m_ShiftPressed;
 
   Map& m_map;
-
-  int m_hearts;
   float m_fallen;
-  unsigned long m_passedFrames;
-
-
+  PlayerAttributes m_attrib;
 
 };
+
+//////////// INLINE
+
+int Player::getHearts()
+{
+  return m_attrib.getHearts();
+}
+
+int Player::getMaxHearts() const
+{
+  return m_attrib.maxHearts();
+}
+
+///////////////////////////////END OF FILE/////////////////////////////////////
