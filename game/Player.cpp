@@ -41,7 +41,6 @@ Player::Player( Map& m)
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
-    ,m_collided(false)
     ,m_map(m)
     ,m_fallen(0)
     ,m_attrib(MAX_HEARTS)
@@ -206,8 +205,8 @@ void Player::update()
 }
 
 Vec3f Player::getPosition(){
-  return Vec3f(m_position.x, m_position.y+1.0f, m_position.z);
-//  return m_position;
+  return Vec3f(m_position.x, m_position.y+1.1f, m_position.z);
+
 }
 
 Vec3f Player::getDirection(){
@@ -220,8 +219,6 @@ void Player::move_left()
    Vec4f left_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
    m_xMovementspeed += m_movingspeed*left_direction.x;
    m_zMovementspeed += m_movingspeed*left_direction.z;
-   slog("move_left() ...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
-
 }
 
 void Player::move_right()
@@ -230,7 +227,6 @@ void Player::move_right()
    Vec4f left_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
    m_xMovementspeed += m_movingspeed*left_direction.x;
    m_zMovementspeed += m_movingspeed*left_direction.z;
-   slog("move_right()...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
 
 }
 
@@ -241,6 +237,7 @@ void Player::move_forward()
    m_xMovementspeed += m_movingspeed*(m_direction.x+(m_direction.x/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
    m_zMovementspeed += m_movingspeed*(m_direction.z+(m_direction.z/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
    slog("move_forward()...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
+
 }
 
 
@@ -254,6 +251,7 @@ void Player::move_backward()
    slog("move_backward()...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
 
 }
+
 void Player::move_up() //Jump
 {
   
@@ -323,24 +321,19 @@ void Player::movement()
     float deltaX =  fabs(m_position.x - pos.x - BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed)) - FREE_SPACE;
     float deltaZ =  fabs(m_position.z - pos.z - BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed)) - FREE_SPACE; 
 
-    slog("m_pos.x: ", m_position.x, " pos.x:",pos.x, " DeltaX:", deltaX, " Movement X: ", m_xMovementspeed);
-    slog("m_pos.z: ", m_position.z, " pos.z:",pos.z, " DeltaZ:", deltaZ, " Movement Z: ", m_zMovementspeed);
-    //slog("pos.x: ", pos.x, " pos.y: ", pos.y, " pos.z: ",pos.z);
-    slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
-    slog("test collision at x+delta: ",pos.x+deltaX, ",  y: ",pos.y, ", z+delta: ",pos.z+deltaZ );
+    //slog("m_pos.x: ", m_position.x, " pos.x:",pos.x, " DeltaX:", deltaX, " Movement X: ", m_xMovementspeed);
+    //slog("m_pos.z: ", m_position.z, " pos.z:",pos.z, " DeltaZ:", deltaZ, " Movement Z: ", m_zMovementspeed);
+    //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
+    //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
 
-    // test
-   if ( !collide( pos.x, pos.y+1, pos.z) ) {
-    slog("Not collide at block different " );
-    m_collided = false;
-   }
-   else {
-       m_collided = true;
-       slog("collide with block different");
-   }
+    float block_x = BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed);
+    float block_z = BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed);
+    //slog("test collision at x+gap: ",pos.x+block_x, ",  y: ",pos.y, ", z+gap: ",pos.z+block_z );
 
-   //Check if we are in air
-   if( ! collide(pos.x, pos.y, pos.z) /*&& ! m_collided*/  )
+   //Check if we can move for XZ-direction
+   if(    !collide(pos.x, pos.y, pos.z)
+       && !collide( m_position.x+ block_x , m_position.y+1.2, m_position.z+ block_z )
+       && !collide( m_position.x+ block_x , m_position.y, m_position.z+ block_z )  )
    {
         //Free Moving because of free space in moving direction.
         //The movement is only in the current block
@@ -424,19 +417,19 @@ void Player::movement()
             }
           }
 
-        }       
+        }
    }
-   else
+   else // collide with other objects ...we don't update the m_position of x and z
    {
-        slog("Not in the air");
+        slog("Collide with other objects with ");
 
    }
+   //Reset Movementspeed
+   m_xMovementspeed = 0;
+   m_zMovementspeed = 0;
+
    slog("-------------------------------------------------------------");
 
-    //slog(m_position.y);
-    //Reset Movementspeed
-    m_xMovementspeed = 0;
-    m_zMovementspeed = 0;
 }
 
 bool Player::collide(float x, float y, float z)
