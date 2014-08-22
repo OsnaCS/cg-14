@@ -5,15 +5,16 @@
 #include "ChunkView.hpp"
 #include "Map.hpp"
 #include "Camera.hpp"
+#include "Environment.hpp"
 
 class MapView
 {
 
 public:
 
-	MapView(Map& map, Camera& cam);
+	MapView(Map& map, Camera& cam, Environment& envir);
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
-	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer);
+	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
 
 	/**
@@ -28,6 +29,7 @@ private:
 	map<Vec2i, ChunkView> m_mapView;
 	Map& m_map;
 	Camera& m_cam;
+	Environment& m_envir;
 	Tex2D m_colorTexture;
 	Program m_program;
 	Program m_normalPass;

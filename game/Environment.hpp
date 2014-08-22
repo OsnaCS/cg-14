@@ -24,6 +24,12 @@ public:
   float getSunIntensity();
   Vec3f getSunPos();
 
+  float getTime()
+  {return m_time;}
+
+  float getDayLength()
+  {return m_dayLength;}
+
   void setExactness(int e);
 
 private:

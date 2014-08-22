@@ -9,7 +9,7 @@ using namespace std;
 
 CraftGame::CraftGame()
     :m_player(m_map)
-    ,m_mapView(m_map, m_camera)
+    ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
     ,m_envir(m_camera)
     ,m_camera(m_window)
@@ -181,10 +181,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex);
+
+
+
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 
-    // hotContext.getDefaultFrameBuffer().enableBlending(0);
+    hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
