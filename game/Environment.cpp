@@ -4,11 +4,12 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(10), m_time(0), m_day(0) {
+: m_camera(camera), m_dayLength(10), m_time(0), m_day(0), m_phase(0) {
 
 }
 
 void Environment::draw(Mat4f viewMat, Mat4f projMat){
+
 	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
@@ -213,7 +214,11 @@ void Environment::update(float delta)
 		m_time -= m_dayLength;
 		m_day++;
 	}
-	m_phase = 4 * (m_day % 30 + (m_time / m_dayLength)) / 30;
+	// m_phase = 4 * (m_day % 30 + (m_time / m_dayLength)) / 30;
+	m_phase += 4 * (delta / m_dayLength) / 29.575;
+	if(m_phase > 4){
+		m_phase -= 4;
+	}
 
 }
 
@@ -277,21 +282,24 @@ Vec3f Environment::getSunColor()
 
 float Environment::getSunIntensity(){
 
-	float help;
+	float help = m_time / m_dayLength;
 
-	help = m_time / m_dayLength;
+	if(help>0.25 && help<0.75){
 
-	if(help>0.2 && help<0.8){
 
-		help -= 0.2;
-		if(help > 0.3){
-			help = 0.6 - help;
+		return 0.9;
+
+	} else{
+
+
+		help = m_phase;
+		if(help > 2){
+			help = 4 - help;
 		}
 
-		return help*3;
+		return (2 - m_phase) / 6;
 
 	}
-	return 0.0;
 }
 
 Vec3f Environment::getSunPos(){
