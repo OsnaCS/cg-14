@@ -81,6 +81,11 @@ void CraftGame::updateComponents(float delta) {
 
   // generate new chunks if neccessary
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
+
+  if(m_mapView.size() > 100) {
+
+    m_mapView.clearMapView(m_map.getChunkPos(m_camera.get_position()));
+  }
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {

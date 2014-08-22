@@ -141,3 +141,16 @@ void MapView::deleteChunkView(Vec2i chunkPos){
 bool MapView::exists(Vec2i pos) {
   return m_mapView.count(pos) > 0;
 }
+
+void MapView::clearMapView(Vec2i position) {
+  auto it = m_mapView.begin();
+  auto pred = [&](std::pair<Vec2i, ChunkView&> entry) {
+    Vec2i temp = entry.first - position;
+    
+    return temp.length() > 20;
+  };
+  while((it = std::find_if(it, m_mapView.end(), pred)) != m_mapView.end()) {
+    m_mapView.erase(it++);
+  }
+  
+}

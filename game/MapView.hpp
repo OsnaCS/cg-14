@@ -22,6 +22,8 @@ public:
 	*/
 	bool isChunkVisible(Vec2i& chunkPos);
 	bool exists(Vec2i pos);
+	void clearMapView(Vec2i position);
+	int size(){return m_mapView.size();}
 	
 
 private:
