@@ -8,11 +8,11 @@ using namespace lumina;
 using namespace std;
 
 CraftGame::CraftGame()
-    :m_player(m_map)
-    ,m_mapView(m_map, m_camera)
-    ,m_playerView(m_player)
+    :m_camera(m_window)
+    ,m_player(m_map)
     ,m_envir(m_camera)
-    ,m_camera(m_window)
+    ,m_mapView(m_map, m_camera, m_envir)
+    ,m_playerView(m_player)
 {
   m_running = true;
 }
@@ -63,20 +63,40 @@ void CraftGame::start() {
     [this](HotRenderContext& hotContext) { this->run(hotContext); });
 }
 
+void CraftGame::updateComponents(float delta) {
+
+  // update game window
+  m_window.update();
+
+  // update environment
+  m_envir.update(delta);
+
+  // poll events
+  if(m_cheatmode){
+    m_camera.update();
+  }else{
+    m_player.update();
+    m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
+  }
+
+  // generate new chunks if neccessary
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
+
+  if(m_mapView.size() > 100) {
+
+    m_mapView.clearMapView(m_map.getChunkPos(m_camera.get_position()));
+  }
+}
+
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
+
 
   m_envir.init();
   m_mapView.init();
   m_playerView.init();
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
-  auto now = chrono::system_clock::now();
-
-  uint counter = 0;
-
-  // the chunk where the player/the camera is in
-  Vec2i activeChunk = m_map.getChunkPos(m_camera.get_position());
-  Vec2i oldChunk = activeChunk;
-
+  //
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create(m_window.getSize());
@@ -86,11 +106,26 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   gCont.addTexture(0, m_gBufferNormal);
   gCont.addTexture(1, m_gBufferDepth);
 
+  //
   m_lBufferTex.create(m_window.getSize(), TexFormat::RGBA8);
   m_lBufferTex.params.filterMode = TexFilterMode::Nearest;
   m_lBuffer.create(m_window.getSize());
   m_lBuffer.attachColor(0, m_lBufferTex);
 
+  //Texture for FXAA:
+  m_fxaaTex.create(m_window.getSize(), TexFormat::RGB8);
+  m_fxaaBuffer.create(m_window.getSize());
+  m_fxaaBuffer.attachColor(0,m_fxaaTex); //unterschiedliche attachmentpoints: weil rgb-textur ->"color"
+  
+  //creating the fxaa-program:
+  VShader fxaaVS;
+  fxaaVS.compile(loadShaderFromFile("shader/FXAAShader.vsh"));
+  FShader fxaaFS;
+  fxaaFS.compile(loadShaderFromFile("shader/FXAAShader.fsh"));
+  Program fxaaP;
+  fxaaP.create(fxaaVS, fxaaFS);
+
+  //
   m_fBufferTex.create(m_window.getSize(), TexFormat::RGB8);
   m_fBuffer.create(m_window.getSize());
   m_fBuffer.attachColor(0, m_fBufferTex);
@@ -103,11 +138,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotSeq.vertex[3] = Vec2f(1, 1);
   });
 
+  //
   VShader tempVS;
   tempVS.compile(loadShaderFromFile("shader/TempShader.vsh"));
   FShader tempFS;
   tempFS.compile(loadShaderFromFile("shader/TempShader.fsh"));
-
   Program tempP;
   tempP.create(tempVS, tempFS);
 
@@ -118,41 +153,27 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_gBuffer.attachRenderBuffer(zBuf);
   m_lBuffer.attachRenderBuffer(zBuf);
 
-  // generate the first chunks
-  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
-
+  // time measurement
   float sum = 0;
+  auto now = chrono::system_clock::now();
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
+
+    // measure time
     auto diff = chrono::system_clock::now() - now;
-    float s = chrono::duration_cast<chrono::milliseconds>(diff).count()
-              / 1000.f;
-
-    sum += s;
-
-    if(counter % 100 == 0) {
-      slog("FPS:", 1 / s);
-    }
-
+    float delta = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
     now = chrono::system_clock::now();
+    sum += delta;
 
-    // update activeChunk and generate new chunks
-    activeChunk = m_map.getChunkPos(m_camera.get_position());
-    if (oldChunk != activeChunk) {
-      oldChunk = activeChunk;
-      m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+    // print FPS
+    if(sum > 2) {
+      slog("FPS:", 1 / delta);
+      sum -= 2;
     }
 
-    // poll events
-    m_window.update();
-    m_envir.update(s);
-    if(m_cheatmode){
-      m_camera.update();
-    }else{
-      m_player.update();
-      m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
-    }
+    // update game components
+    updateComponents(delta);
 
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix();
@@ -181,18 +202,34 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex);
+
+
+
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
+
+    // fourth pass (FXAA)
+    m_fxaaBuffer.prime([&](HotFrameBuffer& hotFB) {
+      fxaaP.prime([&](HotProgram& hotP) {
+        // m_window.getSize() gives Vec2i back, cast to Vec2f and inverse
+        hotP.uniform["R_inverseFilterTextureSize"] = Vec2f(1/(m_window.getSize().x + 0.0f), 1/(m_window.getSize().y + 0.0f));
+        m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
+          hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
+        });      
+      });
+    });
+
 
     hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
+
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
+      m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });
@@ -203,7 +240,5 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // swap buffer
     hotContext.swapBuffer();
-
-    counter++;
   }
 }

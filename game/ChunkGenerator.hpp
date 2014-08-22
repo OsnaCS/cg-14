@@ -5,6 +5,7 @@
 #include "BiomeType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
+#include "MapView.hpp"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ public:
   ChunkGenerator();
 
   // generiert alle weiteren Chunks abhängig davon wo der Player hinläuft
-  void chunkGeneration(Map& m, Vec3i player_pos);
+  void chunkGeneration(Map& map, Vec3i spectatorPos, MapView& mapView);
 
 
 private:
