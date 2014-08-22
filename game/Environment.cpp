@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(10), m_time(0), m_day(0), m_phase(0) {
+: m_camera(camera), m_dayLength(50), m_time(0), m_day(0), m_phase(0) {
 
 }
 
@@ -252,6 +252,7 @@ Vec3f Environment::getSunColor()
 
 		help = m_time - 0.5 * m_dayLength;
 		help = help /(m_dayLength/4);
+		help *= help;
 		r = 1;
 		g = 1 - 0.7 * help;
 		b = 0.75 * (1 - help);
@@ -262,6 +263,10 @@ Vec3f Environment::getSunColor()
 
 		help = m_time - 0.25 * m_dayLength;
 		help = help /(m_dayLength/4);
+		help = 1 - help;
+		help *= help;
+		help = 1- help;
+		
 		r = 1;
 		g = 0.3 + 0.7 * help;
 		b= 0.75 * help;
@@ -346,6 +351,7 @@ Vec3f Environment::getcWest()
 
     help = m_time - 0.5 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help *= help;
 
     return Vec3f(0.75 - (0.5 * help), 0.75 - (0.5 * help), 1 - 0.5 * help);
 
@@ -355,6 +361,9 @@ Vec3f Environment::getcWest()
 
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help = 1 - help;
+    help *= help;
+    help = 1- help;
 
     return Vec3f(0.5 + (0.25 * help), 0.2 + 0.55 * help, help);
 
@@ -434,6 +443,7 @@ Vec3f Environment::getcEast()
 
     help = m_time - 0.5 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help *= help;
 
     return Vec3f(0.75 - (0.25 * help), 0.75 - (0.55 * help), 1 - help);
 
@@ -443,6 +453,9 @@ Vec3f Environment::getcEast()
 
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help = 1 - help;
+    help *= help;
+    help = 1- help;
 
     return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
 
