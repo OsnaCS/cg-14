@@ -10,9 +10,9 @@ using namespace std;
 CraftGame::CraftGame()
     :m_player(m_map)
     ,m_mapView(m_map, m_camera, m_envir)
-    ,m_playerView(m_player)
-    ,m_envir(m_camera)
     ,m_camera(m_window)
+    ,m_envir(m_camera)
+    ,m_playerView(m_player)
 {
   m_running = true;
 }
@@ -63,19 +63,32 @@ void CraftGame::start() {
     [this](HotRenderContext& hotContext) { this->run(hotContext); });
 }
 
+void CraftGame::updateComponents(float delta) {
+
+  // update game window
+  m_window.update();
+
+  // update environment
+  m_envir.update(delta);
+
+  // poll events
+  if(m_cheatmode){
+    m_camera.update();
+  }else{
+    m_player.update();
+    m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
+  }
+
+  // generate new chunks if neccessary
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+}
+
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   m_envir.init();
   m_mapView.init();
   m_playerView.init();
-
-  auto now = chrono::system_clock::now();
-
-  uint counter = 0;
-
-  // the chunk where the player/the camera is in
-  Vec2i activeChunk = m_map.getChunkPos(m_camera.get_position());
-  Vec2i oldChunk = activeChunk;
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
 
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
@@ -118,41 +131,27 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_gBuffer.attachRenderBuffer(zBuf);
   m_lBuffer.attachRenderBuffer(zBuf);
 
-  // generate the first chunks
-  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
-
+  // time measurement
   float sum = 0;
+  auto now = chrono::system_clock::now();
 
   // run as long as the window is valid and the user hasn't pessed ESC
   while(m_running && m_window.isValid()) {
+
+    // measure time
     auto diff = chrono::system_clock::now() - now;
-    float s = chrono::duration_cast<chrono::milliseconds>(diff).count()
-              / 1000.f;
-
-    sum += s;
-
-    if(counter % 100 == 0) {
-      slog("FPS:", 1 / s);
-    }
-
+    float delta = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
     now = chrono::system_clock::now();
+    sum += delta;
 
-    // update activeChunk and generate new chunks
-    activeChunk = m_map.getChunkPos(m_camera.get_position());
-    if (oldChunk != activeChunk) {
-      oldChunk = activeChunk;
-      m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+    // print FPS
+    if(sum > 2) {
+      slog("FPS:", 1 / delta);
+      sum -= 2;
     }
 
-    // poll events
-    m_window.update();
-    m_envir.update(s);
-    if(m_cheatmode){
-      m_camera.update();
-    }else{
-      m_player.update();
-      m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
-    }
+    // update game components
+    updateComponents(delta);
 
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix();
@@ -206,7 +205,5 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // swap buffer
     hotContext.swapBuffer();
-
-    counter++;
   }
 }

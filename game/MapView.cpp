@@ -58,8 +58,8 @@ void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
 
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - 6; x <= activeChunk.x + 6; x++) {
-    for(int z = activeChunk.y - 6; z <= activeChunk.y + 6; z++) {
+  for(int x = activeChunk.x - 9; x <= activeChunk.x + 9; x++) {
+    for(int z = activeChunk.y - 9; z <= activeChunk.y + 9; z++) {
 
       if(m_map.exists({x * 16, 0, z * 16})) {
 
