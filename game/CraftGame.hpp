@@ -28,6 +28,8 @@ private:
   MapView m_mapView;
   PlayerView m_playerView;
 
+  bool m_pause;
+
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;
   FrameBuffer m_gBuffer;

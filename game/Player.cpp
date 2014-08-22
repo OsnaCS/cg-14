@@ -42,13 +42,9 @@ Player::Player( Map& m) :
     ,m_hearts(MAX_HEARTS)
     ,m_fallen(0)
     ,m_passedFrames(0)
-
-
-
 {
 
 }
-
 
 EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 {
@@ -110,6 +106,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }
             proccessed = true;
             break;
+
             case KeyCode::Shift :
             if(m_ShiftPressed == false){
                 m_ShiftPressed = true;
@@ -120,9 +117,10 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }
             proccessed = true;
             break;
+
             default:
             //Do Nothing
-              break;
+            break;
                
         }
     }
@@ -147,6 +145,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
     }
 
     return EventResult::Skipped;
+  
 }
 
 void Player::turn_side(float deltaX)
@@ -180,7 +179,6 @@ void Player::update()
     //TODO
     //Check for too much high // to less high
 
-
     if(m_wPressed){
         move_forward();
     }else if(m_sPressed){
@@ -213,6 +211,7 @@ void Player::update()
       m_position = Vec3f(0.0f, 80.5f, 0.0f);
       m_hearts = MAX_HEARTS;
     } 
+
 }
 
 Vec3f Player::getPosition(){

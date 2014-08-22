@@ -13,6 +13,7 @@ CraftGame::CraftGame()
     ,m_camera(m_window)
     ,m_envir(m_camera)
     ,m_playerView(m_player)
+    ,m_pause(false)
 {
   m_running = true;
 }
@@ -23,12 +24,32 @@ void CraftGame::init() {
   m_window.setTitle("CraftGame ComputerGrafikPraktikum 2014");
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
+
   // add event callback (capture by reference
-  m_window.addEventCallback(
-    [&](InputEvent e) { return m_player.processEvent(e, m_window, m_cheatmode); });
-  m_window.addEventCallback(
-    [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
-  m_window.addEventCallback([&](InputEvent e) {
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    if(!m_pause) 
+    {
+      return m_player.processEvent(e, m_window, m_cheatmode);
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+  m_window.addEventCallback([&](InputEvent e) 
+  { 
+    if(!m_pause)
+    {
+      return m_camera.processEvent(e, m_window); 
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+  m_window.addEventCallback([&](InputEvent e) 
+  {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
@@ -36,16 +57,36 @@ void CraftGame::init() {
       return EventResult::Processed;
     }
     // if the keyInpuit is k
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K) {
-      if(m_cheatmode){
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) {
+      if(m_cheatmode)
+      {
         m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
         m_cheatmode = false;
-      }else{
+      }
+      else
+      {
         m_cheatmode = true;
       }
       return EventResult::Processed;
     }
+
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
+    {
+
+      if(m_pause == false)
+      {
+        m_pause = true;
+      }
+      else
+      {
+        m_pause = false;
+      }
+      return EventResult::Processed;
+
+    }
+
     return EventResult::Skipped;
+
   });
 
   // resize window
@@ -69,13 +110,20 @@ void CraftGame::updateComponents(float delta) {
   m_window.update();
 
   // update environment
-  m_envir.update(delta);
+  if(!m_pause)
+  {
+    m_envir.update(delta);
+  }
 
   // poll events
-  if(m_cheatmode){
+  if(m_cheatmode)
+  {
     m_camera.update();
-  }else{
+  }
+  else
+  {
     m_player.update();
+    
     m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
   }
 
@@ -153,6 +201,25 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // update game components
     updateComponents(delta);
 
+    // poll events
+    m_window.update();
+
+    if(!m_pause)
+    {
+      m_envir.update(delta);
+    }
+
+    if(m_cheatmode)
+    {
+      m_camera.update();
+    }
+    else
+    {
+      m_player.update();
+      
+      m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
+    }
+
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix();
 
@@ -181,8 +248,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       m_envir.draw(viewMatrix, projectionMatrix);
 
-
-
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 
@@ -194,10 +259,17 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT) {
-        tempP.prime([&](HotProgram& hotP) {
+      m_fBufferTex.prime(0, [&](HotTex2D& hotT) 
+      {
+
+        tempP.prime([&](HotProgram& hotP) 
+        {
+
+          hotP.uniform["u_pause"] = m_pause;
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
+
         });
+
       });
 
       m_playerView.draw();

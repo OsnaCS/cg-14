@@ -51,7 +51,7 @@ public:
 
   		@return EventResult Give back the result of processing (Skipped/Processed)
   */
-  lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode );
+  lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode);
 
 private:
 	// Get the sign of the Movement
