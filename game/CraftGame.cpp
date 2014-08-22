@@ -8,10 +8,10 @@ using namespace lumina;
 using namespace std;
 
 CraftGame::CraftGame()
-    :m_player(m_map)
-    ,m_mapView(m_map, m_camera, m_envir)
-    ,m_camera(m_window)
+    :m_camera(m_window)
+    ,m_player(m_map)
     ,m_envir(m_camera)
+    ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
 {
   m_running = true;
