@@ -102,6 +102,8 @@ private:
   bool m_CtrlPressed;
   bool m_ShiftPressed;
 
+  bool m_collided;
+
   Map& m_map;
   float m_fallen;
   PlayerAttributes m_attrib;
