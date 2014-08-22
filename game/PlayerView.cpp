@@ -1,6 +1,7 @@
 #include "PlayerView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
 #include "ObjectLoader.hpp"
+#include "Camera.hpp"
 
 using namespace std;
 using namespace lumina;
@@ -13,7 +14,7 @@ m_player(player)
 {
 }
  
-void PlayerView::draw(Mat4f viewProjectionMatrix)
+void PlayerView::draw(Mat4f viewMatrix, Mat4f projectionMatrix)
 {
   //updateHearts();
 	m_program.prime([&](HotProgram& hotprog)
@@ -21,17 +22,7 @@ void PlayerView::draw(Mat4f viewProjectionMatrix)
  		m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
 			hotprog.draw(hotTex, updateHearts(), PrimitiveType::TriangleStrip);
 		});
-	});
-
-	//Show pickaxe
-	m_program2.prime([&](HotProgram& hotPickaxe){
-
-		hotPickaxe.uniform["u_transform"] = viewProjectionMatrix;
-
-		m_pickaxeTexture.prime(0, [&](HotTex2D& hotTex2){
-			hotPickaxe.draw(hotTex2, m_pickaxe, PrimitiveType::Triangle);
-		});
-	});
+	});	
 
 }
 
@@ -62,20 +53,30 @@ void PlayerView::init()
   m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
   m_pickaxeTexture.params.useMipMaps = true;
 
-	VShader vs2;
-	vs2.compile(loadShaderFromFile("shader/Pickaxe.vsh"));
-	FShader fs2;
-	fs2.compile(loadShaderFromFile("shader/Pickaxe.fsh"));
+  // ImageBox image_box3 = loadJPEGImage("gfx/pickaxe_normals512.jpg");
+  // m_pickaxeNormals.create(Vec2i(512,512), TexFormat::RGB8, image_box3.data());
+  // m_pickaxeNormals.params.filterMode = TexFilterMode::Linear;
+  // m_pickaxeNormals.params.useMipMaps = true;
+
+	VShader vsNP;
+	vsNP.compile(loadShaderFromFile("shader/MapViewNormalPass.vsh"));
+	FShader fsNP;
+	fsNP.compile(loadShaderFromFile("shader/MapViewNormalPass.fsh"));
   // create program and link the two shaders
-	m_program2.create(vs2, fs2);
-	m_program2.perFragProc.enableDepthTest();
-	m_program2.perFragProc.setDepthFunction(DepthFunction::Less);
+	m_normalPass.create(vsNP, fsNP);
+	m_normalPass.perFragProc.enableDepthTest();
+	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
-	// m_program2.perFragProc.blendFuncRGB = BlendFunction::Add;
-	// m_program2.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
-	// m_program2.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+	VShader vsFP;
+	vsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.vsh"));
+	FShader fsFP;
+	fsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.fsh"));
+  // create program and link the two shaders
+	m_finalPass.create(vsFP, fsFP);
+	m_finalPass.perFragProc.enableDepthTest();
+	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
-	m_pickaxe = loadOBJ("gfx/pickaxe2.obj");
+	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
 	
 }
 
@@ -108,4 +109,39 @@ VertexSeq PlayerView::updateHearts(){
 	}
 	});
 	return m_heartPanel;
+}
+
+void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
+
+  //Show pickaxe
+	m_normalPass.prime([&](HotProgram& hotPickaxe){
+
+		hotPickaxe.uniform["u_view"] = viewMat;
+		hotPickaxe.uniform["u_projection"] = projMat;
+
+		TexCont cont; 
+		cont.addTexture(0, m_pickaxeTexture);
+		cont.prime([&](HotTexCont& hotTexCont){
+				hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);	
+		});
+	});
+}
+
+void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
+
+  m_finalPass.prime([&](HotProgram& hotP) {
+
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_winSize"] = cam.getWindow().getSize();
+    hotP.uniform["s_lightTexture"] = 0;
+    hotP.uniform["s_colorTexture"] = 1;
+    
+    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+      m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
+        HotTexCont hotTexCont(hotLightingTex, hotTex);
+        hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+      });
+    });
+  });
 }

@@ -1,6 +1,6 @@
 # Blender v2.71 (sub 0) OBJ File: 'pickaxe.blend'
 # www.blender.org
-mtllib pickaxe.mtl
+mtllib pickaxe3.mtl
 o Cube_Cube.004
 v -0.188426 -0.072885 0.188426
 v -0.188426 -0.072885 -0.188426
