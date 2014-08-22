@@ -27,8 +27,9 @@ void main() {
 	theta /= (PI/2);
 
 	help = vec3(1,0,0);
-	inData.coord.y = 0;
-	dpl = dot(inData.coord, help) / (length(inData.coord) * length(help));
+	vec3 h_coord = inData.coord;
+  h_coord.y = 0;
+	dpl = dot(h_coord, help) / (length(h_coord) * length(help));
 	dpl = clamp(dpl, -1, 1);
 	phi = acos(dpl);
 	if(inData.coord.z< 0){

@@ -58,8 +58,8 @@ void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
 
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - 9; x <= activeChunk.x + 9; x++) {
-    for(int z = activeChunk.y - 9; z <= activeChunk.y + 9; z++) {
+  for(int x = activeChunk.x - 4; x <= activeChunk.x + 4; x++) {
+    for(int z = activeChunk.y - 4; z <= activeChunk.y + 4; z++) {
 
       if(m_map.exists({x * 16, 0, z * 16})) {
 
@@ -122,12 +122,12 @@ void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D&
 bool MapView::isChunkVisible(Vec2i& chunkPos) {
 
   Vec2f lookDirection(m_cam.get_direction().x, m_cam.get_direction().z);
-  Vec2i offsetDirection(round(lookDirection.x), round(lookDirection.y));
-  Vec3i playerWorldPos = Vec3i(static_cast<int>(round(m_cam.getPosition().x)), static_cast<int>(round(m_cam.getPosition().y)), static_cast<int>(round(m_cam.getPosition().z)));
-  Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos);
+  lookDirection.normalize();
 
-  // TODO: Winkel hat zu wenig "Spiel"
-  Vec2f checkVector = chunkPos - (playerChunkPos - offsetDirection);
+  Vec3i playerWorldPos = vector_cast<int>(m_cam.getPosition() + Vec3f(.5f, .5f, .5f));
+  Vec2i playerChunkPos = m_map.getChunkPos(playerWorldPos - Vec3i(lookDirection.x * 32, 0, lookDirection.y * 32));
+
+  Vec2f checkVector = chunkPos - playerChunkPos;
   checkVector.normalize();
   float alpha = acos((checkVector.x * lookDirection.x) + (checkVector.y * lookDirection.y)) * 180.0 / M_PI;
   float viewAngleDegree = m_cam.getViewAngle() * 180.0 / M_PI;
@@ -136,5 +136,26 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
     return true;
   }
 
-  return true;
+  return false;
+}
+
+void MapView::deleteChunkView(Vec2i chunkPos){
+  m_mapView.erase(chunkPos);
+}
+
+bool MapView::exists(Vec2i pos) {
+  return m_mapView.count(pos) > 0;
+}
+
+void MapView::clearMapView(Vec2i position) {
+  auto it = m_mapView.begin();
+  auto pred = [&](std::pair<const Vec2i, ChunkView>& entry) {
+    Vec2i temp = entry.first - position;
+    
+    return temp.length() > 20;
+  };
+  while((it = std::find_if(it, m_mapView.end(), pred)) != m_mapView.end()) {
+    m_mapView.erase(it++);
+  }
+  
 }
