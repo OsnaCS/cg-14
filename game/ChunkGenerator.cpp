@@ -22,40 +22,61 @@ ChunkGenerator::ChunkGenerator() {
   m_biome_seed = (m_seed*m_seed)%618;
 }
 
-void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos) {
+void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos, MapView& mapView) {
 
   // chunkPos ist Position des Chunks, in dem der Spectator steht in Chunkkoordinaten
   Vec2i chunkPos = map.getChunkPos(spectatorPos);
 
-  for(int x = chunkPos.x - 2; x <= chunkPos.x + 2; x++) {
-    for(int z = chunkPos.y - 2; z <= chunkPos.y + 2; z++) {
+  for(int x = chunkPos.x - 8; x <= chunkPos.x + 8; x++) {
+    for(int z = chunkPos.y - 8; z <= chunkPos.y + 8; z++) {
+
       if(!map.exists({x * 16, 0, z * 16})) {
+
         map.addChunk({x, z});
         Chunk chunk = map.getChunk({x, z});
         double simpBiomeNoise = SimplexNoise::noise(0.01*x, 0.01*z, m_biome_seed);
         int biomeNoise = SimplexNoise::noiseInt(0, 126, simpBiomeNoise);
-          if(0 <= biomeNoise && biomeNoise < 45){
-            chunk.setBiomeType(BiomeType::Desert);
-          }
-          if(45 <= biomeNoise && biomeNoise < 47){
-            chunk.setBiomeType(BiomeType::DesertPlain);
-          }
-          if(47 <= biomeNoise && biomeNoise < 55){
-            chunk.setBiomeType(BiomeType::Plains);
-          }
-          if(55 <= biomeNoise && biomeNoise < 57){
-            chunk.setBiomeType(BiomeType::PlainForest);
-          }
-          if(57 <= biomeNoise && biomeNoise < 70){
-            chunk.setBiomeType(BiomeType::Forest);
-          }
-          if(70 <= biomeNoise && biomeNoise < 72){
-            chunk.setBiomeType(BiomeType::Hillside);
-          }
-          if(72 <= biomeNoise && biomeNoise <= 126){
-            chunk.setBiomeType(BiomeType::Mountains);
-          }
+
+        if(0 <= biomeNoise && biomeNoise < 45){
+          chunk.setBiomeType(BiomeType::Desert);
+        }
+        if(45 <= biomeNoise && biomeNoise < 47){
+          chunk.setBiomeType(BiomeType::DesertPlain);
+        }
+        if(47 <= biomeNoise && biomeNoise < 55){
+          chunk.setBiomeType(BiomeType::Plains);
+        }
+        if(55 <= biomeNoise && biomeNoise < 57){
+          chunk.setBiomeType(BiomeType::PlainForest);
+        }
+        if(57 <= biomeNoise && biomeNoise < 70){
+          chunk.setBiomeType(BiomeType::Forest);
+        }
+        if(70 <= biomeNoise && biomeNoise < 72){
+          chunk.setBiomeType(BiomeType::Hillside);
+        }
+        if(72 <= biomeNoise && biomeNoise <= 126){
+          chunk.setBiomeType(BiomeType::Mountains);
+        }
+
         setBiomes(map, chunk, x, z);
+        
+        Vec2i chuPos = Vec2i(x + 1, z);
+        if(mapView.exists(chuPos) {
+          mapView.deleteChunkView(chuPos);
+        }
+        chuPos = Vec2i(x - 1, z);
+        if(mapView.exists(chuPos) {
+          mapView.deleteChunkView(chuPos);
+        }
+        chuPos = Vec2i(x, z + 1);
+        if(mapView.exists(chuPos) {
+          mapView.deleteChunkView(chuPos);
+        }
+        chuPos = Vec2i(x, z - 1);
+        if(mapView.exists(chuPos) {
+          mapView.deleteChunkView(chuPos);
+        }
       }
     }
   }

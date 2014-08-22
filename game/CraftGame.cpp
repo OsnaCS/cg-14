@@ -80,15 +80,16 @@ void CraftGame::updateComponents(float delta) {
   }
 
   // generate new chunks if neccessary
-  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
+
   m_envir.init();
   m_mapView.init();
   m_playerView.init();
-  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position());
+  m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
@@ -188,6 +189,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
       // clear the background color of the screen
+
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       

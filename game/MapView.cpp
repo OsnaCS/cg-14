@@ -58,8 +58,8 @@ void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
 
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - 9; x <= activeChunk.x + 9; x++) {
-    for(int z = activeChunk.y - 9; z <= activeChunk.y + 9; z++) {
+  for(int x = activeChunk.x - 4; x <= activeChunk.x + 4; x++) {
+    for(int z = activeChunk.y - 4; z <= activeChunk.y + 4; z++) {
 
       if(m_map.exists({x * 16, 0, z * 16})) {
 
@@ -133,4 +133,12 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
   }
 
   return false;
+}
+
+void MapView::deleteChunkView(Vec2i chunkPos){
+  m_mapView.erase(chunkPos);
+}
+
+bool MapView::exists(Vec2i pos) {
+  return m_mapView.count(pos) > 0;
 }

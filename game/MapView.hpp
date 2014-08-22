@@ -15,11 +15,14 @@ public:
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer);
 	void init();
+	void deleteChunkView(Vec2i chunkPos);
 
 	/**
 	* Checks if a chunk is visible
 	*/
 	bool isChunkVisible(Vec2i& chunkPos);
+	bool exists(Vec2i pos);
+	
 
 private:
 
