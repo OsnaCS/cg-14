@@ -20,9 +20,9 @@ public:
 
   void setDayLength(float sec);
 
-  Vec3f getSunColor();
-  float getSunIntensity();
-  Vec3f getSunPos();
+  Vec3f getSkyLightColor();
+  float getSkyLightIntensity();
+  Vec3f getSkyLightDir();
 
 private:
 
@@ -38,7 +38,18 @@ private:
   float m_dayLength;
   float m_time;
   int m_day;
+  float m_orbitAngle;
   float m_phase;
+  float m_sunAxis;
+  float m_moonAxis;
+
+  Vec3f getSunColor();
+  float getSunIntensity();
+  Vec3f getSunPos();
+
+  Vec3f getMoonColor();
+  float getMoonIntensity();
+  Vec3f getMoonPos();
 
   Vec3f getcUp();
   Vec3f getcWest();

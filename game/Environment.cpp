@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(50), m_time(0), m_day(0), m_phase(0) {
+: m_camera(camera), m_dayLength(15), m_time(0), m_day(0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_orbitAngle(0.0) {
 
 }
 
@@ -28,11 +28,9 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
   m_programSun.prime([&](HotProgram& hotprog){
 
-    float a = m_time * 3.1415 * 2 / (m_dayLength);
-
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, -sin(0.5), cos(0.5)), a));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, -sin(m_sunAxis), cos(m_sunAxis)), m_orbitAngle));
     
     float help = (m_time - static_cast<int>(m_time));
     for(int i = 0; i< 1; i++){
@@ -50,13 +48,11 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
   m_programMoon.prime([&](HotProgram& hotprog){
   	
-    float a = m_time * 3.1415 * 2 / (m_dayLength);
-
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(0.5),cos(0.5)), a));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(m_moonAxis),cos(m_moonAxis)), m_orbitAngle));
 
-   	hotprog.uniform["u_color"] = Vec3f(0.75, 0.75, 0.75);
+   	hotprog.uniform["u_color"] = getMoonColor();
    	hotprog.uniform["u_phase"] = m_phase;
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
     hotprog.draw(m_moon, PrimitiveType::TriangleStrip);
@@ -71,7 +67,7 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     hotProg.uniform["normalTexture"] = 0;
     // hotProg.uniform["depthTexture"] = 1;
     // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
-    hotProg.uniform["u_lightRay"] = getSunPos();
+    hotProg.uniform["u_lightRay"] = getSkyLightDir();
 
     Vec3f direction = m_camera.get_direction().normalize();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -161,12 +157,12 @@ void Environment::init()
   m_programSun.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
 
   m_sun.create(3 + 2, 4);
-  m_sun.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot) {
+  m_sun.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
     
-    hot.vertex[0].set(Vec3f( 1, -5*cos(0.5)-sin(0.5),-5*sin(0.5)+cos(0.5)), Vec2f( 3,  3));
-    hot.vertex[1].set(Vec3f(-1, -5*cos(0.5)-sin(0.5),-5*sin(0.5)+cos(0.5)), Vec2f(-3,  3));
-    hot.vertex[2].set(Vec3f( 1, -5*cos(0.5)+sin(0.5),-5*sin(0.5)-cos(0.5)), Vec2f( 3, -3));
-    hot.vertex[3].set(Vec3f(-1, -5*cos(0.5)+sin(0.5),-5*sin(0.5)-cos(0.5)), Vec2f(-3, -3));
+    hot.vertex[0].set(Vec3f( 1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f( 3,  3));
+    hot.vertex[1].set(Vec3f(-1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f(-3,  3));
+    hot.vertex[2].set(Vec3f( 1, -5*cos(m_sunAxis)+sin(m_sunAxis),-5*sin(m_sunAxis)-cos(m_sunAxis)), Vec2f( 3, -3));
+    hot.vertex[3].set(Vec3f(-1, -5*cos(m_sunAxis)+sin(m_sunAxis),-5*sin(m_sunAxis)-cos(m_sunAxis)), Vec2f(-3, -3));
 
   });
 
@@ -178,12 +174,12 @@ void Environment::init()
 
 
   m_moon.create(3 + 2, 4);
-  m_moon.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot) {
+  m_moon.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
 
-    hot.vertex[0].set(Vec3f( 1, 10*cos(0.5)+sin(0.5),-10*sin(0.5)+cos(0.5)), Vec2f(1, 1));
-    hot.vertex[1].set(Vec3f(-1, 10*cos(0.5)+sin(0.5),-10*sin(0.5)+cos(0.5)), Vec2f(-1, 1));
-    hot.vertex[2].set(Vec3f( 1, 10*cos(0.5)-sin(0.5),-10*sin(0.5)-cos(0.5)), Vec2f(1, -1));
-    hot.vertex[3].set(Vec3f(-1, 10*cos(0.5)-sin(0.5),-10*sin(0.5)-cos(0.5)), Vec2f(-1, -1));
+    hot.vertex[0].set(Vec3f( 1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f( 2,  2));
+    hot.vertex[1].set(Vec3f(-1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f(-2,  2));
+    hot.vertex[2].set(Vec3f( 1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f( 2, -2));
+    hot.vertex[3].set(Vec3f(-1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f(-2, -2));
 
   });
 
@@ -214,7 +210,9 @@ void Environment::update(float delta)
 		m_time -= m_dayLength;
 		m_day++;
 	}
-	// m_phase = 4 * (m_day % 30 + (m_time / m_dayLength)) / 30;
+
+  m_orbitAngle = m_time * 3.14159265359 * 2 / (m_dayLength);
+
 	m_phase += 4 * (delta / m_dayLength) / 29.575;
 	if(m_phase > 4){
 		m_phase -= 4;
@@ -227,6 +225,39 @@ void Environment::setDayLength(float sec)
 
 	m_dayLength = sec; 
 }
+
+Vec3f Environment::getSkyLightColor(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return getSunColor();
+	} else{
+		return getMoonColor();
+	}
+
+}
+float Environment::getSkyLightIntensity(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return getSunIntensity();
+	} else{
+		return getMoonIntensity();
+	}
+}
+Vec3f Environment::getSkyLightDir(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return -getSunPos();
+	} else{
+		return -getMoonPos();
+	}
+}
+
+
+
+
 
 Vec3f Environment::getSunColor()
 {
@@ -266,7 +297,7 @@ Vec3f Environment::getSunColor()
 		help = 1 - help;
 		help *= help;
 		help = 1- help;
-		
+
 		r = 1;
 		g = 0.3 + 0.7 * help;
 		b= 0.75 * help;
@@ -288,32 +319,67 @@ Vec3f Environment::getSunColor()
 float Environment::getSunIntensity(){
 
 	float help = m_time / m_dayLength;
+	float maxIntens = 0.9;
 
-	if(help>0.25 && help<0.75){
+	if(help >= 0.30 && help < 0.70){
 
+		return maxIntens;
 
-		return 0.9;
+	} else if(help >= 0.25 && help < 0.30){
 
-	} else{
+		help = (help - 0.25) * 20;
+		return maxIntens * help;
 
+	} else if(help >= 0.70 && help < 0.75){	
 
-		help = m_phase;
-		if(help > 2){
-			help = 4 - help;
-		}
+		help = (0.75 - help) * 20;
+		return maxIntens * help;
 
-		return (2 - m_phase) / 6;
-
+	} else {
+		return 0.0;
 	}
 }
 
 Vec3f Environment::getSunPos(){
 
-	return -Vec3f(sin(m_time*2*3.1415/m_dayLength),-cos(m_time*2*3.1415/m_dayLength),0);
+	return Vec3f(sin(m_orbitAngle),-cos(m_orbitAngle) * cos(m_sunAxis),-cos(m_orbitAngle) * sin(m_sunAxis));
 }
 
+Vec3f Environment::getMoonColor(){
+	return Vec3f(0.75, 0.75, 0.75);
+}
+float Environment::getMoonIntensity(){
+	
+	float help = m_time / m_dayLength;
+	float maxIntens = m_phase;
 
+	if(maxIntens > 2){
+		maxIntens = 4 - maxIntens;
+	}
+	maxIntens = (1 - (maxIntens / 2)) * 0.4;
 
+	if(help < 0.20 || help > 0.80){
+
+		return maxIntens;
+
+	} else if(help >= 0.2 && help < 0.25){
+
+		help = (0.25 - help) * 20;
+		return maxIntens * help;
+
+	} else if(help > 0.75 && help <= 0.8){	
+
+		help = (help - 0.75) * 20;
+		return maxIntens * help;
+
+	} else {
+		return 0.0;
+	}
+}
+Vec3f Environment::getMoonPos() { 
+
+	return Vec3f(-sin(m_orbitAngle), cos(m_orbitAngle) * cos(m_moonAxis), -cos(m_orbitAngle) * sin(m_moonAxis));
+}
 
 Vec3f Environment::getcUp()
 {
@@ -342,7 +408,6 @@ Vec3f Environment::getcWest()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(.5,0,0)
     return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
 
   } 
@@ -379,7 +444,6 @@ Vec3f Environment::getcWest()
 
 Vec3f Environment::getcNorth()
 {
-
 	float help;
 
   if(m_time > 0.75 * m_dayLength) 
@@ -388,7 +452,6 @@ Vec3f Environment::getcNorth()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(0,0,0.)
     return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
 
   } 
@@ -407,7 +470,6 @@ Vec3f Environment::getcNorth()
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(0,0,0.5)
     return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
 
   } 
@@ -434,7 +496,6 @@ Vec3f Environment::getcEast()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(.5,0,0)
     return Vec3f(0.5 * (1 - help), 0.2 * (1-help), 0);
 
   } 
