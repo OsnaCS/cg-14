@@ -9,7 +9,6 @@ in VertexData {
 } inData;
 
 uniform ivec2 u_winSize;
-
 uniform sampler2D s_lightTexture;
 uniform sampler2D s_colorTexture;
 

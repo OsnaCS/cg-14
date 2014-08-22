@@ -15,14 +15,13 @@ out VertexData
 		vec3 normal;
 //		vec3 tangent;
 //		float depth;
-
 } outData;
 
 
 void main()
 {
-	
 	vec4 viewPosition = u_view * vec4(i_pos, 1);
+
 
 	outData.uv = vec2(i_uv.x, 1-i_uv.y);
 	//outData.depth = viewPosition.z;

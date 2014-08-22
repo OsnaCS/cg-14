@@ -87,7 +87,7 @@ VertexSeq loadOBJ(string obj_name){
   VertexSeq object;
   object.create(3 + 3 + 2, index_count, index_count);
 //object.create(3 + 3 + 3 + 2, index_count, index_count);
-  // Position, Normale, Tangente, Textur 
+  // Position, Normale, Tangente, Textur Vec3f(0,75,0)+
   object.prime<Vec3f, Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotObject) {
     for(int j = 0; j < index_count; j++) {
       hotObject.vertex[j].set(vertices[i_vertices[j] - 1], normals[i_normals[j] - 1], texture[i_texture[j] - 1]);

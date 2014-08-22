@@ -2,6 +2,7 @@
 #include "lumina/io/ImageJPEG.hpp"
 #include "ObjectLoader.hpp"
 #include "Camera.hpp"
+#include "lumina/util/Transformation.hpp"
 
 using namespace std;
 using namespace lumina;
@@ -59,9 +60,9 @@ void PlayerView::init()
   // m_pickaxeNormals.params.useMipMaps = true;
 
 	VShader vsNP;
-	vsNP.compile(loadShaderFromFile("shader/MapViewNormalPass.vsh"));
+	vsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.vsh"));
 	FShader fsNP;
-	fsNP.compile(loadShaderFromFile("shader/MapViewNormalPass.fsh"));
+	fsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.fsh"));
   // create program and link the two shaders
 	m_normalPass.create(vsNP, fsNP);
 	m_normalPass.perFragProc.enableDepthTest();
@@ -116,7 +117,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   //Show pickaxe
 	m_normalPass.prime([&](HotProgram& hotPickaxe){
 
-		hotPickaxe.uniform["u_view"] = viewMat;
+		hotPickaxe.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
 		hotPickaxe.uniform["u_projection"] = projMat;
 
 		TexCont cont; 
@@ -130,8 +131,9 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
 
   m_finalPass.prime([&](HotProgram& hotP) {
-
-    hotP.uniform["u_view"] = viewMat;
+  	
+    hotP.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection()) * scalingMatrix(Vec3f(0.25,0.25,0.25));
+    slog(m_player.getPosition());
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_winSize"] = cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
