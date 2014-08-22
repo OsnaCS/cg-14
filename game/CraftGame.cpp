@@ -8,10 +8,10 @@ using namespace lumina;
 using namespace std;
 
 CraftGame::CraftGame()
-    :m_camera(m_window)
-    ,m_player(m_map)
+    :m_player(m_map)
+    ,m_mapView(m_map, m_camera, m_envir)
+    ,m_camera(m_window)
     ,m_envir(m_camera)
-    ,m_mapView(m_map, m_camera)
     ,m_playerView(m_player)
 {
   m_running = true;
@@ -186,7 +186,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex);
+
+
+
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 
     hotContext.getDefaultFrameBuffer().enableBlending(0);

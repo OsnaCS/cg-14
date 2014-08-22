@@ -3,8 +3,8 @@
 
 #include <math.h>
 
-MapView::MapView(Map& map, Camera& cam)
-: m_map(map), m_cam(cam) {
+MapView::MapView(Map& map, Camera& cam, Environment& envir)
+: m_map(map), m_cam(cam), m_envir(envir) {
 
 }
 
@@ -94,7 +94,7 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   });
 }
 
-void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer) {
+void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer) {
 
   m_finalPass.prime([&](HotProgram& hotP) {
 
@@ -103,13 +103,18 @@ void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer) {
     hotP.uniform["u_winSize"] = m_cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
     hotP.uniform["s_colorTexture"] = 1;
-    
-    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
-      m_colorTexture.prime(1, [&](HotTex2D& hotTex) {
+    hotP.uniform["s_depthTexture"] = 2;
+    hotP.uniform["u_time"] = m_envir.getTime();
+    hotP.uniform["u_daylength"] = m_envir.getDayLength();
 
-        HotTexCont hotTexCont(hotLightingTex, hotTex);
-        drawChunks(hotP, hotTexCont);
-      });
+    TexCont cont;
+    cont.addTexture(0, lBuffer);
+    cont.addTexture(1, m_colorTexture);
+    cont.addTexture(2, dBuffer);
+    
+
+    cont.prime([&](HotTexCont& hotCont){
+      drawChunks(hotP, hotCont);
     });
   });
 }
