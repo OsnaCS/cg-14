@@ -3,7 +3,6 @@
 using namespace std;
 using namespace lumina;
 
-const int MAX_HEARTS = 10;
 
 //The Block has a radius of 0.5
 const float BLOCK_DIFFERENCE_X = 0.5f; 
@@ -20,11 +19,15 @@ const float FAST_SPEED = 0.4f;
 const float FALL_SPEED = -0.03f;
 const float JUMP_SPEED = 0.5f;
 
+const int MAX_HEARTS = 10;
 //Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;
 
-Player::Player( Map& m) :
-    m_position(Vec3f(0.0f, 78.5f, 0.0f))
+const Vec3f INIT_POSITION = Vec3f(0.0f, 80.5f, 0.0f);
+
+
+Player::Player( Map& m)
+    :m_position(INIT_POSITION)
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_xMovementspeed(0.0f)
@@ -39,9 +42,8 @@ Player::Player( Map& m) :
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
     ,m_map(m)
-    ,m_hearts(MAX_HEARTS)
     ,m_fallen(0)
-    ,m_passedFrames(0)
+    ,m_attrib(MAX_HEARTS)
 {
 
 }
@@ -50,7 +52,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 {
     //Key Pressed and Released
     if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
-        bool proccessed = false;
+
         switch( (KeyCode)(e.keyInput.key))
         {
             case KeyCode::W :
@@ -59,7 +61,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_wPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::S :
@@ -68,7 +70,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_sPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::A :
@@ -77,7 +79,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_aPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::D :
@@ -86,7 +88,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_dPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::Space :
@@ -95,7 +97,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_SpacePressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::Control :
@@ -104,7 +106,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             }else{
                 m_CtrlPressed = false;
             }
-            proccessed = true;
+
             break;
 
             case KeyCode::Shift :
@@ -115,7 +117,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
                 m_ShiftPressed = false;
                 m_movingspeed = BASIC_SPEED;
             }
-            proccessed = true;
+
             break;
 
             default:
@@ -196,36 +198,26 @@ void Player::update()
     }  
     movement();
 
-    //Handle "time in frames"
-    m_passedFrames++;
-    if(m_passedFrames == 100000){
-      m_passedFrames = 0;
+    if ( m_attrib.getHearts() == 0 ) {
+        m_attrib.setHearts(MAX_HEARTS); // reset the game
+        m_position = INIT_POSITION; // reset position
     }
-
-    //Regain health (hearts)
-    if(m_passedFrames % 400 == 0 && m_hearts != MAX_HEARTS){
-      m_hearts++;
-    }
-    //DEATH happens
-    if(m_hearts==0){
-      m_position = Vec3f(0.0f, 80.5f, 0.0f);
-      m_hearts = MAX_HEARTS;
-    } 
-
 }
 
-Vec3f Player::getPosition(){
-  return Vec3f(m_position.x, m_position.y+1.0f, m_position.z);
-//  return m_position;
+
+int Player::getHearts()
+{
+  return m_attrib.getHearts();
 }
 
-Vec3f Player::getDirection(){
-  return m_direction;
+int Player::getMaxHearts() const
+{
+  return m_attrib.maxHearts();
 }
 
 void Player::move_left()
 {
-   Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), 1.5708f ));
+   Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), (float)(M_PI/2) ));
    Vec4f left_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
    m_xMovementspeed += m_movingspeed*left_direction.x;
    m_zMovementspeed += m_movingspeed*left_direction.z;
@@ -233,10 +225,11 @@ void Player::move_left()
 
 void Player::move_right()
 {
-   Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), -1.5708f ));
+   Mat4f rotationM = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), (float)(-M_PI/2) ));
    Vec4f left_direction =  rotationM * Vec4f(m_direction.x, m_direction.y, m_direction.z, 1.0f);
    m_xMovementspeed += m_movingspeed*left_direction.x;
    m_zMovementspeed += m_movingspeed*left_direction.z;
+
 }
 
 void Player::move_forward()
@@ -245,6 +238,8 @@ void Player::move_forward()
   //TODO - Stop moving if falling
    m_xMovementspeed += m_movingspeed*(m_direction.x+(m_direction.x/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
    m_zMovementspeed += m_movingspeed*(m_direction.z+(m_direction.z/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+   //slog("move_forward()...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
+
 }
 
 
@@ -255,7 +250,10 @@ void Player::move_backward()
   //TODO - Stop moving if falling
    m_xMovementspeed += (-1) * m_movingspeed*(m_direction.x+(m_direction.x/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
    m_zMovementspeed += (-1) * m_movingspeed*(m_direction.z+(m_direction.z/(fabs(m_direction.x)+fabs(m_direction.z))*fabs(m_direction.y)));
+   //slog("move_backward()...collided, recalc by x_speed ", m_xMovementspeed, ", z_seed ", m_zMovementspeed );
+
 }
+
 void Player::move_up() //Jump
 {
   
@@ -271,13 +269,6 @@ void Player::move_down()
 }
 
 
-int Player::getHearts(){
-  return m_hearts;
-}
-
-int Player::getMaxHearts(){
-  return MAX_HEARTS;
-}
 
 //Handle all Movements while checking for collision with Blocks
 void Player::movement()
@@ -286,15 +277,18 @@ void Player::movement()
   Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?1:-1) )),
               static_cast<int>(round(m_position.z)) );
   
+  if( pos.y <= 0 || pos.y>=127 )
+    return;
+
+
   //Y-Movement
-    if( pos.y>= 0 & pos.y<=127 ){
-      if( !collide(pos.x, pos.y, pos.z) )
-      {
+  if( !collide(pos.x, pos.y, pos.z))
+   {
         //slog("Speed: ",m_yMovementspeed);
-        //slog("Fallen:", m_fallen);
+        //slog("Not collision in Y!");
         //get fallen distance
         if(m_yMovementspeed < 0){
-                  //slog("Fallen:", m_fallen);
+          //slog("Fallen:", m_fallen);
           m_fallen += m_yMovementspeed;
         }
         if(!collide(posY.x, posY.y, posY.z)){
@@ -309,12 +303,8 @@ void Player::movement()
             //If the distance fallen is bigger than 4, 
             //the player takes damage equal to 2 powered by fallen-5
             if(m_fallen < -4){
-              m_hearts -= pow(2, abs(m_fallen+5));
-              if(m_hearts<0){
-                m_hearts = 0;
-              }
+                m_attrib.updateHeartsBy( static_cast<int>(-pow(2, abs(m_fallen+5))) );
             }
-
             //Reset Movementspeed
             m_yMovementspeed = 0;
             m_fallen = 0;
@@ -324,8 +314,8 @@ void Player::movement()
             m_position.y += m_yMovementspeed;  
           }
         }
-      }
     }
+
 
     pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
 
@@ -335,64 +325,78 @@ void Player::movement()
 
     //slog("m_pos.x: ", m_position.x, " pos.x:",pos.x, " DeltaX:", deltaX, " Movement X: ", m_xMovementspeed);
     //slog("m_pos.z: ", m_position.z, " pos.z:",pos.z, " DeltaZ:", deltaZ, " Movement Z: ", m_zMovementspeed);
+    //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
+    //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
 
-      //Check if we are in air
-      if( !collide(pos.x, pos.y, pos.z) )
-      { 
+    float block_x = BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed);
+    float block_z = BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed);
+    //slog("test collision at x+gap: ",pos.x+block_x, ",  y: ",pos.y, ", z+gap: ",pos.z+block_z );
+
+   //Check if we can move for XZ-direction
+   if(    !collide(pos.x, pos.y, pos.z)
+      // && !collide( m_position.x+ block_x , m_position.y+1.2, m_position.z+ block_z )
+      // && !collide( m_position.x+ block_x , m_position.y, m_position.z+ block_z )  
+    )
+   {
         //Free Moving because of free space in moving direction.
         //The movement is only in the current block
         if(fabs(m_xMovementspeed) <= deltaX && fabs(m_zMovementspeed) <= deltaZ ) {
-          m_position.x += m_xMovementspeed;
-          m_position.z += m_zMovementspeed;
-          //slog("Case 1: x<=delta//z<=delta");
+           m_position.x += m_xMovementspeed;
+           m_position.z += m_zMovementspeed;
+           //slog("Case 1: free moving x<=delta//z<=delta");
         }
         //Move freely in X direction but make a limited move in Z
         //The X Movement is only in the current Block, but the Y Movement is outside
         else if(fabs(m_xMovementspeed) <= deltaX){ 
-          m_position.x += m_xMovementspeed;
-          // we check if we can move in the Z direction...
-          // if there is air, we can move freely
-          if(!collide(pos.x,pos.y,pos.z + (1 * get_sign(m_zMovementspeed)))){
-            m_position.z += m_zMovementspeed;
-            //slog("Case 2: x<=delta//no collision at z");
-          }else{
-            //Only move by delta changed by sign of the movement
-            m_position.z += deltaZ * get_sign(m_zMovementspeed);
-            //slog("Case 3: x<=delta//COLLISION at z");
-          } 
+           m_position.x += m_xMovementspeed;
+           // we check if we can move in the Z direction...
+           // if there is air, we can move freely
+           if(!collide(pos.x,pos.y,pos.z + (1 * get_sign(m_zMovementspeed)))&&!collide(pos.x,pos.y+1,pos.z + (1 * get_sign(m_zMovementspeed)))){
+              m_position.z += m_zMovementspeed;
+              //slog("Case 2: move freely in Z but limited on  x<=delta//no collision at z");
+            }else{
+               //Only move by delta changed by sign of the movement
+               m_position.z += deltaZ * get_sign(m_zMovementspeed);
+               //slog("Case 3: move in Z with limited delta x<=delta//COLLISION at z");
+            }
         }
         // Move freely in Z direction but make a limited move in X
-        else if(fabs(m_zMovementspeed) <= deltaZ){
-          //Move in X but look for Z
-          m_position.z += m_zMovementspeed;
-          // we check if we can move in the Z direction...
-          if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z)){
-            m_position.x += m_xMovementspeed;
-            //slog("Case 4: z<=delta//no collision at x");
-          }else{
-            //Only move by delta
-            m_position.x += deltaX * get_sign(m_xMovementspeed);
-            //slog("Case 5: z<=delta//COLLISION at x");
-          }
-        }else{
-
-
+        else if(fabs(m_zMovementspeed) <= deltaZ)
+        {
+           //Move in X but look for Z
+           m_position.z += m_zMovementspeed;
+           // we check if we can move in the Z direction...
+           if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z)&&!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y+1, pos.z)){
+                m_position.x += m_xMovementspeed;
+                //slog("Case 4: move freely in Z and X z<=delta//no collision at x");
+           }else{
+               //Only move by delta
+                m_position.x += deltaX * get_sign(m_xMovementspeed);
+                //slog("Case 5: move freely in Z and with limited on X z<=delta//COLLISION at x");
+            }
+        }
+        else
+        {
           //slog("Case 6: Movement are both bigger than delta");
-          if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z )){
-            if(!collide(pos.x, pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )){
-              if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )){
+          if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z )&&!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y+1, pos.z )){
+            if(!collide(pos.x, pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )&&!collide(pos.x, pos.y+1, pos.z + (1 * get_sign(m_zMovementspeed)) )){
+              if(!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y, pos.z + (1 * get_sign(m_zMovementspeed)))
+                &&!collide(pos.x + (1 * get_sign(m_xMovementspeed)) , pos.y+1, pos.z + (1 * get_sign(m_zMovementspeed)))){
                 //No collison, move freely in X and Z
                 //slog("Case 6-1: No Colliision in X and Z");
                 m_position.x += m_xMovementspeed;
                 m_position.z += m_zMovementspeed;
               }else if(m_xMovementspeed > m_zMovementspeed){
+                //slog("Case 6-1.1 ");
                 m_position.x += m_xMovementspeed;
                 m_position.z += deltaZ * get_sign(m_zMovementspeed);
               }else if(m_zMovementspeed > m_xMovementspeed){
+                //slog("Case 6-1.2 ");
                 m_position.z += m_zMovementspeed;
                 m_position.x += deltaX * get_sign(m_xMovementspeed);
               }else{
                 //Same Movementspeed
+                //slog("Case 6-1.3 ");
                 m_position.x += deltaX * get_sign(m_xMovementspeed);
                 m_position.z += deltaZ * get_sign(m_zMovementspeed);
               }
@@ -404,7 +408,7 @@ void Player::movement()
 
             }
           }else{
-            if(!collide(pos.x, pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )){
+            if(!collide(pos.x, pos.y, pos.z + (1 * get_sign(m_zMovementspeed)) )&&!collide(pos.x, pos.y+1, pos.z + (1 * get_sign(m_zMovementspeed)) )){
             // only collision in X and we can move freely in Z
               m_position.z += m_zMovementspeed;
               m_position.x += deltaX * get_sign(m_xMovementspeed);
@@ -416,24 +420,28 @@ void Player::movement()
               //slog("Case 6-4: Both collision");
             }
           }
+
         }
-        
-      }else{
-        //slog("Not in the air");
-      }
-      //slog("-------------------------------------------------------------");
-  //}
-    //slog(m_position.y);
-    //Reset Movementspeed
-    m_xMovementspeed = 0;
-    m_zMovementspeed = 0;
+   }
+   else // collide with other objects ...we don't update the m_position of x and z
+   {
+        //slog("Collide with other objects with ");
+
+   }
+   //Reset Movementspeed
+   m_xMovementspeed = 0;
+   m_zMovementspeed = 0;
+
+   //slog("-------------------------------------------------------------");
+
 }
 
 bool Player::collide(float x, float y, float z)
 {
   Vec3i pos = Vec3i(static_cast<int>(round(x)),static_cast<int>(round(y)),static_cast<int>(round(z)));
-    if(m_map.getBlockType(pos) == BlockType::Air){
+  if( m_map.getBlockType(pos) == BlockType::Air){
       return false;
     }
+
     return true;
 }

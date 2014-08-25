@@ -4,20 +4,30 @@
 #include "BlockType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
-using namespace std;
+#include "PlayerAttributes.hpp"
 
 
 /** @Class Player 
 */
 class Player {	
+
+
 public:
 
 	//Constructor
   Player(Map& m);
 
-	//getter-Methoden
+  /**
+   * @brief getHearts Get current number of hearts indicating health of the players
+   * @return current number of hearts
+   */
   int getHearts();
-  int getMaxHearts();
+
+  /**
+   * @brief getMaxHearts Maximum number of hearts to be initialized
+   * @return maximum number of hearts
+   */
+  int getMaxHearts() const;
 
   /** @brief Processing all actual movements
   For every pressed key, the movement will be added and processed.
@@ -27,12 +37,12 @@ public:
   /** @brief Get the direction of the Players view
   		@return Vec3f direction The vector where the Player is looking at
   */
-	Vec3f getDirection();
+  inline	Vec3f getDirection();
 
   /** @brief Get the position of the Player
   		@return Vec3f position Get the Position in 3D Space
   */
-  Vec3f getPosition();
+  inline Vec3f getPosition();
 
   /** @brief Process all input Events by Mouse and Keyboard
 
@@ -55,10 +65,7 @@ public:
 
 private:
 	// Get the sign of the Movement
-	int get_sign(float x) {
-		const float eps = 0.0001;	
-		return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
-	}
+    inline int get_sign(float x);
 
 	//Methods
 	void move_left();
@@ -93,13 +100,30 @@ private:
   bool m_SpacePressed;
   bool m_CtrlPressed;
   bool m_ShiftPressed;
-
   Map& m_map;
-
-  int m_hearts;
   float m_fallen;
-  unsigned long m_passedFrames;
-
-
-
+  PlayerAttributes m_attrib;
 };
+
+
+/////////////INLINE
+
+Vec3f Player::getPosition()
+{
+  return Vec3f(m_position.x, m_position.y+1.1f, m_position.z);
+
+}
+
+Vec3f Player::getDirection()
+{
+  return m_direction;
+}
+
+int Player::get_sign(float x) {
+    const float eps = 0.0001;
+    return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
+}
+
+
+
+///////////////////////////////END OF FILE/////////////////////////////////////

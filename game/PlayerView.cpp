@@ -10,14 +10,15 @@ using namespace lumina;
 const float HEART_SIZE = 0.05f;
 const float HEART_POSY = -0.7f; 
 
-PlayerView::PlayerView(Player& player):
-m_player(player)
+PlayerView::PlayerView(Player& player)
+    : m_player(player)
 {
+
 }
  
 void PlayerView::draw(Mat4f viewMatrix, Mat4f projectionMatrix)
 {
-  //updateHearts();
+
 	m_program.prime([&](HotProgram& hotprog)
 	{
  		m_colorTexture.prime(0, [&](HotTex2D& hotTex) {

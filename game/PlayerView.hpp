@@ -16,9 +16,9 @@ class PlayerView {
 		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer);
 
 	private:
-		VertexSeq updateHearts();
-		Player& m_player;
-	  //VertexSeq m_heartPanel;
+        VertexSeq updateHearts();
+        Player& m_player;
+      //VertexSeq m_heartPanel;
 	  Program m_program;
 	  Program m_normalPass;
 	  Program m_finalPass;
