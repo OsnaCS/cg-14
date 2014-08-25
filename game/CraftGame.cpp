@@ -335,7 +335,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       //m_colorTexture.prime(0, [&](HotTex2D& hotT)
       {
 
-        pMenü.prime([&](HotProgram& hotP) 
+        pMenu.prime([&](HotProgram& hotP)
         {
 
           if(m_pause)

@@ -344,6 +344,11 @@ void Player::movement()
     float deltaX =  fabs(m_position.x - pos.x - BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed)) - FREE_SPACE;
     float deltaZ =  fabs(m_position.z - pos.z - BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed)) - FREE_SPACE; 
 
+    //slog("m_pos.x: ", m_position.x, " pos.x:",pos.x, " DeltaX:", deltaX, " Movement X: ", m_xMovementspeed);
+    //slog("m_pos.z: ", m_position.z, " pos.z:",pos.z, " DeltaZ:", deltaZ, " Movement Z: ", m_zMovementspeed);
+    //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
+    //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
+
    //Check if we can move for XZ-direction
    if(!collide(pos.x, pos.y, pos.z))
    {
