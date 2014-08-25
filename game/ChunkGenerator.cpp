@@ -284,7 +284,7 @@ void ChunkGenerator::setBirchTree(Map& map, int x, int z, int xi, int zj, int no
 
   	// 3rd row
    	k++;
-   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Birch); // Birch
   	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj}, BlockType::BirchLeaves);
@@ -313,7 +313,7 @@ void ChunkGenerator::setBirchTree(Map& map, int x, int z, int xi, int zj, int no
 
   	// 2nd row
    	k++;;
-   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Birch); // Birch
   	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::BirchLeaves);
