@@ -24,7 +24,10 @@ Color8A getColor(BlockType type)
 			return Color8A(255,228,196,255);
 
 		case BlockType::Grass:
-			return Color8A(102,205,0,255);			
+			return Color8A(102,205,0,255);
+
+		default:
+			return Color8A(255,0,204,255);
 	}
 
 }

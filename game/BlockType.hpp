@@ -15,9 +15,7 @@ enum class BlockType
 // North := front side
 // South := back side
 enum class BlockSide{
-	Top, Bottom, North, South, West, East,
-
-	COUNT
+	Top, Bottom, North, South, West, East
 };
 /**
 * returns the Color of the given Blocktype

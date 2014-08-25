@@ -19,7 +19,8 @@ double getFrequency(BiomeType type) {
       return 0.03;
 
     default:
-      slog("Unknown BiomeType in getFrequency");
+      slogWarning("Unknown BiomeType in getFrequency");
+      return 0.0;
   }
 }
 
@@ -44,6 +45,7 @@ int getUpperBound(BiomeType type) {
     case BiomeType::Mountains:
       return 93;
     default:
-      slog("Unknown BiomeType in getUpperBound");
+      slogWarning("Unknown BiomeType in getUpperBound");
+      return 0.0;
   }
 }

@@ -54,7 +54,7 @@ int ChunkView::countVisibleFaces(Vec3i blockWorldPos) {
   
   // increase faceCount for every visible side of the block
   int faceCount = 0;
-  for (int i = 0; i < static_cast<int>(BlockSide::COUNT); i++) {
+  for (int i = 0; i < 6; i++) {
     if(isFaceVisible(blockWorldPos, static_cast<BlockSide>(i))) {
       faceCount++;
     }
