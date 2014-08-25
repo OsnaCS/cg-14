@@ -26,6 +26,10 @@ void PlayerView::draw(Mat4f viewMatrix, Mat4f projectionMatrix)
 		});
 	});	
 
+    m_markerProgram.prime([this](HotProgram& hotprog){
+        hotprog.draw(m_centerMarker, PrimitiveType::Line);
+    });
+
 }
 
 
@@ -42,13 +46,13 @@ void PlayerView::init()
 	vs.compile(loadShaderFromFile("shader/HeartPanel.vsh"));
 	FShader fs;
 	fs.compile(loadShaderFromFile("shader/HeartPanel.fsh"));
-  // create program and link the two shaders
+    // create program and link the two shaders
 	m_program.create(vs, fs);
 	m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
 	m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
 	m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
 
-  // Pickaxe
+    // Pickaxe
 	//Initialize of the texture
 	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture512.jpg");
   m_pickaxeTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box2.data());
@@ -64,7 +68,7 @@ void PlayerView::init()
 	vsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.vsh"));
 	FShader fsNP;
 	fsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.fsh"));
-  // create program and link the two shaders
+    // create program and link the two shaders
 	m_normalPass.create(vsNP, fsNP);
 	m_normalPass.perFragProc.enableDepthTest();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
@@ -73,13 +77,37 @@ void PlayerView::init()
 	vsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.vsh"));
 	FShader fsFP;
 	fsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.fsh"));
-  // create program and link the two shaders
+    // create program and link the two shaders
 	m_finalPass.create(vsFP, fsFP);
 	m_finalPass.perFragProc.enableDepthTest();
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
-	
+
+
+    // For center-marker at the center of the screen
+    m_centerMarker.create(4, 4);
+    m_centerMarker.prime([](HotVertexSeq<Vec2f, Vec3f>& hot)
+    {
+      /*color may change against the background*/
+      hot.vertex[0].set( Vec2f(-0.05, 0.0), Vec3f(1,1,1) );
+      hot.vertex[1].set( Vec2f( 0.05, 0.0), Vec3f(1,1,1));
+      hot.vertex[2].set( Vec2f( 0.0,-0.05), Vec3f(1,1,1));
+      hot.vertex[3].set( Vec2f( 0.0, 0.05), Vec3f(1,1,1));
+
+      hot.index[0] = 0;
+      hot.index[1] = 1;
+      hot.index[2] = 2;
+      hot.index[3] = 3;
+    });
+
+    VShader vsCenterMarker;
+    vsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.vsh"));
+    FShader fsCenterMarker;
+    fsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.fsh"));
+    m_markerProgram.create(vsCenterMarker, fsCenterMarker);
+
+
 }
 
 VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
