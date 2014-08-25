@@ -233,6 +233,6 @@ void Camera::update()
 void Camera::updateFromPlayer(Vec3f pos, Vec3f dir)
 {
     m_position = pos;
-    m_position.y += 1; // this is to increase the eye position (as height) of the player
+    m_position.y += 0.8; // this is to increase the eye position (as height) of the player
     m_direction = dir;
 }
