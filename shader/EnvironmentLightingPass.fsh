@@ -8,6 +8,7 @@ uniform sampler2D normalTexture;
 
 uniform vec3 u_lightRay;
 uniform float u_lightIntens;
+uniform float u_daytime;
 // uniform vec3 u_cameraPos;
 
 in VertexData {
@@ -21,9 +22,13 @@ void main() {
 
 
 	// --------------- Ambient Light --------------------
-	float ambienteIntensity = 0.1;
 
+	float ambienteIntensity = u_daytime * u_daytime;
+	if(ambienteIntensity > 0.5){
+		ambienteIntensity = 1 - ambienteIntensity;
+	}
 
+	ambienteIntensity += 0.1;
 
 	// --------------- Diffuse Light --------------------
 	float diffuseIntensity;
