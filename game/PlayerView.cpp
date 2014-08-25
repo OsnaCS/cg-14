@@ -67,6 +67,7 @@ void PlayerView::init()
   // create program and link the two shaders
 	m_normalPass.create(vsNP, fsNP);
 	m_normalPass.perFragProc.enableDepthTest();
+	m_finalPass.perFragProc.enableDepthWrite();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	VShader vsFP;
@@ -76,6 +77,7 @@ void PlayerView::init()
   // create program and link the two shaders
 	m_finalPass.create(vsFP, fsFP);
 	m_finalPass.perFragProc.enableDepthTest();
+	m_finalPass.perFragProc.enableDepthWrite();
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
@@ -118,23 +120,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   //Show pickaxe
 	m_normalPass.prime([&](HotProgram& hotPickaxe){
 
-		//Scaling
-		Mat4f scaling = scalingMatrix(Vec3f(0.25,0.25,0.25));
-
-		//Rotation Y-axis in player direction
-    float angle = -(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
-  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
-
-  	//Rotation X-axis to tilt pickaxe
-
-  	//Translation to player height and to the front right
-		Vec3f pos = -(m_player.getPosition().normalize());
-		Vec3f dir = m_player.getDirection().normalize();
-  	Vec3f cross1 = cross(pos, dir);
-  	cross1.normalize();
-  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
-
-		hotPickaxe.uniform["u_view"] = viewMat * translation * rotationY * scaling;
+		hotPickaxe.uniform["u_view"] = viewMat * getViewMatrix();
 		hotPickaxe.uniform["u_projection"] = projMat;
 
 		TexCont cont; 
@@ -148,24 +134,8 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
 
   m_finalPass.prime([&](HotProgram& hotP) {
-  	
-		//Scaling
-		Mat4f scaling = scalingMatrix(Vec3f(0.25,0.25,0.25));
 
-		//Rotation Y-axis in player direction
-    float angle = -(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
-  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
-
-  	//Rotation X-axis to tilt pickaxe
-
-  	//Translation to player height and to the front right
-		Vec3f pos = -(m_player.getPosition().normalize());
-		Vec3f dir = m_player.getDirection().normalize();
-  	Vec3f cross1 = cross(pos, dir);
-  	cross1.normalize();
-  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
-
-		hotP.uniform["u_view"] = viewMat * translation * rotationY * scaling;
+		hotP.uniform["u_view"] = viewMat * getViewMatrix();
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_winSize"] = cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
@@ -178,4 +148,35 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
       });
     });
   });
+}
+
+Mat4f PlayerView::getViewMatrix(){
+	//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.15,0.15,0.15));
+
+		//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+
+    //float angle = -abs(acos(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length()));
+    //slog(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
+
+  	//Rotation X-axis to tilt pickaxe
+
+  	//Translation to player height and to the front right
+		Vec3f pos = -(m_player.getPosition().normalize());
+		Vec3f dir = m_player.getDirection().normalize();
+  	Vec3f cross1 = -cross(Vec3f(0,1,0), dir);
+  	cross1.normalize();
+  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
+
+  	return translation * rotationY * scaling;
+
 }

@@ -14,6 +14,7 @@ class PlayerView {
 
 		void drawNormalPass(Mat4f viewMat, Mat4f projMat);
 		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer);
+		Mat4f getViewMatrix();
 
 	private:
         VertexSeq<Vec2f, Vec3f, Vec2f> updateHearts();
