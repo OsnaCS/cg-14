@@ -4,14 +4,14 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(15), m_time(0), m_day(0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_orbitAngle(0.0) {
+: m_camera(camera), m_dayLength(15), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
 
 }
 
 void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
 
-	slog(getSkyLightDir());
+	//slog(getSkyLightDir());
 	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
@@ -52,11 +52,23 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
   	
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,sin(m_moonAxis),cos(m_moonAxis)), m_orbitAngle));
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, sin(m_moonAxis), cos(m_moonAxis)), m_orbitAngle));
+
+    // Mat4f transMat = translationMatrix(Vec3f(0, -10 * cos(m_moonAxis), 10 * sin(m_moonAxis)));
+    // Mat4f transbackMat = translationMatrix(Vec3f(0, 10 * cos(m_moonAxis), -10 * sin(m_moonAxis)));
+
+    // float angle = m_orbitAngle + 3.1415;
+    // if(angle > 3.1415){
+    // 	angle = 2 * 3.1415 - angle;
+    // }
+    // angle /= 2.6;
+
+    // Mat4f rot = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, cos(m_moonAxis), -sin(m_moonAxis)), angle));
+    // Mat4f correct = transbackMat * (rot * transMat);
 
    	hotprog.uniform["u_color"] = getMoonColor();
-   	hotprog.uniform["u_phase"] = m_phase;
-    hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
+   	hotprog.uniform["u_phase"] = 1.0f;//m_phase;
+    hotprog.uniform["u_transform"] = projMat * (viewMat * (rotMat)); // * correct));
     hotprog.draw(m_moon, PrimitiveType::TriangleStrip);
 
   });
