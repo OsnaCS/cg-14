@@ -94,6 +94,9 @@ void main() {
 
   // Interpoliere die Farben
 	texColor.xyz = mix(texColor.xyz, fogColor, depth.x * newlength);
+  if(texColor.w <= 0.25){
+    discard;
+  }
 
 	o_color = vec4(texColor.xyz, 1);
 

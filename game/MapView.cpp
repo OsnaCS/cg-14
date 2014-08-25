@@ -11,10 +11,16 @@ MapView::MapView(Map& map, Camera& cam, Environment& envir)
 
 void MapView::init() {
 
-  ImageBox image_box = loadJPEGImage("gfx/texture_small.jpg");
-  m_colorTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box.data());
+  ImageBox image_box = loadPNGImage("gfx/texture_small.png");
+  m_colorTexture.create(Vec2i(512,512), TexFormat::RGBA8, image_box.data());
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
+
+  ImageBox imageBoxNormal = loadPNGImage("gfx/normals_small.png");
+  m_normalTexture.create(Vec2i(512,512), TexFormat::RGBA8, imageBoxNormal.data());
+  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_normalTexture.params.useMipMaps = true;
+
 
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -49,10 +55,6 @@ void MapView::init() {
   m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_finalPass.primitiveProc.enableCulling();
 
-  ImageBox imageBoxNormal = loadJPEGImage("gfx/normals_small.jpg");
-  m_normalTexture.create(Vec2i(512,512), TexFormat::RGB8, imageBoxNormal.data());
-  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_normalTexture.params.useMipMaps = true;
 }
 
 void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
