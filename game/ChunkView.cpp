@@ -133,15 +133,121 @@ void ChunkView::updateView() {
  */
 Vec4f ChunkView::getLightForFace(Vec3i blockWorldPos, BlockSide side) {
 
+  // prepare lookup
+  std::array<bool, 8> lookup;
 
+  // get check positions depending on the BlockSide
+  std::array<Vec3i, 8> checkPositions;
+  switch (side) {
+    case BlockSide::Top:
+      checkPositions = {
+        blockWorldPos + Vec3i(-1, 1, -1),
+        blockWorldPos + Vec3i(0, 1, -1),
+        blockWorldPos + Vec3i(1, 1, -1),
+        blockWorldPos + Vec3i(1, 1, 0),
+        blockWorldPos + Vec3i(1, 1, 1),
+        blockWorldPos + Vec3i(0, 1, 1),
+        blockWorldPos + Vec3i(-1, 1, 1),
+        blockWorldPos + Vec3i(-1, 1, 0)
+      };
+      break;
+    case BlockSide::Bottom:
+      checkPositions = {
+        blockWorldPos + Vec3i(-1, -1, 1),
+        blockWorldPos + Vec3i(0, -1, 1),
+        blockWorldPos + Vec3i(1, -1, 1),
+        blockWorldPos + Vec3i(1, -1, 0),
+        blockWorldPos + Vec3i(1, -1, -1),
+        blockWorldPos + Vec3i(0, -1, -1),
+        blockWorldPos + Vec3i(-1, -1, -1),
+        blockWorldPos + Vec3i(-1, -1, 0)
+      };
+      break;
 
-  
+    // back side
+    case BlockSide::North:
+      checkPositions = {
+        blockWorldPos + Vec3i(1, 1, -1),
+        blockWorldPos + Vec3i(0, 1, -1),
+        blockWorldPos + Vec3i(-1, 1, -1),
+        blockWorldPos + Vec3i(-1, 0, -1),
+        blockWorldPos + Vec3i(-1, -1, -1),
+        blockWorldPos + Vec3i(0, -1, -1),
+        blockWorldPos + Vec3i(1, -1, -1),
+        blockWorldPos + Vec3i(1, 0, -1)
+      };
+      break;
 
+    // front side
+    case BlockSide::South:
+      checkPositions = {
+        blockWorldPos + Vec3i(-1, 1, 1),
+        blockWorldPos + Vec3i(0, 1, 1),
+        blockWorldPos + Vec3i(1, 1, 1),
+        blockWorldPos + Vec3i(1, 0, 1),
+        blockWorldPos + Vec3i(1, -1, 1),
+        blockWorldPos + Vec3i(0, -1, 1),
+        blockWorldPos + Vec3i(-1, -1, 1),
+        blockWorldPos + Vec3i(-1, 0, 1)
+      };
+      break;
+    case BlockSide::West:
+      checkPositions = {
+        blockWorldPos + Vec3i(-1, 1, -1),
+        blockWorldPos + Vec3i(-1, 1, 0),
+        blockWorldPos + Vec3i(-1, 1, 1),
+        blockWorldPos + Vec3i(-1, 0, 1),
+        blockWorldPos + Vec3i(-1, -1, 1),
+        blockWorldPos + Vec3i(-1, -1, 0),
+        blockWorldPos + Vec3i(-1, -1, -1),
+        blockWorldPos + Vec3i(-1, 0, -1)
+      };
+      break;
+    case BlockSide::East:
+      checkPositions = {
+        blockWorldPos + Vec3i(1, 1, 1),
+        blockWorldPos + Vec3i(1, 1, 0),
+        blockWorldPos + Vec3i(1, 1, -1),
+        blockWorldPos + Vec3i(1, 0, -1),
+        blockWorldPos + Vec3i(1, -1, -1),
+        blockWorldPos + Vec3i(1, -1, 0),
+        blockWorldPos + Vec3i(1, -1, 1),
+        blockWorldPos + Vec3i(1, 0, 1)
+      };
+      break;
+  }
 
-  uint8_t mask = 0;
+  // fill bit lookup
+  int i = 0;
+  for (Vec3i pos : checkPositions) {
+    lookup[i] = m_map->exists(pos) && m_map->getBlockType(pos) != BlockType::Air;
+    i++;
+  }
 
+  // loop over the edges of the quad (+= 2 to use the index in the bitset)
+  std::array<float, 4> colors;
+  for (int i = 0; i < colors.size(); i++) {
 
-  return Vec4f(1.f, 1.f, 1.f, 1.f);
+    int a = i == 0 ? (lookup.size() - 1) : ((i * 2) - 1);
+    int b = i * 2;
+    int c = (i * 2) + 1;
+
+    // darkest
+    if (lookup[a] && lookup[c]) {
+      colors[i] = 0.3f;
+    // half dark
+    } else if ((!lookup[a] && lookup[b] && lookup[c]) || (lookup[a] && lookup[b] && !lookup[c])) {
+      colors[i] = 0.6f;
+    // half light
+    } else if ((lookup[a] && !lookup[b] && !lookup[c]) || (!lookup[a] && !lookup[b] && lookup[c]) || (!lookup[a] && lookup[b] && !lookup[c])) {
+      colors[i] = 0.8f;
+    } else {
+    // light
+      colors[i] = 1.0f;
+    }
+  }
+
+  return Vec4f(colors[0], colors[1], colors[2], colors[3]);
 }
 
 void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType blockType, Vec3i blockWorldPos) {
