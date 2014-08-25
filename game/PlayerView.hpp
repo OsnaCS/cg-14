@@ -11,9 +11,9 @@ class PlayerView {
 		void draw();
 		void init();
 	private:
-		VertexSeq updateHearts();
-		Player& m_player;
-	  //VertexSeq m_heartPanel;
+        VertexSeq updateHearts();
+        Player& m_player;
+      //VertexSeq m_heartPanel;
 	  Program m_program;
 	  Tex2D m_colorTexture;
 };

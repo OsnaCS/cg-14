@@ -204,13 +204,15 @@ void Player::update()
 
 }
 
-Vec3f Player::getPosition(){
-  return Vec3f(m_position.x, m_position.y+1.1f, m_position.z);
 
+int Player::getHearts()
+{
+  return m_attrib.getHearts();
 }
 
-Vec3f Player::getDirection(){
-  return m_direction;
+int Player::getMaxHearts() const
+{
+  return m_attrib.maxHearts();
 }
 
 void Player::move_left()

@@ -16,14 +16,14 @@ public:
     /**
      * @brief PlayerAttributes Constructor
      * @param hearts Number of heart used in intilaization and will be set as maximum number.
+     *        Default is 10.
      */
-    PlayerAttributes(int hearts);
+    PlayerAttributes(int hearts=10);
 
     /**
      * @brief getHearts Get current up-to-date status(number) of hearts
      * @return number of hearts
      */
-    //inline
     int getHearts() ;
 
     /**
@@ -34,7 +34,8 @@ public:
 
     /**
      * @brief setHearts Force reset status/number of the hearts
-     * @param hearts number of hearts to be reset. Typically it is between 0-10.
+     * @param hearts number of hearts to be reset. Typically it is between zero and maximum number of hearts
+     *        when we first initialized the class.
      */
     inline void setHearts(int hearts);
 
