@@ -10,6 +10,8 @@ Environment::Environment(Camera& camera)
 
 void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
+
+	slog(getSkyLightDir());
 	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
