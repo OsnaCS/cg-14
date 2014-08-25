@@ -132,8 +132,8 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
 
   m_finalPass.prime([&](HotProgram& hotP) {
   	
-    hotP.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection()) * scalingMatrix(Vec3f(0.25,0.25,0.25));
-    slog(m_player.getPosition());
+  	//Vec3f cross1 = cross(m_player.getPosition(), m_player.getDirection());
+    hotP.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_winSize"] = cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
