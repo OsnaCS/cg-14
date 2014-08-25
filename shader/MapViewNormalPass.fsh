@@ -22,10 +22,10 @@ void main() {
 	vec3 xA = inData.tangent; // x coordinate from the tangent
 	vec3 yA = cross(zA, xA); // cross product results in the last coordinate
 
-	mat3 texTrans = inverse(mat3(xA, yA, zA));
+	mat3 texTrans = (mat3(xA, yA, zA));
 
-	normal = texture(normalTex, inData.uv).xyz * texTrans;
+	// normal = texTrans * texture(normalTex, inData.uv).xyz;
 
 	o_depth = vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
-	o_normal = normal;
+	o_normal = (normal+1)/2;
 }

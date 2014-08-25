@@ -20,19 +20,20 @@ void main() {
 
 
 	// --------------- Ambient Light --------------------
-	float ambienteIntensity = 0.6;
+	float ambienteIntensity = 0.0;
 
 
 
 	// --------------- Diffuse Light --------------------
 	float diffuseIntensity;
-	float angle = (dot(u_lightRay, normal)/(length(u_lightRay)*length(normal))); 
+	float cosa = (dot(-u_lightRay, ((normal*2)-1))/(length(u_lightRay)*length(normal)));
+	// float cosa = (dot(vec3(-1,0,0), ((normal*2)-1))/(length(u_lightRay)*length(normal)));
 	
-	if(angle > 0) {
+	if(cosa < 0) {
 		diffuseIntensity = 0;
 	} 
 	else {
-		diffuseIntensity = abs(angle); 
+		diffuseIntensity = abs(cosa); 
 	}
 
 

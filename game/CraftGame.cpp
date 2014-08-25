@@ -320,6 +320,17 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
+
+
+
+
+
+
+
+
+
+
+      //m_gbuffnormal
       m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
 
