@@ -55,10 +55,10 @@ void PlayerView::init()
   m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
   m_pickaxeTexture.params.useMipMaps = true;
 
-  // ImageBox image_box3 = loadJPEGImage("gfx/pickaxe_normals512.jpg");
-  // m_pickaxeNormals.create(Vec2i(512,512), TexFormat::RGB8, image_box3.data());
-  // m_pickaxeNormals.params.filterMode = TexFilterMode::Linear;
-  // m_pickaxeNormals.params.useMipMaps = true;
+  ImageBox image_box3 = loadJPEGImage("gfx/player_texture.jpg");
+  m_playerTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box3.data());
+  m_playerTexture.params.filterMode = TexFilterMode::Linear;
+  m_playerTexture.params.useMipMaps = true;
 
 	VShader vsNP;
 	vsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.vsh"));
@@ -81,6 +81,7 @@ void PlayerView::init()
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
+	m_player = loadOBJ("gfx/player.obj");
 	
 }
 
@@ -120,7 +121,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   //Show pickaxe
 	m_normalPass.prime([&](HotProgram& hotPickaxe){
 
-		hotPickaxe.uniform["u_view"] = viewMat * getViewMatrix();
+		hotPickaxe.uniform["u_view"] = viewMat * getTransformationMatrix();
 		hotPickaxe.uniform["u_projection"] = projMat;
 
 		TexCont cont; 
@@ -135,7 +136,7 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
 
   m_finalPass.prime([&](HotProgram& hotP) {
 
-		hotP.uniform["u_view"] = viewMat * getViewMatrix();
+		hotP.uniform["u_view"] = viewMat * getTransformationMatrix();
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_winSize"] = cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
@@ -150,7 +151,7 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
   });
 }
 
-Mat4f PlayerView::getViewMatrix(){
+Mat4f PlayerView::getTransformationMatrix(){
 	//Scaling
 		Mat4f scaling = scalingMatrix(Vec3f(0.15,0.15,0.15));
 
