@@ -20,6 +20,7 @@ const float FAST_SPEED = 0.4f;
 const float FALL_SPEED = -0.03f;
 const float JUMP_SPEED = 0.5f;
 
+const float CAMERA_HIGH = 1.8f;
 const int MAX_HEARTS = 10;
 //Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;
@@ -140,7 +141,7 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
       win.setCursorMode(CursorMode::Normal);
     }
     //Right Click
-    if(e.type == InputType::LMousePressed) {
+    if(e.type == InputType::RMousePressed) {
       m_rightMouseCaptured = true;
     }
     if(!cheatmode){
@@ -185,13 +186,11 @@ void Player::turn_upDown(float deltaY)
 void Player::update(float timePassed)
 {
   //handle block destroy
-  /*if(m_rightMouseCaptured){
+  if(m_rightMouseCaptured){
     m_rightMouseCaptured = false;
-    Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)-1),static_cast<int>(round(m_position.z)));
-     m_map.setBlockType(pos, BlockType::Air);
+    m_map.setBlockType(getNextBlock(), BlockType::Air);
     }
-  */
-
+  
   m_timePassed += timePassed*1000;
   while(m_timePassed >= FRAME_PER_MOVE){
     m_timePassed -= FRAME_PER_MOVE;
@@ -453,4 +452,28 @@ bool Player::collide(float x, float y, float z)
     }
 
     return true;
+}
+
+
+Vec3i Player::getNextBlock()
+{
+  float x = 0;
+  float y = 0;
+  float z = 0;
+
+  //Return current position (where already air is);
+  Vec3i resultNull = Vec3i(m_position.x, m_position.y+1, m_position.z);
+  
+  while(fabs(x)+fabs(y)+fabs(z)<4){
+    x += m_direction.x*0.03;
+    y += m_direction.y*0.03;
+    z += m_direction.z*0.03;
+    
+    if(collide(m_position.x+x,m_position.y+y+CAMERA_HIGH,m_position.z+z)){
+      Vec3i pos = Vec3i(static_cast<int>(round(x+m_position.x)),static_cast<int>(round(y+m_position.y+CAMERA_HIGH)),static_cast<int>(round(z+m_position.z)));
+
+      return pos;
+    }
+  }
+  return resultNull;
 }

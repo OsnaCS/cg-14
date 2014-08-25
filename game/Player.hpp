@@ -81,6 +81,9 @@ private:
   //Check the position for case of air (x/y/z coordinates)
 	bool collide(float x, float y, float z);
  
+  //Get the next Block in the lookingdirection
+  Vec3i getNextBlock(); 
+
   void turn_side(float deltaX);
   void turn_upDown(float deltaY);
   
@@ -125,7 +128,6 @@ int Player::get_sign(float x) {
     const float eps = 0.0001;
     return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
 }
-
 
 
 ///////////////////////////////END OF FILE/////////////////////////////////////
