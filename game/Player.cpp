@@ -328,8 +328,7 @@ void Player::movement()
     //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
     //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
 
-    float block_x = BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed);
-    float block_z = BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed);
+
     //slog("test collision at x+gap: ",pos.x+block_x, ",  y: ",pos.y, ", z+gap: ",pos.z+block_z );
 
    //Check if we can move for XZ-direction
