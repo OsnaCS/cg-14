@@ -122,7 +122,7 @@ void CraftGame::updateComponents(float delta) {
   }
   else
   {
-    m_player.update();
+    m_player.update(0.0f);
     
     m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
   }
@@ -237,7 +237,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     float delta = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
     now = chrono::system_clock::now();
     sum += delta;
-
     // print FPS
     if(sum > 2) {
       slog("FPS:", 1 / delta);
@@ -261,7 +260,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     }
     else
     {
-      m_player.update();
+      m_player.update(delta);
       
       m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
     }

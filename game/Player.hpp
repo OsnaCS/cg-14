@@ -32,7 +32,7 @@ public:
   /** @brief Processing all actual movements
   For every pressed key, the movement will be added and processed.
   */
-  void update();
+  void update(float timePassed);
 
   /** @brief Get the direction of the Players view
   		@return Vec3f direction The vector where the Player is looking at
@@ -92,7 +92,9 @@ private:
 	float m_xMovementspeed;
   float m_yMovementspeed;
   float m_zMovementspeed;
+  float m_timePassed;
   bool m_mouseCaptured;
+  bool m_rightMouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
   bool m_aPressed;

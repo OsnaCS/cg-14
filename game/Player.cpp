@@ -10,9 +10,10 @@ const float BLOCK_DIFFERENCE_Y = 0.5f;
 const float BLOCK_DIFFERENCE_Z = 0.5f;
 
 //To not collide into other blocks you have to stay at least away an amount of FREE_SPACE
-const float FREE_SPACE = 0.05f;
+const float FREE_SPACE = 0.3f;
 
 //The Speeds are for normal walking, running, falling and Jumping
+const float FRAME_PER_MOVE = 30;
 const float BASIC_SPEED = 0.2f; 
 const float FAST_SPEED = 0.4f;
 
@@ -33,7 +34,9 @@ Player::Player( Map& m)
     ,m_xMovementspeed(0.0f)
     ,m_yMovementspeed(0.0f)
     ,m_zMovementspeed(0.0f)
+    ,m_timePassed(0.0f)
     ,m_mouseCaptured(false)
+    ,m_rightMouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
     ,m_aPressed(false)
@@ -136,7 +139,10 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
       m_mouseCaptured = false;
       win.setCursorMode(CursorMode::Normal);
     }
-
+    //Right Click
+    if(e.type == InputType::LMousePressed) {
+      m_rightMouseCaptured = true;
+    }
     if(!cheatmode){
       // Mouse
       if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
@@ -176,8 +182,19 @@ void Player::turn_upDown(float deltaY)
 }
 
 
-void Player::update()
+void Player::update(float timePassed)
 {
+  //handle block destroy
+  /*if(m_rightMouseCaptured){
+    m_rightMouseCaptured = false;
+    Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)-1),static_cast<int>(round(m_position.z)));
+     m_map.setBlockType(pos, BlockType::Air);
+    }
+  */
+
+  m_timePassed += timePassed*1000;
+  while(m_timePassed >= FRAME_PER_MOVE){
+    m_timePassed -= FRAME_PER_MOVE;
     //TODO
     //Check for too much high // to less high
 
@@ -197,7 +214,7 @@ void Player::update()
         move_down();
     }  
     movement();
-
+  }
     if ( m_attrib.getHearts() == 0 ) {
         m_attrib.setHearts(MAX_HEARTS); // reset the game
         m_position = INIT_POSITION; // reset position
@@ -274,14 +291,18 @@ void Player::move_down()
 void Player::movement()
 {
   Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
-  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?1:-1) )),
+  //1*get_sign(m_yMovementspeed) > 0?2:-1 ==> If the  y Movement is negative, look 1 down, else look 2 up
+  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?2:-1) )),
               static_cast<int>(round(m_position.z)) );
   
+  float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;
+     
   if( pos.y <= 0 || pos.y>=127 )
     return;
 
 
   //Y-Movement
+  //Check collision for air
   if( !collide(pos.x, pos.y, pos.z))
    {
         //slog("Speed: ",m_yMovementspeed);
@@ -296,14 +317,14 @@ void Player::movement()
           m_position.y += m_yMovementspeed;
         }else{
           //Hit the floor
-          float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;  
+          //float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;  
           if(m_yMovementspeed+FALL_SPEED < delta){
             m_yMovementspeed = -delta;
             m_position.y += m_yMovementspeed;
             //If the distance fallen is bigger than 4, 
             //the player takes damage equal to 2 powered by fallen-5
             if(m_fallen < -4){
-                m_attrib.updateHeartsBy( static_cast<int>(-pow(2, abs(m_fallen+5))) );
+                m_attrib.updateHeartsBy( static_cast<int>(-pow(2, abs(m_fallen+4))) );
             }
             //Reset Movementspeed
             m_yMovementspeed = 0;
@@ -323,20 +344,8 @@ void Player::movement()
     float deltaX =  fabs(m_position.x - pos.x - BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed)) - FREE_SPACE;
     float deltaZ =  fabs(m_position.z - pos.z - BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed)) - FREE_SPACE; 
 
-    //slog("m_pos.x: ", m_position.x, " pos.x:",pos.x, " DeltaX:", deltaX, " Movement X: ", m_xMovementspeed);
-    //slog("m_pos.z: ", m_position.z, " pos.z:",pos.z, " DeltaZ:", deltaZ, " Movement Z: ", m_zMovementspeed);
-    //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
-    //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
-
-    float block_x = BLOCK_DIFFERENCE_X * get_sign(m_xMovementspeed);
-    float block_z = BLOCK_DIFFERENCE_Z * get_sign(m_zMovementspeed);
-    //slog("test collision at x+gap: ",pos.x+block_x, ",  y: ",pos.y, ", z+gap: ",pos.z+block_z );
-
    //Check if we can move for XZ-direction
-   if(    !collide(pos.x, pos.y, pos.z)
-      // && !collide( m_position.x+ block_x , m_position.y+1.2, m_position.z+ block_z )
-      // && !collide( m_position.x+ block_x , m_position.y, m_position.z+ block_z )  
-    )
+   if(!collide(pos.x, pos.y, pos.z))
    {
         //Free Moving because of free space in moving direction.
         //The movement is only in the current block
