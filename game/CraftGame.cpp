@@ -207,13 +207,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
 
 
-  VShader menüVS;
-  menüVS.compile(loadShaderFromFile("shader/Menü.vsh"));
-  FShader menüFS;
-  menüFS.compile(loadShaderFromFile("shader/Menü.fsh"));
+  VShader menuVS;
+  menuVS.compile(loadShaderFromFile("shader/Menu.vsh"));
+  FShader menuFS;
+  menuFS.compile(loadShaderFromFile("shader/Menu.fsh"));
 
-  Program pMenü;
-  pMenü.create(menüVS, menüFS);
+  Program pMenu;
+  pMenu.create(menuVS, menuFS);
 
 
 
@@ -336,7 +336,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       //m_colorTexture.prime(0, [&](HotTex2D& hotT)
       {
 
-        pMenü.prime([&](HotProgram& hotP) 
+        pMenu.prime([&](HotProgram& hotP)
         {
 
           if(m_pause)
