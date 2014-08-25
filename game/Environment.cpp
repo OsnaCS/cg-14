@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(50), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
+: m_camera(camera), m_dayLength(200), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
 
 }
 
@@ -88,6 +88,7 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     // hotProg.uniform["depthTexture"] = 1;
     // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
     hotProg.uniform["u_lightRay"] = getSkyLightDir();
+    hotProg.uniform["u_lightIntens"] = getSkyLightIntensity();
 
     Vec3f direction = m_camera.get_direction();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -341,18 +342,18 @@ float Environment::getSunIntensity(){
 	float help = m_time / m_dayLength;
 	float maxIntens = 0.9;
 
-	if(help >= 0.30 && help < 0.70){
+	if(help >= 0.35 && help < 0.65){
 
 		return maxIntens;
 
-	} else if(help >= 0.25 && help < 0.30){
+	} else if(help >= 0.25 && help < 0.35){
 
-		help = (help - 0.25) * 20;
+		help = (help - 0.25) * 10;
 		return maxIntens * help;
 
-	} else if(help >= 0.70 && help < 0.75){	
+	} else if(help >= 0.65 && help < 0.75){	
 
-		help = (0.75 - help) * 20;
+		help = (0.75 - help) * 10;
 		return maxIntens * help;
 
 	} else {
@@ -376,20 +377,20 @@ float Environment::getMoonIntensity(){
 	if(maxIntens > 2){
 		maxIntens = 4 - maxIntens;
 	}
-	maxIntens = (1 - (maxIntens / 2)) * 0.4;
+	maxIntens = (1 - (maxIntens / 2)) * 0.2;
 
-	if(help < 0.20 || help > 0.80){
+	if(help < 0.15 || help > 0.85){
 
 		return maxIntens;
 
-	} else if(help >= 0.2 && help < 0.25){
+	} else if(help >= 0.15 && help < 0.25){
 
-		help = (0.25 - help) * 20;
+		help = (0.25 - help) * 10;
 		return maxIntens * help;
 
-	} else if(help > 0.75 && help <= 0.8){	
+	} else if(help > 0.75 && help <= 0.85){	
 
-		help = (help - 0.75) * 20;
+		help = (help - 0.75) * 10;
 		return maxIntens * help;
 
 	} else {

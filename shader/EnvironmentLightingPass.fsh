@@ -7,6 +7,7 @@ layout(location = 0) out vec4 o_color;
 uniform sampler2D normalTexture;
 
 uniform vec3 u_lightRay;
+uniform float u_lightIntens;
 // uniform vec3 u_cameraPos;
 
 in VertexData {
@@ -20,7 +21,7 @@ void main() {
 
 
 	// --------------- Ambient Light --------------------
-	float ambienteIntensity = 0.0;
+	float ambienteIntensity = 0.1;
 
 
 
@@ -33,7 +34,7 @@ void main() {
 		diffuseIntensity = 0;
 	} 
 	else {
-		diffuseIntensity = abs(cosa); 
+		diffuseIntensity = u_lightIntens * abs(cosa); 
 	}
 
 
