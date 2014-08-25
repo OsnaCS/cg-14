@@ -1,5 +1,7 @@
 #include "ChunkView.hpp"
 
+#include <cstdint>
+
 ChunkView::ChunkView() {
 
 }
@@ -130,7 +132,12 @@ void ChunkView::updateView() {
  */
 Vec4f ChunkView::getLightForFace(Vec3i blockWorldPos, BlockSide side) {
 
+
+
   
+
+
+  uint8_t mask = 0;
 
 
   return Vec4f(1.f, 1.f, 1.f, 1.f);
