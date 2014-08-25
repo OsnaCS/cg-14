@@ -96,10 +96,10 @@ void ChunkView::updateView() {
       continue;
     }
 
-    VertexSeq sequence;
-    sequence.create(3 + 3 + 3 + 2 + 1, 4 * faceCount, 5 * faceCount);
+    VertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float> sequence;
+    sequence.create(4 * faceCount, 5 * faceCount);
 
-    sequence.prime<Vec3f, Vec3f, Vec3f, Vec2f, float>([&](
+    sequence.prime([&](
       HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>& hotSeq) {
 
     	// vertex and index indices
@@ -274,7 +274,7 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>& hot
 
 
 void ChunkView::draw(HotProgram& hotProg, HotTexCont& hotCont) {
-  for(VertexSeq& sequence : m_chunkSequences) {
+  for(VertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>& sequence : m_chunkSequences) {
     if(sequence) {
       hotProg.draw(hotCont, sequence, PrimitiveType::TriangleStrip);
     }

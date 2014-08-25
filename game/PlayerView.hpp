@@ -16,7 +16,7 @@ class PlayerView {
 		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer);
 
 	private:
-        VertexSeq updateHearts();
+        VertexSeq<Vec2f, Vec3f, Vec2f> updateHearts();
         Player& m_player;
       //VertexSeq m_heartPanel;
 	  Program m_program;
@@ -25,6 +25,6 @@ class PlayerView {
 	  Tex2D m_pickaxeTexture;
 	  Tex2D m_pickaxeNormals;
 	  Tex2D m_colorTexture;
-	  VertexSeq m_pickaxe;
+	  VertexSeq<Vec3f, Vec3f, Vec2f> m_pickaxe;
 };
 

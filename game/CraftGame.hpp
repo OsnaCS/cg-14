@@ -33,8 +33,8 @@ private:
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;
   FrameBuffer m_gBuffer;
-  VertexSeq m_fullScreenQuad;
-  VertexSeq m_fullScreenQuad2;
+  VertexSeq<Vec2f> m_fullScreenQuad;
+  VertexSeq<Vec2f, Vec2f> m_fullScreenQuad2;
   Tex2D m_lBufferTex;
   FrameBuffer m_lBuffer;
   Tex2D m_fBufferTex;

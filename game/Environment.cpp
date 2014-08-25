@@ -96,10 +96,10 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     float halfBackPlaneWidth = screenRatio * halfBackPlaneHeight;
     Vec3f backPlaneCenter = direction.normalize() * backPlaneDistance;
 
-    VertexSeq backPlane;
-    backPlane.create(3 + 3, 4);
+    VertexSeq<Vec2f, Vec3f> backPlane;
+    backPlane.create(4);
 
-    backPlane.prime<Vec2f, Vec3f>([&](HotVertexSeq<Vec2f, Vec3f>& hotV) {
+    backPlane.prime([&](HotVertexSeq<Vec2f, Vec3f>& hotV) {
       // oben rechts
       hotV.vertex[0].set(Vec2f(1, 1), backPlaneCenter + (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth));
       // unten rechts
@@ -127,8 +127,8 @@ void Environment::init()
   // create program and link the two shaders
 	m_programSphere.create(vsSphere, fsSphere);
 
-  m_sphere.create(3, 6, 13);
-  m_sphere.prime<Vec3f>([](HotVertexSeq<Vec3f>& hot)
+  m_sphere.create(6, 13);
+  m_sphere.prime([](HotVertexSeq<Vec3f>& hot)
   {
 
   	hot.vertex[0].set(Vec3f(0, 1, 0));
@@ -170,8 +170,8 @@ void Environment::init()
   m_programSun.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
   m_programSun.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
 
-  m_sun.create(3 + 2, 4);
-  m_sun.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
+  m_sun.create(4);
+  m_sun.prime([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
     
     hot.vertex[0].set(Vec3f( 1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f( 3,  3));
     hot.vertex[1].set(Vec3f(-1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f(-3,  3));
@@ -187,8 +187,8 @@ void Environment::init()
 
 
 
-  m_moon.create(3 + 2, 4);
-  m_moon.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
+  m_moon.create(4);
+  m_moon.prime([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
 
     hot.vertex[0].set(Vec3f( 1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f( 2,  2));
     hot.vertex[1].set(Vec3f(-1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f(-2,  2));

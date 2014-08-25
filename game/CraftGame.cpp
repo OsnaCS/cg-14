@@ -182,16 +182,16 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_fBuffer.create(m_window.getSize());
   m_fBuffer.attachColor(0, m_fBufferTex);
 
-  m_fullScreenQuad.create(2, 4);
-  m_fullScreenQuad.prime<Vec2f>([&](HotVertexSeq<Vec2f>& hotSeq) {
+  m_fullScreenQuad.create(4);
+  m_fullScreenQuad.prime([&](HotVertexSeq<Vec2f>& hotSeq) {
     hotSeq.vertex[0] = Vec2f(-1, -1);
     hotSeq.vertex[1] = Vec2f(1, -1);
     hotSeq.vertex[2] = Vec2f(-1, 1);
     hotSeq.vertex[3] = Vec2f(1, 1);
   });
 
-  m_fullScreenQuad2.create(4, 4);
-  m_fullScreenQuad2.prime<Vec2f, Vec2f>([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
+  m_fullScreenQuad2.create(4);
+  m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
     hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
     hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
     hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));

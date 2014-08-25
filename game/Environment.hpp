@@ -32,9 +32,9 @@ public:
 
 private:
 
-  VertexSeq m_sphere;
-  VertexSeq m_sun;
-  VertexSeq m_moon;
+  VertexSeq<Vec3f> m_sphere;
+  VertexSeq<Vec3f, Vec2f> m_sun;
+  VertexSeq<Vec3f, Vec2f> m_moon;
   Program m_programSphere;
   Program m_programSun;
   Program m_programMoon;

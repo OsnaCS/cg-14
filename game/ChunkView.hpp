@@ -19,7 +19,7 @@ public:
 private:
 	Vec2i m_index;
 	Map* m_map;
-	std::array<VertexSeq, 8> m_chunkSequences;
+	std::array<VertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>, 8> m_chunkSequences;
 
 	void addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, Vec3f, Vec2f, float>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType blockType, Vec3i blockWorldPos);
 	int countVisibleFaces(Vec3i blockWorldPos);

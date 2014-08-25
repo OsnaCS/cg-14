@@ -6,7 +6,7 @@
 
 using namespace std;
 
-VertexSeq loadOBJ(string obj_name){
+VertexSeq<Vec3f, Vec3f, Vec2f> loadOBJ(string obj_name){
   // Liste der verschiedenen Vertices/Normalen/Texturkoordinaten
   vector<Vec3f> vertices;
   vector<Vec3f> normals;
@@ -84,11 +84,11 @@ VertexSeq loadOBJ(string obj_name){
     tangents.push_back(vertices[i_vertices[i + 1]] - vertices[i_vertices[i]]);
   }
 
-  VertexSeq object;
-  object.create(3 + 3 + 2, index_count, index_count);
+  VertexSeq<Vec3f, Vec3f, Vec2f> object;
+  object.create(index_count, index_count);
 //object.create(3 + 3 + 3 + 2, index_count, index_count);
   // Position, Normale, Tangente, Textur Vec3f(0,75,0)+
-  object.prime<Vec3f, Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotObject) {
+  object.prime([&](HotVertexSeq<Vec3f, Vec3f, Vec2f>& hotObject) {
     for(int j = 0; j < index_count; j++) {
       hotObject.vertex[j].set(vertices[i_vertices[j] - 1], normals[i_normals[j] - 1], texture[i_texture[j] - 1]);
       hotObject.index[j] = j;

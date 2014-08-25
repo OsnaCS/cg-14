@@ -82,14 +82,14 @@ void PlayerView::init()
 	
 }
 
-VertexSeq PlayerView::updateHearts(){
+VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
   
   int activeHearts = m_player.getHearts();
   int maxHearts = m_player.getMaxHearts();
   float nextHeart = -(maxHearts / 2.0f) * HEART_SIZE;
- 	VertexSeq m_heartPanel;
-	m_heartPanel.create(7, 4 * maxHearts, 5 * maxHearts);
-  m_heartPanel.prime<Vec2f, Vec3f, Vec2f>([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
+ 	VertexSeq<Vec2f, Vec3f, Vec2f> m_heartPanel;
+	m_heartPanel.create(4 * maxHearts, 5 * maxHearts);
+  m_heartPanel.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
   {
  	for(int i = 0; i < maxHearts; i++){
 	  if(activeHearts > i){

@@ -7,4 +7,4 @@
 using namespace lumina;
 using namespace std;
 
-VertexSeq loadOBJ(string file);
+VertexSeq<Vec3f, Vec3f, Vec2f> loadOBJ(string file);
