@@ -8,6 +8,7 @@ out vec4 o_color;
 in VertexData {
 	vec2 uv;
 	vec3 pos;
+  float simpleLight;
 } inData;
 
 uniform ivec2 u_winSize;
@@ -26,6 +27,7 @@ void main() {
 	vec4 texColor = texture(s_colorTexture, inData.uv);
 	
 	texColor.xyz *= light.xyz;
+  texColor.xyz *= inData.simpleLight;
 	texColor.xyz *= light.w;
 
 	vec3 fogColor = vec3(0.8,0.8,0.8);

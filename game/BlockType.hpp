@@ -12,8 +12,8 @@ enum class BlockType
 	Air, Dirt, Wood, Stone, Water, Sand, Grass, Cactus, Birch, Spruce, BirchLeaves, SpruceLeaves, PineLeaves
 };
 
-// North := front side
-// South := back side
+// North := back side
+// South := front side
 enum class BlockSide{
 	Top, Bottom, North, South, West, East
 };
