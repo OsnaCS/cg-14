@@ -4,14 +4,14 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(15), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
+: m_camera(camera), m_dayLength(50), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
 
 }
 
 void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
 
-	//slog(getSkyLightDir());
+	
 	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
@@ -89,7 +89,7 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
     hotProg.uniform["u_lightRay"] = getSkyLightDir();
 
-    Vec3f direction = m_camera.get_direction().normalize();
+    Vec3f direction = m_camera.get_direction();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
     float viewAngle = m_camera.getViewAngle();
     float screenRatio = m_camera.getScreenRatio();
