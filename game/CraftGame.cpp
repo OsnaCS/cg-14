@@ -13,6 +13,7 @@ CraftGame::CraftGame()
     ,m_envir(m_camera)
     ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
+    ,m_pause(false)
 {
   m_running = true;
 }
@@ -23,12 +24,32 @@ void CraftGame::init() {
   m_window.setTitle("CraftGame ComputerGrafikPraktikum 2014");
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
+
   // add event callback (capture by reference
-  m_window.addEventCallback(
-    [&](InputEvent e) { return m_player.processEvent(e, m_window, m_cheatmode); });
-  m_window.addEventCallback(
-    [&](InputEvent e) { return m_camera.processEvent(e, m_window); });
-  m_window.addEventCallback([&](InputEvent e) {
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    if(!m_pause) 
+    {
+      return m_player.processEvent(e, m_window, m_cheatmode);
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+  m_window.addEventCallback([&](InputEvent e) 
+  { 
+    if(!m_pause)
+    {
+      return m_camera.processEvent(e, m_window); 
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+  m_window.addEventCallback([&](InputEvent e) 
+  {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
@@ -36,16 +57,36 @@ void CraftGame::init() {
       return EventResult::Processed;
     }
     // if the keyInpuit is k
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K) {
-      if(m_cheatmode){
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) {
+      if(m_cheatmode)
+      {
         m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
         m_cheatmode = false;
-      }else{
+      }
+      else
+      {
         m_cheatmode = true;
       }
       return EventResult::Processed;
     }
+
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
+    {
+
+      if(m_pause == false)
+      {
+        m_pause = true;
+      }
+      else
+      {
+        m_pause = false;
+      }
+      return EventResult::Processed;
+
+    }
+
     return EventResult::Skipped;
+
   });
 
   // resize window
@@ -69,13 +110,20 @@ void CraftGame::updateComponents(float delta) {
   m_window.update();
 
   // update environment
-  m_envir.update(delta);
+  if(!m_pause)
+  {
+    m_envir.update(delta);
+  }
 
   // poll events
-  if(m_cheatmode){
+  if(m_cheatmode)
+  {
     m_camera.update();
-  }else{
+  }
+  else
+  {
     m_player.update();
+    
     m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
   }
 
@@ -90,6 +138,10 @@ void CraftGame::updateComponents(float delta) {
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
+  ImageBox image_save = loadJPEGImage("gfx/save.jpg");
+  m_colorTexture.create(Vec2i(680,90), TexFormat::RGB8, image_save.data());
+  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
+  m_colorTexture.params.useMipMaps = true;
 
   m_envir.init();
   m_mapView.init();
@@ -138,13 +190,33 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotSeq.vertex[3] = Vec2f(1, 1);
   });
 
-  //
+  m_fullScreenQuad2.create(4, 4);
+  m_fullScreenQuad2.prime<Vec2f, Vec2f>([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
+    hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
+    hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
+    hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));
+    hotSeq.vertex[3].set(Vec2f(680.0/1280.0, 470.0/720.0),Vec2f(1, 1));
+  });
+
   VShader tempVS;
   tempVS.compile(loadShaderFromFile("shader/TempShader.vsh"));
   FShader tempFS;
   tempFS.compile(loadShaderFromFile("shader/TempShader.fsh"));
   Program tempP;
   tempP.create(tempVS, tempFS);
+
+
+
+  VShader menüVS;
+  menüVS.compile(loadShaderFromFile("shader/Menü.vsh"));
+  FShader menüFS;
+  menüFS.compile(loadShaderFromFile("shader/Menü.fsh"));
+
+  Program pMenü;
+  pMenü.create(menüVS, menüFS);
+
+
+
 
   RenderBuffer zBuf;
   zBuf.create(m_window.getSize(), RenderBufferType::Depth32);
@@ -174,6 +246,25 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // update game components
     updateComponents(delta);
+
+    // poll events
+    m_window.update();
+
+    if(!m_pause)
+    {
+      m_envir.update(delta);
+    }
+
+    if(m_cheatmode)
+    {
+      m_camera.update();
+    }
+    else
+    {
+      m_player.update();
+      
+      m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
+    }
 
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix();
@@ -222,7 +313,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotContext.getDefaultFrameBuffer().enableBlending(0);
 
     // we need the default FrameBuffer
-    hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) {
+    hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) 
+    {
       // clear the background color of the screen
 
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
@@ -230,8 +322,42 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       
       m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
+
+          hotP.uniform["u_pause"] = m_pause;
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
+       
         });
+
+      });
+
+      // Für Blur
+      m_fBufferTex.prime(0, [&](HotTex2D& hotT)
+      // Für Textur
+      //m_colorTexture.prime(0, [&](HotTex2D& hotT)
+      {
+
+        pMenü.prime([&](HotProgram& hotP) 
+        {
+
+          if(m_pause)
+          {
+            hotP.uniform["u_offset"] = (float)0.0;
+
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-0.4;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-0.8;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-1.2;
+            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+          }
+       
+        });
+
       });
 
       m_playerView.draw(viewMatrix, projectionMatrix);
@@ -239,5 +365,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
     // swap buffer
     hotContext.swapBuffer();
+
   }
 }
