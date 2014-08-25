@@ -18,7 +18,7 @@ int PlayerAttributes::getHearts()
     auto duration = chrono::duration_cast<chrono::seconds>( now - m_timer ).count();
     if ( duration%(60*3) == 0 ) { // update heart every 3 minutes
        updateHeartsBy( 1 );
-       lumina::slog("auto update heart every 3 mintues by +1 ...");
+       //lumina::slog("auto update heart every 3 mintues by +1 ...");
     }
     return m_hearts;
 }
