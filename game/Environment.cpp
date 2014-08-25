@@ -4,15 +4,15 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(20), m_time(0), m_day(0), m_exactness(32) {
+: m_camera(camera), m_dayLength(15), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
 
 }
 
-void Environment::draw(Mat4f viewMat, Mat4f projMat)
-{
+void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
-	m_program.prime([&](HotProgram& hotprog)
-	{
+
+	//slog(getSkyLightDir());
+	m_programSphere.prime([&](HotProgram& hotprog){
 
 		viewMat.setColumn(3, Vec4f(0,0,0,1));
 
@@ -28,89 +28,48 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat)
 
 	});
 
-  m_program2.prime([&](HotProgram& hotprog)
-  {
-    float a = m_time * 3.1415 * 2 / (m_dayLength);
+  m_programSun.prime([&](HotProgram& hotprog){
 
     viewMat.setColumn(3, Vec4f(0,0,0,1));
 
-
-    hotprog.uniform["u_transform"] = projMat * viewMat;
-    hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
-    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0,0,1), a));
-
-   	hotprog.uniform["u_color"] = Vec3f(0.75, 0.75, 0.75);
-    hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
-
-    switch (m_day % 11)
-    {
-
-    	case 0:
-    	{
-    		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 1:
-    	{
-    		hotprog.draw(m_moon1, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 2:
-    	{
-    		hotprog.draw(m_moon2, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 3:
-    	{
-    		hotprog.draw(m_moon3, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 4:
-    	{
-    		hotprog.draw(m_moon4, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 5:
-    	{
-    		hotprog.draw(m_moon5, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 6:
-    	{
-    		hotprog.draw(m_moon6, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 7:
-    	{
-    		hotprog.draw(m_moon7, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 8:
-    	{
-    		hotprog.draw(m_moon8, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 9:
-    	{
-    		hotprog.draw(m_moon9, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	case 10:
-    	{
-    		hotprog.draw(m_moon10, PrimitiveType::TriangleFan);
-    		break;
-    	}
-    	default:
-    	{
-    		hotprog.draw(m_moon, PrimitiveType::TriangleFan);
-    		break;
-    	}
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, -sin(m_sunAxis), cos(m_sunAxis)), m_orbitAngle));
     
-    }
-    
+    float help = (m_time - static_cast<int>(m_time));
+    for(int i = 0; i< 1; i++){
+    	help +=help;
+    	if(help > 1){
+    		help = 2 - help;
+   	 }
+  	}
+    hotprog.uniform["u_pulse"] = help;
     hotprog.uniform["u_color"] = getSunColor();
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
-    hotprog.draw(m_sun, PrimitiveType::TriangleFan);
+    hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
+
+  });
+
+  m_programMoon.prime([&](HotProgram& hotprog){
+  	
+    viewMat.setColumn(3, Vec4f(0,0,0,1));
+
+    Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, sin(m_moonAxis), cos(m_moonAxis)), m_orbitAngle));
+
+    // Mat4f transMat = translationMatrix(Vec3f(0, -10 * cos(m_moonAxis), 10 * sin(m_moonAxis)));
+    // Mat4f transbackMat = translationMatrix(Vec3f(0, 10 * cos(m_moonAxis), -10 * sin(m_moonAxis)));
+
+    // float angle = m_orbitAngle + 3.1415;
+    // if(angle > 3.1415){
+    // 	angle = 2 * 3.1415 - angle;
+    // }
+    // angle /= 2.6;
+
+    // Mat4f rot = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, cos(m_moonAxis), -sin(m_moonAxis)), angle));
+    // Mat4f correct = transbackMat * (rot * transMat);
+
+   	hotprog.uniform["u_color"] = getMoonColor();
+   	hotprog.uniform["u_phase"] = m_phase;
+    hotprog.uniform["u_transform"] = projMat * (viewMat * (rotMat)); // * correct));
+    hotprog.draw(m_moon, PrimitiveType::TriangleStrip);
 
   });
 }
@@ -122,7 +81,7 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     hotProg.uniform["normalTexture"] = 0;
     // hotProg.uniform["depthTexture"] = 1;
     // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
-    hotProg.uniform["u_lightRay"] = getSunPos();
+    hotProg.uniform["u_lightRay"] = getSkyLightDir();
 
     Vec3f direction = m_camera.get_direction().normalize();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -160,26 +119,24 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
 void Environment::init()
 {
 
-	VShader vs;
-	vs.compile(loadShaderFromFile("shader/Environment.vsh"));
-	FShader fs;
-	fs.compile(loadShaderFromFile("shader/Environment.fsh"));
-
-	constexpr float PI = 3.1415926;
+	VShader vsSphere;
+	vsSphere.compile(loadShaderFromFile("shader/Environment.vsh"));
+	FShader fsSphere;
+	fsSphere.compile(loadShaderFromFile("shader/Environment.fsh"));
 
   // create program and link the two shaders
-	m_program.create(vs, fs);
+	m_programSphere.create(vsSphere, fsSphere);
 
-  m_sphere.create(3 + 2, 6, 13);
-  m_sphere.prime<Vec3f, Vec2f>([](HotVertexSeq<Vec3f, Vec2f>& hot)
+  m_sphere.create(3, 6, 13);
+  m_sphere.prime<Vec3f>([](HotVertexSeq<Vec3f>& hot)
   {
 
-  	hot.vertex[0].set(Vec3f(0, 1, 0),  Vec2f(0,0));
-  	hot.vertex[1].set(Vec3f(1, 0, 0),  Vec2f(PI/2,0));
-  	hot.vertex[2].set(Vec3f(0, 0, 1) , Vec2f(PI/2,0));
-  	hot.vertex[3].set(Vec3f(-1, 0, 0), Vec2f(PI/2,0));
-  	hot.vertex[4].set(Vec3f(0, 0, -1), Vec2f(PI/2,0));
-  	hot.vertex[5].set(Vec3f(0, -1, 0), Vec2f(PI,0));
+  	hot.vertex[0].set(Vec3f(0, 1, 0));
+  	hot.vertex[1].set(Vec3f(1, 0, 0));
+  	hot.vertex[2].set(Vec3f(0, 0, 1));
+  	hot.vertex[3].set(Vec3f(-1, 0, 0));
+  	hot.vertex[4].set(Vec3f(0, 0, -1));
+  	hot.vertex[5].set(Vec3f(0, -1, 0));
 
   	hot.index[0] = 0;
   	hot.index[1] = 2;
@@ -197,475 +154,55 @@ void Environment::init()
 
   });
 
+  VShader vsSun;
+  vsSun.compile(loadShaderFromFile("shader/Sun.vsh"));
+  FShader fsSun;
+  fsSun.compile(loadShaderFromFile("shader/Sun.fsh"));
 
-  int e = m_exactness;
-
-  VShader vs2;
-  vs2.compile(loadShaderFromFile("shader/Sun.vsh"));
-  FShader fs2;
-  fs2.compile(loadShaderFromFile("shader/Sun.fsh"));
+  VShader vsMoon;
+  FShader fsMoon;
+  vsMoon.compile(loadShaderFromFile("shader/Moon.vsh"));
+  fsMoon.compile(loadShaderFromFile("shader/Moon.fsh"));
 
   // create program and link the two shaders
-  m_program2.create(vs2, fs2);
-
-  m_moon.create(3, e+3);
-  m_moon.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-  	hot.vertex[0]. set(Vec3f(                   0, 20, 0                  ));
-    hot.vertex[1]. set(Vec3f(                   1, 20, 0                  ));
-
-    for(int i = 2; i < e+1; i++)
-    {
-
-    	hot.vertex[i]. set(Vec3f( cos((i-1) * 2 * PI /e), 20, sin((i-1) * 2 * PI /e)));
-
-    }
-
-		hot.vertex[e+1]. set(Vec3f(                   1, 20, 0                  ));
-
-  });
-
-  m_moon1.create(3, e+3);
-  m_moon1.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, sin( 1 * 3.1415/16) - 0.1));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, sin( 2 * 3.1415/16) - 0.1));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.1));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.125));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, sin( 4 * 3.1415/16) - 0.15));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, sin( 5 * 3.1415/16) - 0.175));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, sin( 6 * 3.1415/16) - 0.2));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, sin( 7 * 3.1415/16) - 0.2));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, sin( 8 * 3.1415/16) - 0.2));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, sin( 9 * 3.1415/16) - 0.2));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, sin(10 * 3.1415/16) - 0.175));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, sin(11 * 3.1415/16) - 0.15));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, sin(12 * 3.1415/16) - 0.125));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, sin(13 * 3.1415/16) - 0.1));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, sin(14 * 3.1415/16) - 0.1));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, sin(15 * 3.1415/16) - 0.1));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, sin(16 * 3.1415/16)));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, sin(17 * 3.1415/16)));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, sin(18 * 3.1415/16)));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, sin(19 * 3.1415/16)));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, sin(20 * 3.1415/16)));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, sin(22 * 3.1415/16)));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, sin(23 * 3.1415/16)));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, sin(24 * 3.1415/16)));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, sin(25 * 3.1415/16)));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, sin(26 * 3.1415/16)));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, sin(27 * 3.1415/16)));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, sin(28 * 3.1415/16)));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, sin(29 * 3.1415/16)));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, sin(30 * 3.1415/16)));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, sin(31 * 3.1415/16)));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-	m_moon2.create(3, e+3);
-  m_moon2.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, sin( 1 * 3.1415/16) - 0.1));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, sin( 2 * 3.1415/16) - 0.125));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.15));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.2));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, sin( 4 * 3.1415/16) - 0.25));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, sin( 5 * 3.1415/16) - 0.3));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, sin( 6 * 3.1415/16) - 0.35));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, sin( 7 * 3.1415/16) - 0.4));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, sin( 8 * 3.1415/16) - 0.4));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, sin( 9 * 3.1415/16) - 0.35));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, sin(10 * 3.1415/16) - 0.3));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, sin(11 * 3.1415/16) - 0.25));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, sin(12 * 3.1415/16) - 0.2));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, sin(13 * 3.1415/16) - 0.15));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, sin(14 * 3.1415/16) - 0.125));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, sin(15 * 3.1415/16) - 0.1));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, sin(16 * 3.1415/16)));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, sin(17 * 3.1415/16)));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, sin(18 * 3.1415/16)));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, sin(19 * 3.1415/16)));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, sin(20 * 3.1415/16)));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, sin(22 * 3.1415/16)));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, sin(23 * 3.1415/16)));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, sin(24 * 3.1415/16)));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, sin(25 * 3.1415/16)));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, sin(26 * 3.1415/16)));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, sin(27 * 3.1415/16)));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, sin(28 * 3.1415/16)));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, sin(29 * 3.1415/16)));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, sin(30 * 3.1415/16)));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, sin(31 * 3.1415/16)));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-	m_moon3.create(3, e+3);
-  m_moon3.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, 0.15));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, 0.15));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, 0.175));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, 0.175));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, 0.2));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, 0.2));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, 0.225));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, 0.225));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, 0.225));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, 0.225));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, 0.2));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, 0.2));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, 0.175));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, 0.175));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, 0.15));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, 0.15));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, sin(16 * 3.1415/16)));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, sin(17 * 3.1415/16)));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, sin(18 * 3.1415/16)));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, sin(19 * 3.1415/16)));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, sin(20 * 3.1415/16)));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, sin(22 * 3.1415/16)));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, sin(23 * 3.1415/16)));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, sin(24 * 3.1415/16)));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, sin(25 * 3.1415/16)));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, sin(26 * 3.1415/16)));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, sin(27 * 3.1415/16)));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, sin(28 * 3.1415/16)));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, sin(29 * 3.1415/16)));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, sin(30 * 3.1415/16)));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, sin(31 * 3.1415/16)));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-	m_moon4.create(3, 6, 15);
-  m_moon4.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-  	hot.vertex[0]. set(Vec3f( 1, 20, 0 ));
-  	hot.vertex[1].set(Vec3f( cos(27 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-  	hot.vertex[2].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-  	hot.vertex[3].set(Vec3f( cos(27 * 3.1415/16), 20, sin(21 * 3.1415/16)+0.4));
-  	hot.vertex[4].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)+0.4));
-  	hot.vertex[5]. set(Vec3f( -1, 20, 0 ));
-
-  	hot.index[0] = 1;
-  	hot.index[1] = 0;
-  	hot.index[2] = 3;
-  	hot.index[3] = GLIndex::PrimitiveRestart;
-  	hot.index[4] = 1;
-  	hot.index[5] = 3;
-  	hot.index[6] = 4;
-  	hot.index[7] = GLIndex::PrimitiveRestart;
-  	hot.index[8] = 1;
-  	hot.index[9] = 4;
-  	hot.index[10] = 2;
-  	hot.index[11] = GLIndex::PrimitiveRestart;
-  	hot.index[12] = 2;
-  	hot.index[13] = 5;
-  	hot.index[14] = 4;
-
-	});
-
-	m_moon5.create(3, 6, 15);
-  m_moon5.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-  	hot.vertex[0]. set(Vec3f( 1, 20, 0 ));
-  	hot.vertex[1].set(Vec3f( cos(27 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-  	hot.vertex[2].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-  	hot.vertex[3].set(Vec3f( cos(27 * 3.1415/16), 20, sin(21 * 3.1415/16)+0.2));
-  	hot.vertex[4].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)+0.2));
-  	hot.vertex[5]. set(Vec3f( -1, 20, 0 ));
-
-  	hot.index[0] = 1;
-  	hot.index[1] = 0;
-  	hot.index[2] = 3;
-  	hot.index[3] = GLIndex::PrimitiveRestart;
-  	hot.index[4] = 1;
-  	hot.index[5] = 3;
-  	hot.index[6] = 4;
-  	hot.index[7] = GLIndex::PrimitiveRestart;
-  	hot.index[8] = 1;
-  	hot.index[9] = 4;
-  	hot.index[10] = 2;
-  	hot.index[11] = GLIndex::PrimitiveRestart;
-  	hot.index[12] = 2;
-  	hot.index[13] = 5;
-  	hot.index[14] = 4;
-
-	});
-
-	m_moon6.create(3, 6, 15);
-  m_moon6.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-  	hot.vertex[0]. set(Vec3f( -1, 20, 0 ));
-  	hot.vertex[1].set(Vec3f( cos(11 * 3.1415/16), 20, sin(5 * 3.1415/16)-0.2));
-  	hot.vertex[2].set(Vec3f( cos(5 * 3.1415/16), 20, sin(5 * 3.1415/16)-0.2));
-  	hot.vertex[3].set(Vec3f( cos(11 * 3.1415/16), 20, sin(5 * 3.1415/16)));
-  	hot.vertex[4].set(Vec3f( cos(5 * 3.1415/16), 20, sin(5 * 3.1415/16)));
-  	hot.vertex[5]. set(Vec3f( 1, 20, 0 ));
-
-  	hot.index[0] = 1;
-  	hot.index[1] = 0;
-  	hot.index[2] = 3;
-  	hot.index[3] = GLIndex::PrimitiveRestart;
-  	hot.index[4] = 1;
-  	hot.index[5] = 3;
-  	hot.index[6] = 4;
-  	hot.index[7] = GLIndex::PrimitiveRestart;
-  	hot.index[8] = 1;
-  	hot.index[9] = 4;
-  	hot.index[10] = 2;
-  	hot.index[11] = GLIndex::PrimitiveRestart;
-  	hot.index[12] = 2;
-  	hot.index[13] = 5;
-  	hot.index[14] = 4;
-
-	});
-
-	m_moon7.create(3, 6, 15);
-  m_moon7.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-  	hot.vertex[0]. set(Vec3f( -1, 20, 0 ));
-  	hot.vertex[1].set(Vec3f( cos(11 * 3.1415/16), 20, sin(5 * 3.1415/16)-0.4));
-  	hot.vertex[2].set(Vec3f( cos(5 * 3.1415/16), 20, sin(5 * 3.1415/16)-0.4));
-  	hot.vertex[3].set(Vec3f( cos(11 * 3.1415/16), 20, sin(5 * 3.1415/16)));
-  	hot.vertex[4].set(Vec3f( cos(5 * 3.1415/16), 20, sin(5 * 3.1415/16)));
-  	hot.vertex[5]. set(Vec3f( 1, 20, 0 ));
-
-  	hot.index[0] = 1;
-  	hot.index[1] = 0;
-  	hot.index[2] = 3;
-  	hot.index[3] = GLIndex::PrimitiveRestart;
-  	hot.index[4] = 1;
-  	hot.index[5] = 3;
-  	hot.index[6] = 4;
-  	hot.index[7] = GLIndex::PrimitiveRestart;
-  	hot.index[8] = 1;
-  	hot.index[9] = 4;
-  	hot.index[10] = 2;
-  	hot.index[11] = GLIndex::PrimitiveRestart;
-  	hot.index[12] = 2;
-  	hot.index[13] = 5;
-  	hot.index[14] = 4;
-
-	});
-
-  m_moon8.create(3, 35);
-  m_moon8.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, sin( 1 * 3.1415/16)));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, sin( 2 * 3.1415/16)));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16)));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16)));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, sin( 4 * 3.1415/16)));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, sin( 5 * 3.1415/16)));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, sin( 6 * 3.1415/16)));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, sin( 7 * 3.1415/16)));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, sin( 8 * 3.1415/16)));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, sin( 9 * 3.1415/16)));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, sin(10 * 3.1415/16)));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, sin(11 * 3.1415/16)));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, sin(12 * 3.1415/16)));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, sin(13 * 3.1415/16)));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, sin(14 * 3.1415/16)));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, sin(15 * 3.1415/16)));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, -0.15));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, -0.15));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, -0.175));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, -0.175));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, -0.2));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, -0.2));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, -0.225));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, -0.225));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, -0.225));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, -0.225));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, -0.2));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, -0.2));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, -0.175));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, -0.175));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, -0.15));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, -0.15));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-  m_moon9.create(3, 35);
-  m_moon9.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, sin( 1 * 3.1415/16)));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, sin( 2 * 3.1415/16)));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16)));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16)));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, sin( 4 * 3.1415/16)));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, sin( 5 * 3.1415/16)));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, sin( 6 * 3.1415/16)));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, sin( 7 * 3.1415/16)));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, sin( 8 * 3.1415/16)));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, sin( 9 * 3.1415/16)));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, sin(10 * 3.1415/16)));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, sin(11 * 3.1415/16)));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, sin(12 * 3.1415/16)));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, sin(13 * 3.1415/16)));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, sin(14 * 3.1415/16)));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, sin(15 * 3.1415/16)));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, sin(16 * 3.1415/16) - 0.1));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, sin(17 * 3.1415/16) - 0.125));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, sin(18 * 3.1415/16) - 0.15));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, sin(19 * 3.1415/16) - 0.2));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, sin(20 * 3.1415/16) - 0.25));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16) - 0.3));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, sin(22 * 3.1415/16) - 0.35));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, sin(23 * 3.1415/16) - 0.4));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, sin(24 * 3.1415/16) - 0.4));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, sin(25 * 3.1415/16) - 0.35));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, sin(26 * 3.1415/16) - 0.3));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, sin(27 * 3.1415/16) - 0.25));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, sin(28 * 3.1415/16) - 0.2));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, sin(29 * 3.1415/16) - 0.15));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, sin(30 * 3.1415/16) - 0.125));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, sin(31 * 3.1415/16) - 0.1));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-  m_moon10.create(3, e+3);
-  m_moon10.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot)
-  {
-
-
- 		hot.vertex[0]. set(Vec3f( 0, 20, 0 ));
-
-		hot.vertex[1]. set(Vec3f( 1, 20, 0 ));
-		hot.vertex[2]. set(Vec3f( cos( 1 * 3.1415/16), 20, sin( 1 * 3.1415/16) - 0.1));
-		hot.vertex[3]. set(Vec3f( cos( 2 * 3.1415/16), 20, sin( 2 * 3.1415/16) - 0.1));
-		hot.vertex[4]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.1));
-		hot.vertex[5]. set(Vec3f( cos( 3 * 3.1415/16), 20, sin( 3 * 3.1415/16) - 0.125));
-		hot.vertex[6]. set(Vec3f( cos( 4 * 3.1415/16), 20, sin( 4 * 3.1415/16) - 0.15));
-		hot.vertex[7]. set(Vec3f( cos( 5 * 3.1415/16), 20, sin( 5 * 3.1415/16) - 0.175));
-		hot.vertex[8]. set(Vec3f( cos( 6 * 3.1415/16), 20, sin( 6 * 3.1415/16) - 0.2));
-		hot.vertex[9]. set(Vec3f( cos( 7 * 3.1415/16), 20, sin( 7 * 3.1415/16) - 0.2));
- 
- 		// cos = 0, sin = 1 
- 		hot.vertex[10].set(Vec3f( cos( 8 * 3.1415/16), 20, sin( 8 * 3.1415/16) - 0.2));
- 		hot.vertex[11].set(Vec3f( cos( 9 * 3.1415/16), 20, sin( 9 * 3.1415/16) - 0.2));
- 		hot.vertex[12].set(Vec3f( cos(10 * 3.1415/16), 20, sin(10 * 3.1415/16) - 0.175));
- 		hot.vertex[13].set(Vec3f( cos(11 * 3.1415/16), 20, sin(11 * 3.1415/16) - 0.15));
- 		hot.vertex[14].set(Vec3f( cos(12 * 3.1415/16), 20, sin(12 * 3.1415/16) - 0.125));
- 		hot.vertex[15].set(Vec3f( cos(13 * 3.1415/16), 20, sin(13 * 3.1415/16) - 0.1));
- 		hot.vertex[16].set(Vec3f( cos(14 * 3.1415/16), 20, sin(14 * 3.1415/16) - 0.1));
-		hot.vertex[17].set(Vec3f( cos(15 * 3.1415/16), 20, sin(15 * 3.1415/16) - 0.1));
-
-		// cos = -1, sin = 0
-		hot.vertex[18].set(Vec3f( cos(16 * 3.1415/16), 20, sin(16 * 3.1415/16)));
-		hot.vertex[19].set(Vec3f( cos(17 * 3.1415/16), 20, sin(17 * 3.1415/16)));
-		hot.vertex[20].set(Vec3f( cos(18 * 3.1415/16), 20, sin(18 * 3.1415/16)));
-		hot.vertex[21].set(Vec3f( cos(19 * 3.1415/16), 20, sin(19 * 3.1415/16)));
-		hot.vertex[22].set(Vec3f( cos(20 * 3.1415/16), 20, sin(20 * 3.1415/16)));
-		hot.vertex[23].set(Vec3f( cos(21 * 3.1415/16), 20, sin(21 * 3.1415/16)));
-		hot.vertex[24].set(Vec3f( cos(22 * 3.1415/16), 20, sin(22 * 3.1415/16)));
-		hot.vertex[25].set(Vec3f( cos(23 * 3.1415/16), 20, sin(23 * 3.1415/16)));
-
-		// cos = 0, sin = -1
-		hot.vertex[26].set(Vec3f( cos(24 * 3.1415/16), 20, sin(24 * 3.1415/16)));
-		hot.vertex[27].set(Vec3f( cos(25 * 3.1415/16), 20, sin(25 * 3.1415/16)));
-		hot.vertex[28].set(Vec3f( cos(26 * 3.1415/16), 20, sin(26 * 3.1415/16)));
-		hot.vertex[29].set(Vec3f( cos(27 * 3.1415/16), 20, sin(27 * 3.1415/16)));
-		hot.vertex[30].set(Vec3f( cos(28 * 3.1415/16), 20, sin(28 * 3.1415/16)));
-		hot.vertex[31].set(Vec3f( cos(29 * 3.1415/16), 20, sin(29 * 3.1415/16)));
-		hot.vertex[32].set(Vec3f( cos(30 * 3.1415/16), 20, sin(30 * 3.1415/16)));
-		hot.vertex[33].set(Vec3f( cos(31 * 3.1415/16), 20, sin(31 * 3.1415/16)));
-
-		hot.vertex[34].set(Vec3f( 1, 20, 0 ));
-
-	});
-
-
-	m_sun.create(3, e+2);
-  m_sun.prime<Vec3f>([e](HotVertexSeq<Vec3f>& hot) {
+  m_programSun.create(vsSun, fsSun);
+  m_programSun.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_programSun.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+  m_programSun.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+  m_sun.create(3 + 2, 4);
+  m_sun.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
     
-    hot.vertex[0].set(Vec3f(0, -15, 0));
-    hot.vertex[1].set(Vec3f(1, -15, 0));
-
-    for(int i = 2; i < e + 1; i++) {
-
-      hot.vertex[i].set(Vec3f(cos((i - 1) * 2 * PI / e), -15, sin((i - 1) * 2 * PI / e)));
-    }
-
-    hot.vertex[e + 1].set(Vec3f(1, -15, 0));
+    hot.vertex[0].set(Vec3f( 1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f( 3,  3));
+    hot.vertex[1].set(Vec3f(-1, -5*cos(m_sunAxis)-sin(m_sunAxis),-5*sin(m_sunAxis)+cos(m_sunAxis)), Vec2f(-3,  3));
+    hot.vertex[2].set(Vec3f( 1, -5*cos(m_sunAxis)+sin(m_sunAxis),-5*sin(m_sunAxis)-cos(m_sunAxis)), Vec2f( 3, -3));
+    hot.vertex[3].set(Vec3f(-1, -5*cos(m_sunAxis)+sin(m_sunAxis),-5*sin(m_sunAxis)-cos(m_sunAxis)), Vec2f(-3, -3));
 
   });
 
-  // m_program.perFragProc.enableDepthTest();
-  // m_program.perFragProc.setDepthFunction(DepthFunction::Less);
-  // m_program2.perFragProc.enableDepthTest();
-  // m_program2.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_programMoon.create(vsMoon, fsMoon);
+  m_programMoon.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_programMoon.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+  m_programMoon.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+
+
+  m_moon.create(3 + 2, 4);
+  m_moon.prime<Vec3f, Vec2f>([&](HotVertexSeq<Vec3f, Vec2f>& hot) {
+
+    hot.vertex[0].set(Vec3f( 1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f( 2,  2));
+    hot.vertex[1].set(Vec3f(-1, 10*cos(m_moonAxis)+sin(m_moonAxis),-10*sin(m_moonAxis)+cos(m_moonAxis)), Vec2f(-2,  2));
+    hot.vertex[2].set(Vec3f( 1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f( 2, -2));
+    hot.vertex[3].set(Vec3f(-1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f(-2, -2));
+
+  });
+
+
+
+  // m_programSphere.perFragProc.enableDepthTest();
+  // m_programSphere.perFragProc.setDepthFunction(DepthFunction::Less);
+  // m_programSun.perFragProc.enableDepthTest();
+  // m_programSun.perFragProc.setDepthFunction(DepthFunction::Less);
 
   VShader lightingVS;
   lightingVS.compile(loadShaderFromFile("shader/EnvironmentLightingPass.vsh"));
@@ -688,6 +225,13 @@ void Environment::update(float delta)
 		m_day++;
 	}
 
+  m_orbitAngle = m_time * 3.14159265359 * 2 / (m_dayLength);
+
+	m_phase += 4 * (delta / m_dayLength) / 29.575;
+	if(m_phase > 4){
+		m_phase -= 4;
+	}
+
 }
 
 void Environment::setDayLength(float sec) 
@@ -695,6 +239,39 @@ void Environment::setDayLength(float sec)
 
 	m_dayLength = sec; 
 }
+
+Vec3f Environment::getSkyLightColor(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return getSunColor();
+	} else{
+		return getMoonColor();
+	}
+
+}
+float Environment::getSkyLightIntensity(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return getSunIntensity();
+	} else{
+		return getMoonIntensity();
+	}
+}
+Vec3f Environment::getSkyLightDir(){
+
+	if(m_time <= 0.75 * m_dayLength && m_time > 0.25 * m_dayLength){
+
+		return -getSunPos();
+	} else{
+		return -getMoonPos();
+	}
+}
+
+
+
+
 
 Vec3f Environment::getSunColor()
 {
@@ -712,6 +289,7 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.75 * m_dayLength;
 		help = help /(m_dayLength/4);
 		r = 1 - help;
+		g = 0.3 - 0.3 * help;
 
 	} 
 	else if(m_time > 0.5 * m_dayLength) 
@@ -719,9 +297,10 @@ Vec3f Environment::getSunColor()
 
 		help = m_time - 0.5 * m_dayLength;
 		help = help /(m_dayLength/4);
+		help *= help;
 		r = 1;
-		g = 1 - help;
-		b = 0.5 * (1 - help);
+		g = 1 - 0.7 * help;
+		b = 0.75 * (1 - help);
 
 	} 
 	else if(m_time > 0.25 * m_dayLength) 
@@ -729,9 +308,13 @@ Vec3f Environment::getSunColor()
 
 		help = m_time - 0.25 * m_dayLength;
 		help = help /(m_dayLength/4);
+		help = 1 - help;
+		help *= help;
+		help = 1- help;
+
 		r = 1;
-		g = help;
-		b= 0.5 * help;
+		g = 0.3 + 0.7 * help;
+		b= 0.75 * help;
 
 	} 
 	else 
@@ -739,6 +322,7 @@ Vec3f Environment::getSunColor()
 
 		help = m_time / (m_dayLength/4);
 		r = help;
+		g = 0.3 * help;
 
 	}
 
@@ -748,36 +332,68 @@ Vec3f Environment::getSunColor()
 
 float Environment::getSunIntensity(){
 
-	float help;
+	float help = m_time / m_dayLength;
+	float maxIntens = 0.9;
 
-	help = m_time / m_dayLength;
+	if(help >= 0.30 && help < 0.70){
 
-	if(help>0.25 && help<0.75){
+		return maxIntens;
 
-		help -= 0.25;
-		if(help > 0.25){
-			help = 0.5 - help;
-		}
+	} else if(help >= 0.25 && help < 0.30){
 
-		return help*3;
+		help = (help - 0.25) * 20;
+		return maxIntens * help;
 
+	} else if(help >= 0.70 && help < 0.75){	
+
+		help = (0.75 - help) * 20;
+		return maxIntens * help;
+
+	} else {
+		return 0.0;
 	}
-	return 0.0;
 }
 
 Vec3f Environment::getSunPos(){
 
-	return -Vec3f(sin(m_time*2*3.1415/m_dayLength),-cos(m_time*2*3.1415/m_dayLength),0);
+	return Vec3f(sin(m_orbitAngle),-cos(m_orbitAngle) * cos(m_sunAxis),-cos(m_orbitAngle) * sin(m_sunAxis));
 }
 
-void Environment::setExactness(int e){
-
-	m_exactness = e;
-
+Vec3f Environment::getMoonColor(){
+	return Vec3f(0.75, 0.75, 0.75);
 }
+float Environment::getMoonIntensity(){
+	
+	float help = m_time / m_dayLength;
+	float maxIntens = m_phase;
 
+	if(maxIntens > 2){
+		maxIntens = 4 - maxIntens;
+	}
+	maxIntens = (1 - (maxIntens / 2)) * 0.4;
 
+	if(help < 0.20 || help > 0.80){
 
+		return maxIntens;
+
+	} else if(help >= 0.2 && help < 0.25){
+
+		help = (0.25 - help) * 20;
+		return maxIntens * help;
+
+	} else if(help > 0.75 && help <= 0.8){	
+
+		help = (help - 0.75) * 20;
+		return maxIntens * help;
+
+	} else {
+		return 0.0;
+	}
+}
+Vec3f Environment::getMoonPos() { 
+
+	return Vec3f(-sin(m_orbitAngle), cos(m_orbitAngle) * cos(m_moonAxis), -cos(m_orbitAngle) * sin(m_moonAxis));
+}
 
 Vec3f Environment::getcUp()
 {
@@ -806,7 +422,6 @@ Vec3f Environment::getcWest()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(.5,0,0)
     return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
 
   } 
@@ -815,6 +430,7 @@ Vec3f Environment::getcWest()
 
     help = m_time - 0.5 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help *= help;
 
     return Vec3f(0.75 - (0.5 * help), 0.75 - (0.5 * help), 1 - 0.5 * help);
 
@@ -824,8 +440,11 @@ Vec3f Environment::getcWest()
 
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help = 1 - help;
+    help *= help;
+    help = 1- help;
 
-    return Vec3f(0.5 + (0.25 * help), 0.75 * help, help);
+    return Vec3f(0.5 + (0.25 * help), 0.2 + 0.55 * help, help);
 
   } 
   else 
@@ -833,14 +452,12 @@ Vec3f Environment::getcWest()
     help = m_time;
     help = help / (m_dayLength / 4);
 
-    return Vec3f(0.5 * help, 0, 0);
+    return Vec3f(0.5 * help, 0.2 * help, 0);
   }
-
 }
 
 Vec3f Environment::getcNorth()
 {
-
 	float help;
 
   if(m_time > 0.75 * m_dayLength) 
@@ -849,7 +466,6 @@ Vec3f Environment::getcNorth()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(0,0,0.)
     return Vec3f(0.25 * (1 - help), 0.25 * (1 - help), 0.5 * (1-help));
 
   } 
@@ -868,7 +484,6 @@ Vec3f Environment::getcNorth()
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(0,0,0.5)
     return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
 
   } 
@@ -895,8 +510,7 @@ Vec3f Environment::getcEast()
     help = m_time - 0.75 * m_dayLength;
     help = help / (m_dayLength / 4);
 
-    //(.5,0,0)
-    return Vec3f(0.5 * (1 - help), 0, 0);
+    return Vec3f(0.5 * (1 - help), 0.2 * (1-help), 0);
 
   } 
   else if(m_time > 0.5 * m_dayLength) 
@@ -904,8 +518,9 @@ Vec3f Environment::getcEast()
 
     help = m_time - 0.5 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help *= help;
 
-    return Vec3f(0.75 - (0.25 * help), 0.75 - (0.75 * help), 1 - help);
+    return Vec3f(0.75 - (0.25 * help), 0.75 - (0.55 * help), 1 - help);
 
   } 
   else if(m_time > 0.25 * m_dayLength) 
@@ -913,6 +528,9 @@ Vec3f Environment::getcEast()
 
     help = m_time - 0.25 * m_dayLength;
     help = help / (m_dayLength / 4);
+    help = 1 - help;
+    help *= help;
+    help = 1- help;
 
     return Vec3f(0.25 + (0.5 * help), 0.25 + (0.5 * help), 0.5 + (0.5 * help));
 

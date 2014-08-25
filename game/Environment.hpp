@@ -20,42 +20,42 @@ public:
 
   void setDayLength(float sec);
 
-  Vec3f getSunColor();
-  float getSunIntensity();
-  Vec3f getSunPos();
-
   float getTime()
   {return m_time;}
 
   float getDayLength()
   {return m_dayLength;}
-
-  void setExactness(int e);
+  
+  Vec3f getSkyLightColor();
+  float getSkyLightIntensity();
+  Vec3f getSkyLightDir();
 
 private:
 
   VertexSeq m_sphere;
   VertexSeq m_sun;
   VertexSeq m_moon;
-  VertexSeq m_moon1;
-  VertexSeq m_moon2;
-  VertexSeq m_moon3;
-  VertexSeq m_moon4;
-  VertexSeq m_moon5;
-  VertexSeq m_moon6;
-  VertexSeq m_moon7;
-  VertexSeq m_moon8;
-  VertexSeq m_moon9;
-  VertexSeq m_moon10;
-  Program m_program;
-  Program m_program2;
+  Program m_programSphere;
+  Program m_programSun;
+  Program m_programMoon;
   Program m_lightingPass;
   Camera& m_camera;
 
   float m_dayLength;
   float m_time;
   int m_day;
-  int m_exactness;
+  float m_orbitAngle;
+  float m_phase;
+  float m_sunAxis;
+  float m_moonAxis;
+
+  Vec3f getSunColor();
+  float getSunIntensity();
+  Vec3f getSunPos();
+
+  Vec3f getMoonColor();
+  float getMoonIntensity();
+  Vec3f getMoonPos();
 
   Vec3f getcUp();
   Vec3f getcWest();

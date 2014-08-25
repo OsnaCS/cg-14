@@ -57,6 +57,9 @@ void main() {
 	if(phi >= 3){
 
     phi -= 3;
+    phi = 1 - phi;
+    phi *= phi;
+    phi = 1 - phi;
     c2 = u_colorSouth;
 		c3 = u_colorWest;
 
@@ -64,6 +67,7 @@ void main() {
 	else if(phi >= 2){
 
 		phi -= 2;
+		phi *= phi;
 		c2 = u_colorEast;
 		c3 = u_colorSouth;
 
@@ -71,112 +75,25 @@ void main() {
 	else if(phi >= 1){
 
 		phi -= 1;
+		phi = 1 - phi;
+		phi *= phi;
+		phi = 1 - phi;
 		c2 = u_colorNorth;
 		c3 = u_colorEast;
 
 	}
 	else if (phi >= 0){
 
+		phi *= phi;
 		c2 = u_colorWest;
 		c3 = u_colorNorth;
 	}
 
   vec3 res = mix(c2, c3, phi);
-
+  theta = 1 - theta;
+  theta *= theta;
+  theta = 1 - theta;
   res = mix(res, c1, theta);
   o_color = vec4(res, 1);
-
-	// o_color = vec4(phi, theta, 0, 1);
-
-
-
-
-/*	vec3 c1, c2, c3;
-	vec3 planevec1;
-	vec3 planevec2;
-  float angle1;
-  float angle2;
-  float l;
-  float dpl;
-
-	if(inData.coord.y < 0){
-		c1 = u_colorDown;
-	}
-	else{
-		c1 = u_colorUp;
-	}
-
-	  // for u_colorWest,u_colorNorth
-  if(inData.coord.x > 0 && inData.coord.z >= 0) {
-  	c2 = u_colorWest;
-  	c3 = u_colorNorth;
-
-  	planevec2 = vec3(1,0,0);
-
-  }
-  // for u_colorNorth,u_colorEast
-  else if(inData.coord.x <= 0 && inData.coord.z > 0) {
-  	c2 = u_colorNorth;
-  	c3 = u_colorEast;
-
-  	planevec2 = vec3(0,0,1);
-  }
-  // for u_colorEast,u_colorSouth
-  else if(inData.coord.x < 0 && inData.coord.z <= 0) {
-  	c2 = u_colorEast;
-  	c3 = u_colorSouth;
-
-  	planevec2 = vec3(-1,0,0);
-  }
-  // for u_colorSouth,u_colorWest
-  else if(inData.coord.x >= 0 && inData.coord.z < 0) {
-  	c2 = u_colorSouth;
-  	c3 = u_colorWest;
-
-  	planevec2 = vec3(0,0,-1);
-  }
-
-  planevec1 = inData.coord;
-  planevec1.y = 0;
-
-  planevec2.y = 0;
-
-  if(length(planevec1) == 0) {
-    angle1 = 1;
-  } else {
-
-
-    l = length(inData.coord) * length(planevec1);
-    dpl = dot(inData.coord, planevec1) / l;
-    dpl = clamp(dpl, -1, 1);
-
-    angle1 = acos(dpl);
-
-    if(angle1 >= PI)
-      angle1 = 2 * PI - angle1;
-
-    angle1 /= (PI / 2);
-    angle1 = clamp(angle1, 0, 1);
-  }
-
-  inData.coord.y = 0;
-  l = length(inData.coord) * length(planevec2);
-  dpl = dot(inData.coord, planevec2) / l;
-  dpl = clamp(dpl, -1, 1);
-
-  angle2 = acos(dpl);
-
-  if(angle2 > PI)
-    angle2 = 2 * PI - angle2;
-
-  angle2 /= (PI / 2);
-  angle2 = clamp(angle2,0,1);
-
-  vec3 res;
-
-  res = mix(c2, c3, angle2);
-
-  res = mix(res, c1, angle1);
-  o_color = vec4(res, 1);*/
 
  }
