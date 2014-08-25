@@ -87,6 +87,33 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
     hotP.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
     hotP.uniform["normalTex"] = 0;
 
+    // u_normals[0] = Top
+    hotP.uniform["u_normals[0]"] = Vec3f(0,1,0);
+    // u_normals[1] = Bottom
+    hotP.uniform["u_normals[1]"] = Vec3f(0,-1,0);
+    // u_normals[2] = North
+    hotP.uniform["u_normals[2]"] = Vec3f(0,0,-1);
+    // u_normals[3] = South
+    hotP.uniform["u_normals[3]"] = Vec3f(0,0,1);
+    // u_normals[4] = West
+    hotP.uniform["u_normals[4]"] = Vec3f(-1,0,0);
+    // u_normals[5] = East
+    hotP.uniform["u_normals[5]"] = Vec3f(1,0,0);
+
+    // u_tangents[0] = Top
+    hotP.uniform["u_tangents[0]"] = Vec3f(1,0,0);
+    // u_tangents[0] = Bottom
+    hotP.uniform["u_tangents[1]"] = Vec3f(0,0,1);
+    // u_tangents[0] = North
+    hotP.uniform["u_tangents[2]"] = Vec3f(1,0,0);
+    // u_tangents[0] = South
+    hotP.uniform["u_tangents[3]"] = Vec3f(1,0,0);
+    // u_tangents[0] = West
+    hotP.uniform["u_tangents[4]"] = Vec3f(0,0,1);
+    // u_tangents[0] = East
+    hotP.uniform["u_tangents[5]"] = Vec3f(0,0,1);
+
+
     TexCont cont;
     cont.addTexture(0, m_normalTexture);
     cont.prime([&](HotTexCont& hotTexCont) {
