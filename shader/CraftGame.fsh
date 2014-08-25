@@ -9,6 +9,7 @@ in VertexData {
 	vec3 tangent;
 	vec3 pos;
 } inData;
+
 uniform vec3 u_lightRay;
 uniform vec3 u_eyePoint;
 uniform sampler2D texture1;

@@ -1,5 +1,6 @@
 #include "MapView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
+#include "ObjectLoader.hpp"
 
 #include <math.h>
 
@@ -89,6 +90,7 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
     TexCont cont;
     cont.addTexture(0, m_normalTexture);
     cont.prime([&](HotTexCont& hotTexCont) {
+      
       drawChunks(hotP, hotTexCont);
     });
   });

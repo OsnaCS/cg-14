@@ -185,6 +185,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
+      m_playerView.drawNormalPass(viewMatrix, projectionMatrix);
     });
 
     // second pass (lighting)
@@ -202,9 +203,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-
-
-
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 
@@ -217,6 +215,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
           hotP.draw(hotT, m_fullScreenQuad, PrimitiveType::TriangleStrip);
         });      
       });
+
+      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
 
@@ -235,7 +235,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         });
       });
 
-      m_playerView.draw();
+      m_playerView.draw(viewMatrix, projectionMatrix);
     });
 
     // swap buffer

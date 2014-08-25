@@ -40,4 +40,5 @@ private:
 	Program m_normalPass;
 	Program m_finalPass;
 	Tex2D m_normalTexture;
+	Tex2D m_pickaxeTexture;
 };
