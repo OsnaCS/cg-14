@@ -118,7 +118,23 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   //Show pickaxe
 	m_normalPass.prime([&](HotProgram& hotPickaxe){
 
-		hotPickaxe.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
+		//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.25,0.25,0.25));
+
+		//Rotation Y-axis in player direction
+    float angle = -(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
+
+  	//Rotation X-axis to tilt pickaxe
+
+  	//Translation to player height and to the front right
+		Vec3f pos = -(m_player.getPosition().normalize());
+		Vec3f dir = m_player.getDirection().normalize();
+  	Vec3f cross1 = cross(pos, dir);
+  	cross1.normalize();
+  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
+
+		hotPickaxe.uniform["u_view"] = viewMat * translation * rotationY * scaling;
 		hotPickaxe.uniform["u_projection"] = projMat;
 
 		TexCont cont; 
@@ -133,8 +149,23 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
 
   m_finalPass.prime([&](HotProgram& hotP) {
   	
-  	//Vec3f cross1 = cross(m_player.getPosition(), m_player.getDirection());
-    hotP.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
+		//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.25,0.25,0.25));
+
+		//Rotation Y-axis in player direction
+    float angle = -(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
+
+  	//Rotation X-axis to tilt pickaxe
+
+  	//Translation to player height and to the front right
+		Vec3f pos = -(m_player.getPosition().normalize());
+		Vec3f dir = m_player.getDirection().normalize();
+  	Vec3f cross1 = cross(pos, dir);
+  	cross1.normalize();
+  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
+
+		hotP.uniform["u_view"] = viewMat * translation * rotationY * scaling;
     hotP.uniform["u_projection"] = projMat;
     hotP.uniform["u_winSize"] = cam.getWindow().getSize();
     hotP.uniform["s_lightTexture"] = 0;
