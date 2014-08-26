@@ -48,7 +48,17 @@ Player::Player( Map& m)
     ,m_map(m)
     ,m_fallen(0)
     ,m_attrib(MAX_HEARTS)
+    ,m_inventory(10)
 {
+    m_inventory.addItem(BlockType::Cactus);
+    m_inventory.addItem(BlockType::Cactus);
+    m_inventory.addItem(BlockType::Cactus);
+    m_inventory.addItem(BlockType::Cactus);
+    m_inventory.addItem(BlockType::Birch);
+    m_inventory.addItem(BlockType::Stone);
+    m_inventory.addItem(BlockType::Stone);
+    m_inventory.addItem(BlockType::Wood);
+
 
 }
 
@@ -482,3 +492,14 @@ Vec3i Player::getNextBlock()
   }
   return resultNull;
 }
+
+const map<BlockType, int>& Player::getInventoryItems() const
+{
+    return m_inventory.getItems();
+}
+
+
+ int Player::maxDisplayItems() const
+ {
+     return m_inventory.maxDisplayItems();
+ }

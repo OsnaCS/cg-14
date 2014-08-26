@@ -5,7 +5,7 @@
 #include "Chunk.hpp"
 #include "Map.hpp"
 #include "PlayerAttributes.hpp"
-
+#include "PlayerInventory.hpp"
 
 /** @Class Player 
 */
@@ -43,6 +43,19 @@ public:
   		@return Vec3f position Get the Position in 3D Space
   */
   inline Vec3f getPosition();
+
+  /**
+   * @brief getInventoryItems Get items from player's inventory
+   * @return
+   */
+  const map<BlockType, int>& getInventoryItems() const;
+
+  /**
+    * @brief maxDisplayItems Maximum number of "listed" items
+    * @return
+    */
+   int maxDisplayItems() const;
+
 
   /** @brief Process all input Events by Mouse and Keyboard
 
@@ -108,6 +121,7 @@ private:
   Map& m_map;
   float m_fallen;
   PlayerAttributes m_attrib;
+  PlayerInventory m_inventory;
 };
 
 

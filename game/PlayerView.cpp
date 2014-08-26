@@ -3,6 +3,8 @@
 #include "ObjectLoader.hpp"
 #include "Camera.hpp"
 #include "lumina/util/Transformation.hpp"
+#include <map>
+#include "BlockType.hpp"
 
 using namespace std;
 using namespace lumina;
@@ -16,18 +18,28 @@ PlayerView::PlayerView(Player& player)
 
 }
  
-void PlayerView::draw(Mat4f viewMatrix, Mat4f projectionMatrix)
+void PlayerView::draw( )
 {
 
 	m_program.prime([&](HotProgram& hotprog)
 	{
- 		m_colorTexture.prime(0, [&](HotTex2D& hotTex) {
+        m_colorTexture.prime(0, [&](HotTex2D& hotTex)
+        {
 			hotprog.draw(hotTex, updateHearts(), PrimitiveType::TriangleStrip);
 		});
 	});	
 
-    m_markerProgram.prime([this](HotProgram& hotprog){
+    m_markerProgram.prime([this](HotProgram& hotprog)
+    {
         hotprog.draw(m_centerMarker, PrimitiveType::Line);
+    });
+
+    m_inventoryProg.prime([&,this](HotProgram& hotprog)
+    {
+        m_inventoryTex.prime(0, [&,this](HotTex2D& hotTex)
+        {
+            hotprog.draw(hotTex, updateInventory(), PrimitiveType::TriangleStrip);
+        });
     });
 
 }
@@ -35,23 +47,6 @@ void PlayerView::draw(Mat4f viewMatrix, Mat4f projectionMatrix)
 
 void PlayerView::init()
 {
-
-	//Initialize of the texture
-	ImageBox image_box = loadJPEGImage("gfx/hearts.jpeg");
-  m_colorTexture.create(Vec2i(256,128), TexFormat::RGB8, image_box.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
-
-	VShader vs;
-	vs.compile(loadShaderFromFile("shader/HeartPanel.vsh"));
-	FShader fs;
-	fs.compile(loadShaderFromFile("shader/HeartPanel.fsh"));
-    // create program and link the two shaders
-	m_program.create(vs, fs);
-	m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
-	m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
-	m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
-
     // Pickaxe
 	//Initialize of the texture
 	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture512.jpg");
@@ -85,60 +80,77 @@ void PlayerView::init()
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
 
 
+    // Display hearts panel
+    initHeartPanel();
+
     // For center-marker at the center of the screen
-    m_centerMarker.create(4, 4);
-    m_centerMarker.prime([](HotVertexSeq<Vec2f, Vec3f>& hot)
-    {
-      /*color may change against the background*/
-      hot.vertex[0].set( Vec2f(-0.05, 0.0), Vec3f(1,1,1) );
-      hot.vertex[1].set( Vec2f( 0.05, 0.0), Vec3f(1,1,1));
-      hot.vertex[2].set( Vec2f( 0.0,-0.05), Vec3f(1,1,1));
-      hot.vertex[3].set( Vec2f( 0.0, 0.05), Vec3f(1,1,1));
+    initCenterMarker();
 
-      hot.index[0] = 0;
-      hot.index[1] = 1;
-      hot.index[2] = 2;
-      hot.index[3] = 3;
-    });
-
-    VShader vsCenterMarker;
-    vsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.vsh"));
-    FShader fsCenterMarker;
-    fsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.fsh"));
-    m_markerProgram.create(vsCenterMarker, fsCenterMarker);
-
+    // Display player's inventory
+    initInventory();
 
 }
 
+VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
+{
+    const map<BlockType, int> items = m_player.getInventoryItems();
+    const Vec2f INIT_POS(-0.8f, -0.85f);
+    const float ITEM_SIZE = 0.07f;
+
+    VertexSeq<Vec2f, Vec2f> inventoryPanel;
+    inventoryPanel.create(4*items.size(), 5*m_player.maxDisplayItems() );
+    inventoryPanel.prime([&](HotVertexSeq<Vec2f, Vec2f>& hot)
+    {
+        auto it=items.begin();
+        for ( int i=0;  it != items.end(); ++it, ++i )
+        {
+            Vec2f texCoord = getTexCoords(it->first, BlockSide::North);
+            hot.vertex[i*4+0].set( Vec2f(INIT_POS.x+  i  *ITEM_SIZE, INIT_POS.y), texCoord );
+            hot.vertex[i*4+1].set( Vec2f(INIT_POS.x+(i+1)*ITEM_SIZE, INIT_POS.y), texCoord + Vec2f(1/8.f, 0) );
+            hot.vertex[i*4+2].set( Vec2f(INIT_POS.x+(i+1)*ITEM_SIZE, INIT_POS.y-ITEM_SIZE)
+                                                                                , texCoord+Vec2f(1/8.f, 1/8.f) );
+            hot.vertex[i*4+3].set( Vec2f(INIT_POS.x+   i *ITEM_SIZE, INIT_POS.y-ITEM_SIZE)
+                                                                                , texCoord+Vec2f(0, 1/8.f) );
+            hot.index[i*5+0] = i*4+0;
+            hot.index[i*5+1] = i*4+1;
+            hot.index[i*5+2] = i*4+2;
+            hot.index[i*5+3] = i*4+3;
+            hot.index[i*5+4] = GLIndex::PrimitiveRestart;
+        }
+    });
+    return inventoryPanel;
+}
+
+
 VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
-  
+
   int activeHearts = m_player.getHearts();
   int maxHearts = m_player.getMaxHearts();
   float nextHeart = -(maxHearts / 2.0f) * HEART_SIZE;
- 	VertexSeq<Vec2f, Vec3f, Vec2f> m_heartPanel;
-	m_heartPanel.create(4 * maxHearts, 5 * maxHearts);
-  m_heartPanel.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
+  VertexSeq<Vec2f, Vec3f, Vec2f> heartPanel;
+  heartPanel.create(4 * maxHearts, 5 * maxHearts);
+  heartPanel.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
   {
  	for(int i = 0; i < maxHearts; i++){
 	  if(activeHearts > i){
 		 	hot.vertex[0+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY), Vec3f(0,1,1), Vec2f(0.5,0));
-	  	hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.5,1));
-	  	hot.vertex[2+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY), Vec3f(1,1,0),Vec2f(1,0));
-	  	hot.vertex[3+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY - HEART_SIZE), Vec3f(1,0,1),Vec2f(1,1));
+            hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.5,1));
+            hot.vertex[2+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY), Vec3f(1,1,0),Vec2f(1,0));
+            hot.vertex[3+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY - HEART_SIZE), Vec3f(1,0,1),Vec2f(1,1));
 	 	}else{
 		 	hot.vertex[0+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY), Vec3f(0,1,1), Vec2f(0.0,0));
-	  	hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.0,1));
+            hot.vertex[1+i*4].set(Vec2f(nextHeart +	HEART_SIZE * i, HEART_POSY - HEART_SIZE), Vec3f(1,1,1),Vec2f(0.0,1));
 		 	hot.vertex[2+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY), Vec3f(1,1,0),Vec2f(0.5,0));
 		 	hot.vertex[3+i*4].set(Vec2f(nextHeart + HEART_SIZE * (i + 1), HEART_POSY - HEART_SIZE), Vec3f(1,0,1),Vec2f(0.5,1));
 		}
-	  hot.index[0+ i * 5] = 0 + i * 4;
-	  hot.index[1+ i * 5] = 1 + i * 4;
+        hot.index[0+ i * 5] = 0 + i * 4;
+        hot.index[1+ i * 5] = 1 + i * 4;
 	 	hot.index[2+ i * 5] = 2 + i * 4;
 		hot.index[3+ i * 5] = 3 + i * 4;
 		hot.index[4+ i * 5] = GLIndex::PrimitiveRestart;
 	}
 	});
-	return m_heartPanel;
+    return heartPanel;
 }
 
 void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
@@ -175,4 +187,64 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
       });
     });
   });
+}
+
+void PlayerView::initInventory()
+{
+
+    ImageBox image_box = loadJPEGImage("gfx/texture_inventory.jpg");
+    m_inventoryTex.create(Vec2i(512,512), TexFormat::RGB8, image_box.data());
+    m_inventoryTex.params.filterMode = TexFilterMode::Trilinear;
+    m_inventoryTex.params.useMipMaps = true;
+
+    VShader vs;
+    vs.compile(loadShaderFromFile("shader/PlayerInventory.vsh"));
+    FShader fs;
+    fs.compile(loadShaderFromFile("shader/PlayerInventory.fsh"));
+    m_inventoryProg.create(vs, fs);
+
+}
+
+void PlayerView::initCenterMarker()
+{
+    m_centerMarker.create(4, 4);
+    m_centerMarker.prime([](HotVertexSeq<Vec2f, Vec3f>& hot)
+    {
+      /*color may change against the background...now,it is onl white cross.*/
+      hot.vertex[0].set( Vec2f(-0.04, 0.0), Vec3f(1,1,1) );
+      hot.vertex[1].set( Vec2f( 0.04, 0.0), Vec3f(1,1,1));
+      hot.vertex[2].set( Vec2f( 0.0,-0.05), Vec3f(1,1,1));
+      hot.vertex[3].set( Vec2f( 0.0, 0.05), Vec3f(1,1,1));
+
+      hot.index[0] = 0;
+      hot.index[1] = 1;
+      hot.index[2] = 2;
+      hot.index[3] = 3;
+    });
+
+    VShader vsCenterMarker;
+    vsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.vsh"));
+    FShader fsCenterMarker;
+    fsCenterMarker.compile(loadShaderFromFile("shader/CenterMarker.fsh"));
+    m_markerProgram.create(vsCenterMarker, fsCenterMarker);
+
+}
+
+void PlayerView::initHeartPanel()
+{
+
+    //Initialize of the texture
+    ImageBox image_box = loadJPEGImage("gfx/hearts.jpeg");
+    m_colorTexture.create(Vec2i(256,128), TexFormat::RGB8, image_box.data());
+    m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
+    m_colorTexture.params.useMipMaps = true;
+
+    VShader vs;
+    vs.compile(loadShaderFromFile("shader/HeartPanel.vsh"));
+    FShader fs;
+    fs.compile(loadShaderFromFile("shader/HeartPanel.fsh"));
+    m_program.create(vs, fs);
+    m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
+    m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+    m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
 }
