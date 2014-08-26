@@ -83,6 +83,7 @@ private:
  
   //Get the next Block in the lookingdirection
   Vec3i getNextBlock(); 
+  Vec3i getLastAir();
 
   void turn_side(float deltaX);
   void turn_upDown(float deltaY);
@@ -102,6 +103,7 @@ private:
   bool m_sPressed;
   bool m_aPressed;
   bool m_dPressed;
+  bool m_ePressed;
   bool m_SpacePressed;
   bool m_CtrlPressed;
   bool m_ShiftPressed;

@@ -42,6 +42,7 @@ Player::Player( Map& m)
     ,m_sPressed(false)
     ,m_aPressed(false)
     ,m_dPressed(false)
+    ,m_ePressed(false)
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
@@ -124,6 +125,13 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 
             break;
 
+            case KeyCode::E :
+            if(m_ePressed == false){
+                m_ePressed = true;
+            }
+
+            break;
+
             default:
             //Do Nothing
             break;
@@ -185,6 +193,11 @@ void Player::turn_upDown(float deltaY)
 
 void Player::update(float timePassed)
 {
+
+  if(m_ePressed){
+    m_ePressed = false;
+    m_map.setBlockType(getLastAir(),BlockType::Dirt);
+  }
   //handle block destroy
   if(m_rightMouseCaptured){
     m_rightMouseCaptured = false;
@@ -477,6 +490,30 @@ Vec3i Player::getNextBlock()
     if(collide(m_position.x+x,m_position.y+y+CAMERA_HIGH,m_position.z+z)){
       Vec3i pos = Vec3i(static_cast<int>(round(x+m_position.x)),static_cast<int>(round(y+m_position.y+CAMERA_HIGH)),static_cast<int>(round(z+m_position.z)));
 
+      return pos;
+    }
+  }
+  return resultNull;
+}
+
+Vec3i Player::getLastAir()
+{
+  float x = 0;
+  float y = 0;
+  float z = 0;
+
+  //Return current position (where already air is);
+  Vec3i resultNull = Vec3i(m_position.x, m_position.y, m_position.z);
+  
+  while(fabs(x)+fabs(y)+fabs(z)<4){
+    x += m_direction.x*0.03;
+    y += m_direction.y*0.03;
+    z += m_direction.z*0.03;
+    
+    if(collide(m_position.x+x,m_position.y+y+CAMERA_HIGH,m_position.z+z)){
+      Vec3i pos = Vec3i(static_cast<int>(round(x+m_position.x-m_direction.x*0.03)),
+                        static_cast<int>(round(y+m_position.y+CAMERA_HIGH-m_direction.y*0.03)),
+                        static_cast<int>(round(z+m_position.z-m_direction.z*0.03)));
       return pos;
     }
   }
