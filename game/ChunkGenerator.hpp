@@ -29,7 +29,7 @@ private:
    * @param zj z-Wert des Blockes in Chunckkoordinaten
    * @param noise Höhenwert des zu setzenden Blockes
    */
-  void setBlockHeight(Map& m, BiomeType type, int x, int z, int xi, int zj, int noise);
+  void setBlockHeight(Map& m, BiomeType type, int x, int z, int xi, int zj, int noise, int biomeNoise);
 
   void setBiomes(Map& map, Chunk chunk, int x, int y, int biomeNoise);
 
