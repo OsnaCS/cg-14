@@ -46,7 +46,8 @@ private:
   Tex2D m_saveTex;
   Tex2D m_loadTex;
   Tex2D m_exitTex;
-
+  Tex2D m_optionsTex;
+  
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);
   void updateComponents(float delta);

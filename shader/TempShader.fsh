@@ -51,7 +51,7 @@ void main()
 	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + 3.0*blurSize2)) * 0.09;
 	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + 4.0*blurSize2)) * 0.05;
 
-	  // Um das ganze Schwarzweiß zu machen
+	  // Um das ganze Schwarzweiß zu
 		float graur = save.x * 0.299;
 		float graug = save.y * 0.587;
 		float graub = save.z * 0.114;

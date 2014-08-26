@@ -158,6 +158,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_exitTex.params.filterMode = TexFilterMode::Trilinear;
   m_exitTex.params.useMipMaps = true;
 
+  ImageBox image_options = loadPNGImage("gfx/options.png");
+  m_optionsTex.create(Vec2i(680,90), TexFormat::RGBA8, image_options.data());
+  m_optionsTex.params.filterMode = TexFilterMode::Trilinear;
+  m_optionsTex.params.useMipMaps = true;
+
   m_envir.init();
   m_mapView.init();
   m_playerView.init();
@@ -206,7 +211,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   });
 
   m_fullScreenQuad2.create(4);
-  m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
+  m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) 
+  {
     hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
     hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
     hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));
@@ -220,8 +226,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program tempP;
   tempP.create(tempVS, tempFS);
 
-
-
   VShader menuVS;
   menuVS.compile(loadShaderFromFile("shader/Menu.vsh"));
   FShader menuFS;
@@ -229,9 +233,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
   Program pMenu;
   pMenu.create(menuVS, menuFS);
-
-
-
 
   RenderBuffer zBuf;
   zBuf.create(m_window.getSize(), RenderBufferType::Depth32);
@@ -354,28 +355,34 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         cont.addTexture(0, m_resTex);
         cont.addTexture(1, m_loadTex);
         cont.addTexture(2, m_saveTex);
-        cont.addTexture(3, m_exitTex);
+        cont.addTexture(3, m_optionsTex);
+        cont.addTexture(4, m_exitTex);
+
 
         cont.prime([&](HotTexCont& hotTexCont) 
         {
 
           if(m_pause)
           {
-            
+
             hotP.uniform["u_offset"] = (float)0.0;
 
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.4;
+            hotP.uniform["u_offset"] = (float)-0.3;
             hotP.uniform["s_menupng"] = 1;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.8;
+            hotP.uniform["u_offset"] = (float)-0.6;
             hotP.uniform["s_menupng"] = 2;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-1.2;
+            hotP.uniform["u_offset"] = (float)-0.9;
             hotP.uniform["s_menupng"] = 3;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-1.2;
+            hotP.uniform["s_menupng"] = 4;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }
