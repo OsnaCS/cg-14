@@ -90,7 +90,6 @@ void CraftGame::init() {
   });
 
   // resize window
-  m_window.setSizeMultiplier(2);
   m_window.resize(Vec2i(1280, 720));
 }
 
