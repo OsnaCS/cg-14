@@ -3,7 +3,7 @@ GAME_HPP := $(wildcard game/*.hpp)
 GAME_OBJ := $(GAME_CPP:game/%.cpp=obj/%.obj)
 EXE_FILE := app
 
-CXXFLAGS := -Wall -std=c++1y -I. -Ilibs/glfw/include
+CXXFLAGS := -Wall -Wno-missing-braces -std=c++1y -I. -Ilibs/glfw/include
 CXX := clang++ 
 LDFLAGS := -Llibs -lglfw3 -lGLEW -lpthread -ljpeg -lpng
 OS := $(shell uname -s)
