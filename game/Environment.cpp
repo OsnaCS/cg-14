@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(200), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0) {
+: m_camera(camera), m_dayLength(200), m_time(m_dayLength/5), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0) {
 
 }
 
