@@ -52,14 +52,14 @@ void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos, MapView& mapV
         if(57 <= biomeNoise && biomeNoise < 70){
           chunk.setBiomeType(BiomeType::Forest);
         }
-        if(70 <= biomeNoise && biomeNoise < 72){
+        if(70 <= biomeNoise && biomeNoise < 75){
           chunk.setBiomeType(BiomeType::Hillside);
         }
-        if(72 <= biomeNoise && biomeNoise <= 126){
+        if(75 <= biomeNoise && biomeNoise <= 126){
           chunk.setBiomeType(BiomeType::Mountains);
         }
 
-        setBiomes(map, chunk, x, z);
+        setBiomes(map, chunk, x, z, biomeNoise);
         
         Vec2i chuPos = Vec2i(x + 1, z);
         if(mapView.exists(chuPos)) {
@@ -82,7 +82,7 @@ void ChunkGenerator::chunkGeneration(Map& map, Vec3i spectatorPos, MapView& mapV
   }
 }
 
-void ChunkGenerator::setBiomes(Map& m, Chunk chunk, int x, int z) {
+void ChunkGenerator::setBiomes(Map& m, Chunk chunk, int x, int z, int biomeNoise) {
   BiomeType type = chunk.getBiomeType();
 
   double frequency = getFrequency(type);
@@ -92,12 +92,28 @@ void ChunkGenerator::setBiomes(Map& m, Chunk chunk, int x, int z) {
   for(int xi = x * 16; xi < (x * 16) + 16; xi++) {
     // Blöcke von oben nach unten (in Blockkoordinaten)
     for(int zj = z * 16; zj < (z * 16) + 16; zj++) {
-      // Simplex Noise:
-      // Berechne Werte im Intervall [-1,1] mit Simplex Noise
 
-      double simpNoise = SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
-      // Umrechnen von Intervall [-1,1] in Intervall [c,d]
-      int noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise);
+
+
+
+      // Simplex Noise:
+      double simpNoise;
+      int noise;
+      // Wenn Biom Mountains oder Hillside
+      if(70 <= biomeNoise && biomeNoise <= 126){
+        // Umrechnen von Intervall [70,126] in [-1.25,1.25] für Gaußsche Glockenkurve
+        double term = ((1.75 * biomeNoise - (-1.75) * biomeNoise + 126 * (-1.75) - 1.75 * 70) / (126.0 - 70.0));
+        // Multiplikation von Simplex Noise mit Gaußscher Glockenkurve für einen weicheren Biomübergang an den Bergen
+        simpNoise = exp(-1 * term * term) * SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
+        // Umrechnen von Intervall [-1,1] in Intervall [c,d]
+        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise) -7;
+      }
+      else {
+        // Berechne Werte im Intervall [-1,1] mit Simplex Noise
+        simpNoise = SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
+        // Umrechnen von Intervall [-1,1] in Intervall [c,d]
+        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise);
+      }
 
       // xi und zj umrechnen
       int xii = xi%16;
@@ -207,13 +223,13 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         break;
 
       case BiomeType::Hillside:
-        if(k == noise && noise <= 80) {
+        if(k == noise && noise <= 77) {
           srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
           int random = rand() % 512;
           if(random < 350){ 
             map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
           } else map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-        } else if (k == noise && noise > 80){
+        } else if (k == noise && noise > 77){
           map.getChunk({x,z}).setBlockType({xi,k,zj}, BlockType::Stone);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
@@ -221,9 +237,9 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         break;
 
         case BiomeType::Mountains:
-        if(k == noise && noise > 80) {
+        if(k == noise && noise > 72) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-        } else if(k == noise && noise <= 80){
+        } else if(k == noise && noise <= 72){
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone); //  Unter dem Noise-Wert gibt es nur Dirt
@@ -284,7 +300,7 @@ void ChunkGenerator::setBirchTree(Map& map, int x, int z, int xi, int zj, int no
 
   	// 3rd row
    	k++;
-   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Birch); // Birch
   	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi-2, k+1, zj}, BlockType::BirchLeaves);
@@ -313,7 +329,7 @@ void ChunkGenerator::setBirchTree(Map& map, int x, int z, int xi, int zj, int no
 
   	// 2nd row
    	k++;;
-   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Wood);
+   	map.getChunk({x, z}).setBlockType({xi, k+1, zj}, BlockType::Birch); // Birch
   	map.getChunk({x, z}).setBlockType({xi-1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi+1, k+1, zj}, BlockType::BirchLeaves);
   	map.getChunk({x, z}).setBlockType({xi, k+1, zj+1}, BlockType::BirchLeaves);
