@@ -5,7 +5,7 @@
 Chunk::Chunk()
  : m_blocks(16*16*128)
 {
-	BiomeType chunkBiomeType;
+	
 }
 
 void Chunk::setBlockType(Vec3i pos, BlockType type)

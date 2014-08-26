@@ -119,6 +119,8 @@ void CraftGame::start() {
 
 void CraftGame::updateComponents(float delta) {
 
+  m_fps.printFPS(delta);
+
   // update game window
   m_window.update();
 
@@ -218,18 +220,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   Program tempP;
   tempP.create(tempVS, tempFS);
 
+  VShader menuVS;
+  menuVS.compile(loadShaderFromFile("shader/Menu.vsh"));
+  FShader menuFS;
+  menuFS.compile(loadShaderFromFile("shader/Menu.fsh"));
 
-
-  VShader menüVS;
-  menüVS.compile(loadShaderFromFile("shader/Menü.vsh"));
-  FShader menüFS;
-  menüFS.compile(loadShaderFromFile("shader/Menü.fsh"));
-
-  Program pMenü;
-  pMenü.create(menüVS, menüFS);
-
-
-
+  Program pMenu;
+  pMenu.create(menuVS, menuFS);
 
   RenderBuffer zBuf;
   zBuf.create(m_window.getSize(), RenderBufferType::Depth32);
@@ -239,7 +236,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_lBuffer.attachRenderBuffer(zBuf);
 
   // time measurement
-  float sum = 0;
   auto now = chrono::system_clock::now();
 
   // run as long as the window is valid and the user hasn't pessed ESC
@@ -249,13 +245,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     auto diff = chrono::system_clock::now() - now;
     float delta = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
     now = chrono::system_clock::now();
-    sum += delta;
-
-    // print FPS
-    if(sum > 2) {
-      slog("FPS:", 1 / delta);
-      sum -= 2;
-    }
 
     // update game components
     updateComponents(delta);
@@ -350,7 +339,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       //m_colorTexture.prime(0, [&](HotTex2D& hotT)
       {
 
-        pMenü.prime([&](HotProgram& hotP) 
+        pMenu.prime([&](HotProgram& hotP)
         {
 
           if(m_pause)

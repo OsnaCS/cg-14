@@ -22,10 +22,14 @@ void main() {
 	vec3 xA = inData.tangent; // x coordinate from the tangent
 	vec3 yA = cross(zA, xA); // cross product results in the last coordinate
 
-	mat3 texTrans = inverse(mat3(xA, yA, zA));
+	mat3 texTrans = mat3(xA, yA, zA);
 
-	normal = texture(normalTex, inData.uv).xyz * texTrans;
+	normal = texTrans * (((texture(normalTex, inData.uv).xyz) - 0.5) * 2);
+
+	// Gibt ein Vec4 zurueck, wobei die 4. Komponente der Alpha-Wert ist
+
 
 	o_depth = vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
-	o_normal = normal;
+
+	o_normal = (normal+1)/2;
 }

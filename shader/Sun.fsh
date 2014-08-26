@@ -16,14 +16,6 @@ vec2 edge;
 
 void main(){
 
-	// float theta = 0;
-	// float dpl;
-	// vec2 help = vec2(0,1);
- //  dpl = dot(inData.edge, help) / (length(inData.edge) * length(help));
- //  dpl = clamp(dpl, -1, 1);
-	// theta = acos(dpl);
-	// theta /= PI;
-
 	float distance = inData.edge.x * inData.edge.x + inData.edge.y * inData.edge.y;
  	float xh, yh, zh;
   if(distance <= 1- 0.04 * u_pulse) {

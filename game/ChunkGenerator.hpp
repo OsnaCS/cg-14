@@ -31,7 +31,7 @@ private:
    */
   void setBlockHeight(Map& m, BiomeType type, int x, int z, int xi, int zj, int noise);
 
-  void setBiomes(Map& map, Chunk chunk, int x, int y);
+  void setBiomes(Map& map, Chunk chunk, int x, int y, int biomeNoise);
 
   void setBirchTree(Map& map, int x, int z, int xi, int zj, int noise);
   void setSpruceTree(Map& map, int x, int z, int xi, int zj, int noise);
