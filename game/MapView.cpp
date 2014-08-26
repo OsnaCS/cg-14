@@ -64,6 +64,12 @@ void MapView::init() {
   m_lightingPass.create(lightingVS, lightingFS);
   m_lightingPass.perFragProc.enableDepthTest();
   m_lightingPass.perFragProc.setDepthFunction(DepthFunction::Greater);
+  m_lightingPass.perFragProc.blendFuncRGB = BlendFunction::Max;
+  m_lightingPass.perFragProc.blendFuncA = BlendFunction::Max;
+  m_lightingPass.perFragProc.srcRGBParam = BlendParam::One;
+  m_lightingPass.perFragProc.dstRGBParam = BlendParam::One;
+  m_lightingPass.perFragProc.srcAParam = BlendParam::One;
+  m_lightingPass.perFragProc.dstAParam = BlendParam::One;
 }
 
 void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
@@ -137,7 +143,8 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
   vector<Vec3f> pointLights = m_map.getPointLights();
-  pointLights.push_back(Vec3f(0, 80, 0));
+  pointLights.push_back(Vec3f(0, 78, 0));
+  pointLights.push_back(Vec3f(16, 80, 16));
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
 
