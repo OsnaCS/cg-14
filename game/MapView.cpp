@@ -170,6 +170,32 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
   return false;
 }
 
+bool MapView::notifiBlockUpdate(Vec3i blockPos) {
+
+  deleteChunkView(m_map.getChunkPos(blockPos));
+
+  if(blockPos.x % 16 == 0) {
+
+    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(-1, 0));
+  }
+
+  if(blockPos.x % 16 == 15) {
+
+    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(1, 0));
+  }
+
+  if(blockPos.z % 16 == 0) {
+
+    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(0, -1));
+  }
+
+  if(blockPos.z % 16 == 15) {
+
+    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(0, 1));
+  }
+
+}
+
 void MapView::deleteChunkView(Vec2i chunkPos){
   m_mapView.erase(chunkPos);
 }
