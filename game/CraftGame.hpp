@@ -8,6 +8,7 @@
 #include "MapView.hpp"
 #include "ChunkGenerator.hpp"
 #include "PlayerView.hpp"
+#include "FPSCounter.hpp"
 
 class CraftGame {
 public:
@@ -41,6 +42,7 @@ private:
   FrameBuffer m_fBuffer;
   Tex2D m_fxaaTex;
   FrameBuffer m_fxaaBuffer;
+  FPSCounter m_fps;
 
   Tex2D m_colorTexture;
 
