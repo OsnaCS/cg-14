@@ -14,6 +14,7 @@ public:
 
 	MapView(Map& map, Camera& cam, Environment& envir);
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
+	void drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer);
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
 	bool notifiBlockUpdate(Vec3i blockPos);
@@ -42,4 +43,5 @@ private:
 	Program m_finalPass;
 	Tex2D m_normalTexture;
 	Tex2D m_pickaxeTexture;
+	Program m_lightingPass;
 };

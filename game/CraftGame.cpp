@@ -285,7 +285,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     m_lBuffer.prime([&](HotFrameBuffer& hotFB) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
 
-      m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
+      // m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
+      m_mapView.drawLightingPass(viewMatrix, projectionMatrix, gCont);
     });
 
     // third pass (final)
@@ -323,7 +324,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
-      m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
+      m_lBufferTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
 
           hotP.uniform["u_pause"] = m_pause;

@@ -58,6 +58,11 @@ void Map::setBlockType(Vec3i pos, BlockType type) {
   if(pos.z < 0)
     pos.z = pos.z + 16;
 
+  // TODO: remove torches from list if block is removed
+  if (type == BlockType::Torch) {
+    m_pointLights.push_back(pos);
+  }
+
   m_map.at(pos2d).setBlockType(pos, type);
 }
 

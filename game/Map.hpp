@@ -3,6 +3,7 @@
 #include "Chunk.hpp"
 #include "BlockType.hpp"
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -99,9 +100,14 @@ public:
 
 	//map<Vec2i, Chunk> loadWorld("WeltDatei");
 
+	vector<Vec3f> getPointLights() {
+		return m_pointLights;
+	}
+
 private: 
 	// Map with all Chunks
 	map<Vec2i, Chunk> m_map;
+	vector<Vec3f> m_pointLights;
 
 	//Name of the Map
 	string m_name;

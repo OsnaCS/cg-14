@@ -3,6 +3,7 @@
 #include "ObjectLoader.hpp"
 
 #include <math.h>
+#include <vector>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
 : m_map(map), m_cam(cam), m_envir(envir) {
@@ -55,6 +56,14 @@ void MapView::init() {
   m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_finalPass.primitiveProc.enableCulling();
 
+  VShader lightingVS;
+  lightingVS.compile(loadShaderFromFile("shader/MapViewLightingPass.vsh"));
+  FShader lightingFS;
+  lightingFS.compile(loadShaderFromFile("shader/MapViewLightingPass.fsh"));
+
+  m_lightingPass.create(lightingVS, lightingFS);
+  m_lightingPass.perFragProc.enableDepthTest();
+  m_lightingPass.perFragProc.setDepthFunction(DepthFunction::Greater);
 }
 
 void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
@@ -122,6 +131,55 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
       
       drawChunks(hotP, hotTexCont);
     });
+  });
+}
+
+void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
+
+  vector<Vec3f> pointLights = m_map.getPointLights();
+  pointLights.push_back(Vec3f(0, 80, 0));
+
+  m_lightingPass.prime([&](HotProgram& hotProg) {
+
+    for (Vec3f pointLight : pointLights) {
+
+      hotProg.uniform["normalTexture"] = 0;
+      hotProg.uniform["depthTexture"] = 1;
+      hotProg.uniform["u_lightIntens"] = 1.f;
+      hotProg.uniform["u_lightPosition"] = pointLight;
+      hotProg.uniform["u_cameraPos"] = m_cam.get_position();
+
+      Vec3f direction = m_cam.get_direction();
+      float backPlaneDistance = m_cam.getBackPlaneDistance();
+      float viewAngle = m_cam.getViewAngle();
+      float screenRatio = m_cam.getScreenRatio();
+      Vec3f viewUp = m_cam.getViewUp();
+
+      // vector in the backplane
+      Vec3f vd = cross(direction, viewUp).normalize();
+      viewUp = cross(vd, direction).normalize();
+      float halfBackPlaneHeight = tan(viewAngle / 2) * backPlaneDistance;
+      float halfBackPlaneWidth = screenRatio * halfBackPlaneHeight;
+      Vec3f backPlaneCenter = direction.normalize() * backPlaneDistance;
+
+      VertexSeq<Vec2f, Vec3f> backPlane;
+      backPlane.create(4);
+
+      backPlane.prime([&](HotVertexSeq<Vec2f, Vec3f>& hotV) {
+        // oben rechts
+        hotV.vertex[0].set(Vec2f(1, 1), backPlaneCenter + (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth));
+        // unten rechts
+        hotV.vertex[1].set(Vec2f(1, -1), backPlaneCenter - (viewUp * halfBackPlaneHeight) + (vd * halfBackPlaneWidth));
+        // oben links
+        hotV.vertex[2].set(Vec2f(-1, 1), backPlaneCenter + (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth));
+        // unten links
+        hotV.vertex[3].set(Vec2f(-1, -1), backPlaneCenter - (viewUp * halfBackPlaneHeight) - (vd * halfBackPlaneWidth));
+      });
+
+      gBuffer.prime([&](HotTexCont& hotTexCont) {
+        hotProg.draw(hotTexCont, backPlane, PrimitiveType::TriangleStrip);
+      });
+    }
   });
 }
 
