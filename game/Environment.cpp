@@ -4,7 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(50), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0) {
+: m_camera(camera), m_dayLength(200), m_time(0), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0) {
 
 }
 
@@ -34,14 +34,12 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
 
     Mat4f rotMat = rotationMatrix(quaternionFromAxisAngle(Vec3f(0, -sin(m_sunAxis), cos(m_sunAxis)), m_orbitAngle));
     
-    float help = (m_time - static_cast<int>(m_time));
-    for(int i = 0; i< 1; i++){
-    	help +=help;
-    	if(help > 1){
-    		help = 2 - help;
-   	 }
-  	}
-    hotprog.uniform["u_pulse"] = help;
+    float pulse = m_pulse;
+    if(pulse > 1){
+    	pulse = 2 - pulse;
+    }
+
+    hotprog.uniform["u_pulse"] = pulse;
     hotprog.uniform["u_color"] = getSunColor();
     hotprog.uniform["u_transform"] = projMat * (viewMat * rotMat);
     hotprog.draw(m_sun, PrimitiveType::TriangleStrip);
@@ -240,6 +238,11 @@ void Environment::update(float delta)
 		m_phase -= 4;
 	}
 
+	m_pulse += delta;
+	if(m_pulse > 2){
+		m_pulse -= 2;
+	}
+
 }
 
 void Environment::setDayLength(float sec) 
@@ -306,6 +309,7 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.5 * m_dayLength;
 		help = help /(m_dayLength/4);
 		help *= help;
+		help *= help;
 		r = 1;
 		g = 1 - 0.7 * help;
 		b = 0.75 * (1 - help);
@@ -317,6 +321,7 @@ Vec3f Environment::getSunColor()
 		help = m_time - 0.25 * m_dayLength;
 		help = help /(m_dayLength/4);
 		help = 1 - help;
+		help *= help;
 		help *= help;
 		help = 1- help;
 
