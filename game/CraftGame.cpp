@@ -138,10 +138,25 @@ void CraftGame::updateComponents(float delta) {
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
-  ImageBox image_save = loadJPEGImage("gfx/save.jpg");
-  m_colorTexture.create(Vec2i(680,90), TexFormat::RGB8, image_save.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
+  ImageBox image_resume = loadPNGImage("gfx/resume.png");
+  m_resTex.create(Vec2i(680,90), TexFormat::RGBA8, image_resume.data());
+  m_resTex.params.filterMode = TexFilterMode::Trilinear;
+  m_resTex.params.useMipMaps = true;
+
+  ImageBox image_save = loadPNGImage("gfx/save.png");
+  m_saveTex.create(Vec2i(680,90), TexFormat::RGBA8, image_save.data());
+  m_saveTex.params.filterMode = TexFilterMode::Trilinear;
+  m_saveTex.params.useMipMaps = true;
+
+  ImageBox image_load = loadPNGImage("gfx/load.png");
+  m_loadTex.create(Vec2i(680,90), TexFormat::RGBA8, image_load.data());
+  m_loadTex.params.filterMode = TexFilterMode::Trilinear;
+  m_loadTex.params.useMipMaps = true;
+
+  ImageBox image_exit = loadPNGImage("gfx/exit.png");
+  m_exitTex.create(Vec2i(680,90), TexFormat::RGBA8, image_exit.data());
+  m_exitTex.params.filterMode = TexFilterMode::Trilinear;
+  m_exitTex.params.useMipMaps = true;
 
   m_envir.init();
   m_mapView.init();
@@ -330,37 +345,48 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
 
-      // Für Blur
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT)
-      // Für Textur
-      //m_colorTexture.prime(0, [&](HotTex2D& hotT)
+      pMenu.prime([&](HotProgram& hotP)
       {
 
-        pMenu.prime([&](HotProgram& hotP)
+        hotP.uniform["s_menupng"] = 0;
+        hotP.uniform["s_background"] = 1;
+
+        TexCont cont;
+        cont.addTexture(0, m_resTex);
+        cont.addTexture(1, m_fBufferTex);
+        cont.addTexture(2, m_loadTex);
+        cont.addTexture(3, m_saveTex);
+        cont.addTexture(4, m_exitTex);
+
+        cont.prime([&](HotTexCont& hotTexCont) 
         {
 
           if(m_pause)
           {
             hotP.uniform["u_offset"] = (float)0.0;
 
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.4;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["s_menupng"] = 2;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.8;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["s_menupng"] = 3;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-1.2;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["s_menupng"] = 4;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }
-       
+
         });
 
       });
 
       m_playerView.draw(viewMatrix, projectionMatrix);
+
     });
 
     // swap buffer

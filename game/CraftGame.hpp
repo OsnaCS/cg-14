@@ -42,7 +42,10 @@ private:
   Tex2D m_fxaaTex;
   FrameBuffer m_fxaaBuffer;
 
-  Tex2D m_colorTexture;
+  Tex2D m_resTex;
+  Tex2D m_saveTex;
+  Tex2D m_loadTex;
+  Tex2D m_exitTex;
 
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);
