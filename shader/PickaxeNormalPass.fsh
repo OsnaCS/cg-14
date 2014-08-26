@@ -14,6 +14,7 @@ in VertexData {
 
 
 void main() {
+	
 	/*
 	vec3 normal = inData.normal;
 	vec3 zA = normal; // normal goes in z-direction
@@ -26,6 +27,7 @@ void main() {
 
 	o_depth = vec3(0,0,0); //vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
 	*/
+
 	o_normal = inData.normal;
 	
 

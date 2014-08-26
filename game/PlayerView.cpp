@@ -81,7 +81,9 @@ void PlayerView::init()
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
-	m_player = loadOBJ("gfx/player.obj");
+	m_playerFigure = loadOBJ("gfx/player.obj");
+
+	m_showPickaxe = false;
 	
 }
 
@@ -118,40 +120,107 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
 
 void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 
-  //Show pickaxe
-	m_normalPass.prime([&](HotProgram& hotPickaxe){
+	m_normalPass.prime([&](HotProgram& hotPlayer) {
+		Mat4f tmp = viewMat * getTransMatrixPlayer();
+		tmp = tmp.inverted();
+    tmp = tmp.transposed();
+		hotPlayer.uniform["u_view"] = viewMat* getTransMatrixPlayer();
+    hotPlayer.uniform["u_projection"] = projMat;
+    hotPlayer.uniform["u_transform"] = tmp;
 
-		hotPickaxe.uniform["u_view"] = viewMat * getTransformationMatrix();
-		hotPickaxe.uniform["u_projection"] = projMat;
+    TexCont contPlayer;
+    contPlayer.addTexture(0, m_playerTexture);
+      contPlayer.prime([&](HotTexCont& hotTexCont) { 
+      	hotPlayer.draw(hotTexCont, m_playerFigure, PrimitiveType::Triangle); 
+      });
+  });
 
-		TexCont cont; 
-		cont.addTexture(0, m_pickaxeTexture);
-		cont.prime([&](HotTexCont& hotTexCont){
-				hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);	
-		});
-	});
+
+  if(m_showPickaxe) {
+    // Show pickaxe
+    m_normalPass.prime([&](HotProgram& hotPickaxe) {
+    	Mat4f tmp = viewMat * getTransMatrixPlayer();
+			tmp = tmp.inverted();
+   	  tmp = tmp.transposed();
+      hotPickaxe.uniform["u_view"] = viewMat*getTransMatrix();
+      hotPickaxe.uniform["u_projection"] = projMat;
+      hotPickaxe.uniform["u_transform"] = tmp;
+
+      TexCont cont;
+      cont.addTexture(0, m_pickaxeTexture);
+      cont.prime([&](HotTexCont& hotTexCont) { 
+      	hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle); 
+      });
+    });
+  }
 }
 
 void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
 
-  m_finalPass.prime([&](HotProgram& hotP) {
+		m_finalPass.prime([&](HotProgram& hotPlayer) {
 
-		hotP.uniform["u_view"] = viewMat * getTransformationMatrix();
-    hotP.uniform["u_projection"] = projMat;
-    hotP.uniform["u_winSize"] = cam.getWindow().getSize();
-    hotP.uniform["s_lightTexture"] = 0;
-    hotP.uniform["s_colorTexture"] = 1;
-    
-    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
-      m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
-        HotTexCont hotTexCont(hotLightingTex, hotTex);
-        hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+      hotPlayer.uniform["u_view"] = viewMat * getTransMatrixPlayer();
+      hotPlayer.uniform["u_projection"] = projMat;
+      hotPlayer.uniform["u_winSize"] = cam.getWindow().getSize();
+      hotPlayer.uniform["s_lightTexture"] = 0;
+      hotPlayer.uniform["s_colorTexture"] = 1;
+
+      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+        m_playerTexture.prime(1, [&](HotTex2D& hotTex) {
+          HotTexCont hotTexContPlayer(hotLightingTex, hotTex);
+          hotPlayer.draw(hotTexContPlayer, m_playerFigure, PrimitiveType::Triangle);
+        });
       });
     });
-  });
+
+  if(m_showPickaxe) {
+    m_finalPass.prime([&](HotProgram& hotP) {
+
+      hotP.uniform["u_view"] = viewMat * getTransMatrix();
+      hotP.uniform["u_projection"] = projMat;
+      hotP.uniform["u_winSize"] = cam.getWindow().getSize();
+      hotP.uniform["s_lightTexture"] = 0;
+      hotP.uniform["s_colorTexture"] = 1;
+
+      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+        m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
+          HotTexCont hotTexCont(hotLightingTex, hotTex);
+          hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+        });
+      });
+    });
+  }
 }
 
-Mat4f PlayerView::getTransformationMatrix(){
+Mat4f PlayerView::getTransMatrixPlayer(){
+
+	//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.6,0.6,0.6));
+
+		//Translation to origin
+		Mat4f translationOrigin = translationMatrix(Vec3f(0,0,0));
+
+		//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle+1.57f));
+
+  	//Translation to player height and to the front right
+  	Mat4f translation = translationMatrix(m_player.getPosition() - m_player.getDirection() + Vec3f(0, -1.1, 0));
+
+
+  	return translation * rotationY * translationOrigin * scaling;
+
+}
+
+Mat4f PlayerView::getTransMatrix(){
 	//Scaling
 		Mat4f scaling = scalingMatrix(Vec3f(0.15,0.15,0.15));
 
@@ -164,20 +233,30 @@ Mat4f PlayerView::getTransformationMatrix(){
 		if(m_player.getDirection().x >0) {
 			angle = -angle;
 		}
-
-    //float angle = -abs(acos(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length()));
-    //slog(dot(Vec3f(0.0f, 0.0f, -1.0f), m_player.getDirection())/m_player.getDirection().length());
   	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
 
-  	//Rotation X-axis to tilt pickaxe
-
   	//Translation to player height and to the front right
-		Vec3f pos = -(m_player.getPosition().normalize());
 		Vec3f dir = m_player.getDirection().normalize();
   	Vec3f cross1 = -cross(Vec3f(0,1,0), dir);
   	cross1.normalize();
-  	Mat4f translation = translationMatrix(m_player.getPosition() + 3*m_player.getDirection() + cross1);
+  	Mat4f translation = translationMatrix(m_player.getPosition() + 2*m_player.getDirection() + 0.75f*cross1);
 
   	return translation * rotationY * scaling;
 
+}
+
+EventResult PlayerView::processEvent(InputEvent& e, Window& win, bool cheatmode) {
+
+  if(e.type == InputType::KeyPressed) {
+    if((KeyCode)(e.keyInput.key) == KeyCode::T &&  !cheatmode) {
+      togglePickaxe();
+    }else if((KeyCode)(e.keyInput.key) == KeyCode::K){
+    	m_showPickaxe = false;
+    }
+  }
+  return EventResult::Skipped;
+}
+
+void PlayerView::togglePickaxe(){
+	m_showPickaxe = !m_showPickaxe;
 }
