@@ -23,17 +23,17 @@ void main() {
 
 	// --------------- Ambient Light --------------------
 
-	float ambienteIntensity = u_daytime * u_daytime;
+	float ambienteIntensity = u_daytime;
 	if(ambienteIntensity > 0.5){
 		ambienteIntensity = 1 - ambienteIntensity;
 	}
 
-	ambienteIntensity += 0.1;
+	// ambienteIntensity += 0.1;
+	ambienteIntensity = 0.1;
 
 	// --------------- Diffuse Light --------------------
 	float diffuseIntensity;
 	float cosa = (dot(-u_lightRay, ((normal*2)-1))/(length(u_lightRay)*length(normal)));
-	// float cosa = (dot(vec3(-1,0,0), ((normal*2)-1))/(length(u_lightRay)*length(normal)));
 	
 	if(cosa < 0) {
 		diffuseIntensity = 0;

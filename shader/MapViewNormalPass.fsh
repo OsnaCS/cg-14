@@ -24,8 +24,9 @@ void main() {
 
 	mat3 texTrans = (mat3(xA, yA, zA));
 
-	// normal = texTrans * texture(normalTex, inData.uv).xyz;
+	normal = texTrans * (((texture(normalTex, inData.uv).xyz) - 0.5) * 2);
 
 	o_depth = vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
+
 	o_normal = (normal+1)/2;
 }
