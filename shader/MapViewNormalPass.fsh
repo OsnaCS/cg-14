@@ -22,7 +22,7 @@ void main() {
 	vec3 xA = inData.tangent; // x coordinate from the tangent
 	vec3 yA = cross(zA, xA); // cross product results in the last coordinate
 
-	mat3 texTrans = (mat3(xA, yA, zA));
+	mat3 texTrans = mat3(xA, yA, zA);
 
 	normal = texTrans * (((texture(normalTex, inData.uv).xyz) - 0.5) * 2);
 

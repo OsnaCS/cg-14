@@ -28,8 +28,7 @@ void main() {
 		ambienteIntensity = 1 - ambienteIntensity;
 	}
 
-	// ambienteIntensity += 0.1;
-	ambienteIntensity = 0.1;
+	ambienteIntensity += 0.1;
 
 	// --------------- Diffuse Light --------------------
 	float diffuseIntensity;
