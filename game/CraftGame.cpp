@@ -349,34 +349,33 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       {
 
         hotP.uniform["s_menupng"] = 0;
-        hotP.uniform["s_background"] = 1;
 
         TexCont cont;
         cont.addTexture(0, m_resTex);
-        cont.addTexture(1, m_fBufferTex);
-        cont.addTexture(2, m_loadTex);
-        cont.addTexture(3, m_saveTex);
-        cont.addTexture(4, m_exitTex);
+        cont.addTexture(1, m_loadTex);
+        cont.addTexture(2, m_saveTex);
+        cont.addTexture(3, m_exitTex);
 
         cont.prime([&](HotTexCont& hotTexCont) 
         {
 
           if(m_pause)
           {
+            
             hotP.uniform["u_offset"] = (float)0.0;
 
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.4;
-            hotP.uniform["s_menupng"] = 2;
+            hotP.uniform["s_menupng"] = 1;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.8;
-            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_menupng"] = 2;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-1.2;
-            hotP.uniform["s_menupng"] = 4;
+            hotP.uniform["s_menupng"] = 3;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }
