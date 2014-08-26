@@ -25,6 +25,19 @@ void CraftGame::init() {
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
 
+  //Toggle Pickaxe by pressing p
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    if(!m_pause) 
+    {
+      return m_playerView.processEvent(e, m_window, m_cheatmode);
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+
   // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) 
   {
@@ -287,6 +300,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_envir.draw(viewMatrix, projectionMatrix);
       m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
+
+      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
     // fourth pass (FXAA)
@@ -299,7 +314,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         });      
       });
 
-      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
     hotContext.getDefaultFrameBuffer().enableBlending(0);

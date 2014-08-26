@@ -8,6 +8,7 @@ layout(location = 2) in vec2 i_uv;
 
 uniform mat4 u_projection;
 uniform mat4 u_view;
+uniform mat4 u_transform;
 
 out VertexData
 {
@@ -25,7 +26,8 @@ void main()
 
 	outData.uv = vec2(i_uv.x, 1-i_uv.y);
 	//outData.depth = viewPosition.z;
-	outData.normal = i_normal;
+
+	outData.normal = (u_transform * vec4(i_normal, 1)).xyz;
 	//outData.tangent = i_tangent;
 
   // write gl_Position -> make OpenGL happy
