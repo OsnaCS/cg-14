@@ -28,7 +28,7 @@ const int MAX_HEARTS = 10;
 const Vec3f INIT_POSITION = Vec3f(0.0f, 80.5f, 0.0f);
 
 
-Player::Player( Map& m)
+Player::Player(Map& map, MapView& mapView)
     :m_position(INIT_POSITION)
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
@@ -45,7 +45,8 @@ Player::Player( Map& m)
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
-    ,m_map(m)
+    ,m_map(map)
+    ,m_mapView(mapView)
     ,m_fallen(0)
     ,m_attrib(MAX_HEARTS)
 {
@@ -188,7 +189,9 @@ void Player::update(float timePassed)
   //handle block destroy
   if(m_rightMouseCaptured){
     m_rightMouseCaptured = false;
-    m_map.setBlockType(getNextBlock(), BlockType::Air);
+    auto nextBlock = getNextBlock();
+    m_map.setBlockType(nextBlock, BlockType::Air);
+    m_mapView.notifyBlockUpdate(nextBlock);
     }
   
   m_timePassed += timePassed*1000;

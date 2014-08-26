@@ -16,6 +16,7 @@ public:
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
+	bool notifyBlockUpdate(Vec3i blockPos);
 	void deleteChunkView(Vec2i chunkPos);
 
 	/**
