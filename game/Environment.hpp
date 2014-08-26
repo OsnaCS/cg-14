@@ -48,6 +48,7 @@ private:
   float m_phase;
   float m_sunAxis;
   float m_moonAxis;
+  float m_pulse;
 
   Vec3f getSunColor();
   float getSunIntensity();

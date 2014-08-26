@@ -15,7 +15,7 @@ out VertexData {
 
 void main() {
 
-  outData.uv = vec2(i_uv.x, 1- i_uv.y);
+  outData.uv = vec2(i_uv.x, 1 - i_uv.y);
   outData.pos = i_pos;
 
   // write gl_Position -> make OpenGL happy
