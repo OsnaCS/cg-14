@@ -123,16 +123,16 @@ Vec2f getTexCoords(BlockType type, BlockSide side){
 				return m*Vec2f(6,0);
 		}
 
-		case BlockType::PineLeaves:
-		switch(side){
-			case BlockSide::Top: 
-			case BlockSide::Bottom:
-			case BlockSide::North:
-			case BlockSide::South:
-			case BlockSide::West:
-			case BlockSide::East:
-				return m*Vec2f(7,0);
-		}
+		// case BlockType::PineLeaves:
+		// switch(side){
+		// 	case BlockSide::Top: 
+		// 	case BlockSide::Bottom:
+		// 	case BlockSide::North:
+		// 	case BlockSide::South:
+		// 	case BlockSide::West:
+		// 	case BlockSide::East:
+		// 		return m*Vec2f(7,0);
+		// }
 
 		case BlockType::SpruceLeaves:
 		switch(side){
@@ -142,7 +142,7 @@ Vec2f getTexCoords(BlockType type, BlockSide side){
 			case BlockSide::South:
 			case BlockSide::West:
 			case BlockSide::East:
-				return m*Vec2f(7,1);
+				return m*Vec2f(7,0);
 		}
 
 
