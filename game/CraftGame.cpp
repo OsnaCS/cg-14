@@ -151,7 +151,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
   //
-  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
+  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB32F);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create(m_window.getSize());
   m_gBuffer.attachColor(0, m_gBufferNormal);
@@ -264,8 +264,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(1, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
       m_playerView.drawNormalPass(viewMatrix, projectionMatrix);
+      m_envir.drawCloudNormalPass(viewMatrix, projectionMatrix); 
     });
 
     // second pass (lighting)
@@ -283,6 +285,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
+      m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
     });
 

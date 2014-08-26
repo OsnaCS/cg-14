@@ -80,6 +80,40 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
   });
 }
 
+void Environment::drawCloudNormalPass(Mat4f viewMat, Mat4f projMat){
+  m_programCloud.prime([&](HotProgram& hotprog){
+    hotprog.uniform["u_projection"] = projMat;
+    hotprog.uniform["u_view"] = viewMat; 
+    hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+  }); 
+
+}
+
+void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBufferTex, Tex2D& gBufferDepth){
+  m_programFinalCloud.prime([&](HotProgram& hotprog){
+    //hotprog.uniform["u_projection"] = projMat;
+    //hotprog.uniform["u_view"] = viewMat; 
+    
+
+    hotprog.uniform["u_view"] = viewMat;
+    hotprog.uniform["u_projection"] = projMat;
+    hotprog.uniform["s_lightTexture"] = 0;
+    hotprog.uniform["s_depthTexture"] = 1;
+    hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
+    TexCont cont;
+    cont.addTexture(0, lBufferTex);
+    cont.addTexture(1, gBufferDepth);
+    
+
+    cont.prime([&](HotTexCont& hotCont){
+      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+    });
+  });  
+
+}
+
+
 void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
@@ -170,6 +204,17 @@ void Environment::init()
   vsMoon.compile(loadShaderFromFile("shader/Moon.vsh"));
   fsMoon.compile(loadShaderFromFile("shader/Moon.fsh"));
 
+  //Cloudshader 
+  VShader vsCloud;
+  FShader fsCloud;
+  vsCloud.compile(loadShaderFromFile("shader/CloudNormalPass.vsh"));
+  fsCloud.compile(loadShaderFromFile("shader/CloudNormalPass.fsh"));
+
+  VShader vsFinalCloud;
+  FShader fsFinalCloud;
+  vsFinalCloud.compile(loadShaderFromFile("shader/CloudFinalPass.vsh"));
+  fsFinalCloud.compile(loadShaderFromFile("shader/CloudFinalPass.fsh"));
+
   // create program and link the two shaders
   m_programSun.create(vsSun, fsSun);
   m_programSun.perFragProc.blendFuncRGB = BlendFunction::Add;
@@ -202,6 +247,21 @@ void Environment::init()
     hot.vertex[3].set(Vec3f(-1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f(-2, -2));
 
   });
+
+
+//Create Cloud for testing
+  // create program and link the two shaders
+  m_programCloud.create(vsCloud, fsCloud);
+  m_programCloud.perFragProc.enableDepthTest();
+  m_programCloud.perFragProc.setDepthFunction(DepthFunction::Less);
+  
+  m_programFinalCloud.create(vsFinalCloud, fsFinalCloud);
+  m_programFinalCloud.perFragProc.enableDepthTest();
+  m_programFinalCloud.perFragProc.enableDepthWrite();
+  m_programFinalCloud.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_programFinalCloud.primitiveProc.enableCulling();
+  
+  m_cloud = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
 
 
 
