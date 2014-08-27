@@ -291,13 +291,13 @@ void Environment::init()
   m_cloudSmall = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
 
   srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
-  int random;
-  for(int i=-10; i<10; i++){
-    for(int j =-10; j<10; j++){
-
+  int random, noise;
+  for(int i=-15; i<15; i++){
+    for(int j =-15; j<15; j++){
+      noise = rand() % 40;
       random = rand() % 8;
       if(random < 3){
-        m_cloudPosition.push_back(std::pair<Vec3f, int>(Vec3f(60 * i, 130, 60 * j), random));
+        m_cloudPosition.push_back(std::pair<Vec3f, int>(Vec3f(60 * i + noise, 130, 60 * j + 1.2 * noise), random));
       }
     }
   }
@@ -346,9 +346,9 @@ void Environment::update(float delta)
     vector.first.x += 2 * delta;
     vector.first.z += 2 * delta;
 
-    if(vector.first.x > 600){
-      vector.first.x -= 1200;
-      vector.first.z -= 1200;
+    if(vector.first.x > 900){
+      vector.first.x -= 1800;
+      vector.first.z -= 1800;
     }
   }
 }
