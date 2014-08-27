@@ -13,7 +13,8 @@ CraftGame::CraftGame()
     ,m_envir(m_camera)
     ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
-    ,m_pause(false)
+    ,m_pause(true)
+    ,m_pos(0.0,0.0)
 {
   m_running = true;
 }
@@ -28,6 +29,7 @@ void CraftGame::init() {
   // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) 
   {
+
     if(!m_pause) 
     {
       return m_player.processEvent(e, m_window, m_cheatmode);
@@ -39,6 +41,7 @@ void CraftGame::init() {
 
   m_window.addEventCallback([&](InputEvent e) 
   { 
+
     if(!m_pause)
     {
       return m_camera.processEvent(e, m_window); 
@@ -52,12 +55,20 @@ void CraftGame::init() {
   {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
-      m_running = false;
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) 
+    {
+      //m_running = false;
+      if(m_pause)
+        m_pause = false;
+      else
+        m_pause = true;
+
       return EventResult::Processed;
     }
     // if the keyInpuit is k
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) {
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) 
+    {
+
       if(m_cheatmode)
       {
         m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
@@ -67,7 +78,9 @@ void CraftGame::init() {
       {
         m_cheatmode = true;
       }
+
       return EventResult::Processed;
+
     }
 
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
@@ -83,6 +96,63 @@ void CraftGame::init() {
       }
       return EventResult::Processed;
 
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    
+    if(e.type == InputType::MouseMovePos && m_pause) 
+    {
+
+      m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
+      return EventResult::Processed;
+
+    }
+
+    return EventResult::Skipped;
+
+  });
+  
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    
+    // Resume
+    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100) 
+    {
+      m_pause = false;
+      return EventResult::Processed;
+    }
+
+    // Load
+    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215) 
+    {
+      m_map.loadWorld("untitled2");
+      m_player.reset();
+      return EventResult::Processed;
+    }
+
+    // Save
+    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 275 && m_pos.y <= 325) 
+    {
+      m_map.saveWorld();
+      return EventResult::Processed;
+    }
+
+    // Optionen
+    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 385 && m_pos.y <= 435) 
+    {
+      return EventResult::Processed;
+    }
+
+    // Exit
+    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 492 && m_pos.y <= 542) 
+    {
+      m_running = false;
+      return EventResult::Processed;
     }
 
     return EventResult::Skipped;

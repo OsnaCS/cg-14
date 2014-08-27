@@ -444,3 +444,8 @@ bool Player::collide(float x, float y, float z)
 
     return true;
 }
+
+void Player::reset()
+{
+  m_position = INIT_POSITION;
+}

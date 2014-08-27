@@ -140,6 +140,8 @@ void Map::saveWorld() {
 
 void Map::loadWorld(string name) {
 
+  m_map.clear();
+
   string mappath = "save/" + name + "/";
 
   // Für den Fall, dass der MapOrdner nicht existiert, wird eine Exception geworfen

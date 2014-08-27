@@ -29,6 +29,7 @@ private:
   PlayerView m_playerView;
 
   bool m_pause;
+  Vec2f m_pos;
 
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;
