@@ -65,6 +65,8 @@ public:
   */
   lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode);
 
+  void resetkeys();
+
 private:
 	// Get the sign of the Movement
     inline int get_sign(float x);

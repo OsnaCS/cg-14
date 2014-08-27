@@ -60,9 +60,15 @@ void CraftGame::init() {
     {
       //m_running = false;
       if(m_pause)
+      {
         m_pause = false;
+        m_player.resetkeys();
+      }
       else
+      {
         m_pause = true;
+        m_player.resetkeys();
+      }
 
       return EventResult::Processed;
     }
@@ -90,10 +96,12 @@ void CraftGame::init() {
       if(m_pause == false)
       {
         m_pause = true;
+        m_player.resetkeys();
       }
       else
       {
         m_pause = false;
+        m_player.resetkeys();
       }
       return EventResult::Processed;
 
@@ -146,55 +154,52 @@ void CraftGame::init() {
   m_window.addEventCallback([&](InputEvent e) 
   {
 
-    switch(m_button)
+    if(e.type == InputType::LMouseReleased && m_pause)
     {
-      case 1: {m_pause = false; return EventResult::Processed; break;}
-      case 2: {Vec4f posut = m_map.loadWorld("untitled2"); m_player.reset(Vec3f(posut.x,posut.y,posut.z)); return EventResult::Processed; break;}
-      case 3: {m_map.saveWorld(); return EventResult::Processed; break;}
-      case 4: {return EventResult::Processed; break;}
-      case 5: {m_running = false; return EventResult::Processed; break;}
-      case 0: {return EventResult::Skipped; break;}
-    }
 
-/*
-    // Resume
-    if(m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100)
-    {
-      if(e.type == InputType::LMouseReleased) 
+      switch(m_button)
       {
-        m_pause = false;
-        return EventResult::Processed;
+
+        case 1:
+        {
+          m_pause = false;
+          m_player.resetkeys();
+          return EventResult::Processed; 
+          break;
+        }
+        case 2: 
+        {
+          Vec4f posut = m_map.loadWorld("untitled2"); 
+          m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
+          return EventResult::Processed; 
+          break;
+        }
+        case 3: 
+        {
+          m_map.saveWorld(); 
+          return EventResult::Processed; 
+          break;
+        }
+        case 4: 
+        {
+          return EventResult::Processed; 
+          break;
+        }
+        case 5: 
+        {
+          m_running = false; 
+          return EventResult::Processed; 
+          break;
+        }
+        default: 
+        {
+          return EventResult::Skipped; 
+          break;
+        }
+
       }
-    }
 
-    // Load
-    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215) 
-    {
-      Vec4f posut = m_map.loadWorld("untitled2");
-      m_player.reset(Vec3f(posut.x,posut.y,posut.z));
-      m_mapView.resetMapView();
-      return EventResult::Processed;
     }
-
-    // Save
-    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 275 && m_pos.y <= 325) 
-    {
-      m_map.saveWorld();
-      return EventResult::Processed;
-    }
-
-    // Optionen
-    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 385 && m_pos.y <= 435) 
-    {
-      return EventResult::Processed;
-    }
-
-    // Exit
-    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 492 && m_pos.y <= 542) 
-    {
-      m_running = false;
-      return EventResult::Processed;
-    }*/
 
     return EventResult::Skipped;
 
@@ -241,9 +246,11 @@ void CraftGame::updateComponents(float delta) {
   // generate new chunks if neccessary
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
-  if(m_mapView.size() > 100) {
+  if(m_mapView.size() > 100) 
+  {
 
     m_mapView.clearMapView(m_map.getChunkPos(m_camera.get_position()));
+
   }
 }
 
@@ -464,8 +471,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       pMenu.prime([&](HotProgram& hotP)
       {
-
-        slog(m_button);
 
         hotP.uniform["s_menupng"] = 0;
         hotP.uniform["s_resSh"] = 5;

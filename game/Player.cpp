@@ -449,3 +449,14 @@ void Player::reset(Vec3f pos)
 {
   m_position = pos;
 }
+
+void Player::resetkeys()
+{
+  m_wPressed = false;
+  m_aPressed = false;
+  m_sPressed = false;
+  m_dPressed = false;
+  m_SpacePressed = false;
+  m_CtrlPressed = false;
+  m_ShiftPressed = false;
+}
