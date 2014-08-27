@@ -14,7 +14,7 @@ PlayerInventory::PlayerInventory(int maxDisplayItems)
 
 bool PlayerInventory::addItem(BlockType item)
 {
-    if ( item == BlockType::Air || item == BlockType::Sand )
+    if ( item == BlockType::Air || item == BlockType::Water )
         return false;
 
     auto it = m_items.find(item);

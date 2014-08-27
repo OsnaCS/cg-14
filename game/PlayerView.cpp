@@ -121,16 +121,11 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
         {
             Vec2f texCoord = getTexCoords(it->first, BlockSide::North);
             hot.vertex[i*4+0].set( Vec2f(INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord );
-            hot.vertex[i*4+1].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord + Vec2f(1/8.f, 0) );
-            hot.vertex[i*4+2].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
+            hot.vertex[i*4+2].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord + Vec2f(1/8.f, 0) );
+            hot.vertex[i*4+3].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
                                                                                 , texCoord+Vec2f(1/8.f, 1/8.f) );
-            hot.vertex[i*4+3].set( Vec2f(INIT_INVENT_POS.x+   i *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
+            hot.vertex[i*4+1].set( Vec2f(INIT_INVENT_POS.x+   i *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
                                                                                 , texCoord+Vec2f(0, 1/8.f) );
-            slog("inventory at i: ",i);
-            slog("pos[0] x: ", INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y );
-            slog("pos[1] x: ", INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y );
-            slog("pos[2] x: ", INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y);
-            slog("pos[3] x: ", INIT_INVENT_POS.x+   i *INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y);
             hot.index[i*5+0] = i*4+0;
             hot.index[i*5+1] = i*4+1;
             hot.index[i*5+2] = i*4+2;
@@ -143,51 +138,49 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
 
 VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
 {
-    const map<BlockType, int> items = m_player.getInventoryItems();
 
     // Initial position of the "number" is on the bottom-right of the inventory texture.
     Vec2f init_pos = Vec2f(INIT_INVENT_POS.x + INVENT_ITEM_SIZE.x/2, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y/2);
     // Item size of number texture
     const Vec2f item_size = Vec2f(INVENT_ITEM_SIZE.x/2, INVENT_ITEM_SIZE.y/2);
-    // Gap for placing second digit. Otherwise the space between 2 digits of the same number will be too wide.
+    // Gap for placing second digit(left). Otherwise the space between 2 digits of the same number will be too wide.
     const Vec2f gap = Vec2f(INVENT_ITEM_SIZE.x/4, INVENT_ITEM_SIZE.y/4);
 
+    const map<BlockType, int> items = m_player.getInventoryItems();
     VertexSeq<Vec2f, Vec3f, Vec2f>  numInventory;
-    numInventory.create(4*2*items.size(), 5*2*m_player.maxDisplayItems() );
+    numInventory.create(4*2*m_player.maxDisplayItems(), 5*2*m_player.maxDisplayItems() );
     numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
     {
         auto it=items.begin();
         int cnt = 0; int cntIdx = 0;
-        for ( int i=0;  it != items.end(); ++it, ++i )
+        for ( int i=0;  it != items.end(); ++i, ++it )
         {
             vector<Vec2f> positions = positionOfNumber( it->second );
+
             auto pos_it = positions.begin();
-            //slog("number i: ",i,",type: ",static_cast<int>(it->first), " : ", it->second, ", size_x: ",item_size.x, ", size_y: ",item_size.y);
             for ( int j=0; pos_it != positions.end(); ++pos_it, ++j )
             {
-                cnt += (j==1)?4:0;
-                cntIdx += (j==1)?5:0;
-                float offsetX = -2*j*item_size.x+j*gap.x; // if j=1, shift position[1] to the left as second digit number
-                //slog("offsetX ",offsetX, ", init_pos.x+    i*item_size.x: ", init_pos.x+    i*item_size.x);
+
+                cnt += j*4;
+                cntIdx += j*5;
+                float offsetX = -2*j*item_size.x+j*gap.x; // if j=1, shift position[1] to the left as second digit number           
                 hot.vertex[i*4+0+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
                                        , positions[j] );
-                hot.vertex[i*4+1+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
+                hot.vertex[i*4+2+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
                                        , positions[j] + Vec2f(1/10.f, 0) );
-                hot.vertex[i*4+2+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                hot.vertex[i*4+3+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
                                         , positions[j]+Vec2f(1/10.f, 1.0f) );
-                hot.vertex[i*4+3+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
-                                        , positions[j]+Vec2f(0, 1.0f) );
-                //slog("pos[", i*4+0+cnt,"] x:", init_pos.x+  i  *item_size.x +offsetX, " ,y: ", init_pos.y, ", tex x:", positions[j].x, ",y:",positions[j].y );
-                //slog("pos[", i*4+1+cnt,"] x:", init_pos.x+(i+1)*item_size.x +offsetX, " ,y: ", init_pos.y, ", tex x:", (positions[j] + Vec2f(1/10.f, 0)).x, ",y:",(positions[j] + Vec2f(1/10.f, 0)).y);
-                //slog("pos[", i*4+2+cnt,"] x:", init_pos.x+(i+1)*item_size.x +offsetX, " ,y: ", init_pos.y-item_size.y);
-                //slog("pos[", i*4+3+cnt,"] x:", init_pos.x+   i *item_size.x +offsetX, " ,y: ",init_pos.y-item_size.y);
+                hot.vertex[i*4+1+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                                        , positions[j]+Vec2f(0, 1.0f) );       
                 init_pos.x += (j==1)?0:INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
-                hot.index[i*5+0+cntIdx] = i*4+0;
-                hot.index[i*5+1+cntIdx] = i*4+1;
-                hot.index[i*5+2+cntIdx] = i*4+2;
-                hot.index[i*5+3+cntIdx] = i*4+3;
+                hot.index[i*5+0+cntIdx] = i*4+0+cnt;
+                hot.index[i*5+1+cntIdx] = i*4+1+cnt;
+                hot.index[i*5+2+cntIdx] = i*4+2+cnt;
+                hot.index[i*5+3+cntIdx] = i*4+3+cnt;
                 hot.index[i*5+4+cntIdx] = GLIndex::PrimitiveRestart;
+
             }
+
         }
     });
     return numInventory;
@@ -363,7 +356,6 @@ std::vector<Vec2f> PlayerView::positionOfNumber(int num)
      {
           string text = to_string(num);
           // text[0] and text[1] are swapped oder after conversion. 10 yields text[1]=0 and text[0]=1
-          slog(num, "  at 1:  ->  ", (int)(toDigit(text[1])), ", at 0 -> ", (int)(toDigit(text[0])) );
           positions.push_back( Vec2f(pos.x+ (int)(toDigit(text[1]))*1.0f/10, pos.y) );
           positions.push_back( Vec2f(pos.x+ (int)(toDigit(text[0]))*1.0f/10, pos.y) );
      }
