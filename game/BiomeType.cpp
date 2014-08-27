@@ -14,7 +14,7 @@ double getFrequency(BiomeType type) {
     case BiomeType::Forest:
       return 0.02;
     case BiomeType::Hillside:
-      return 0.025;
+      return 0.03;
     case BiomeType::Mountains:
       return 0.03;
 
@@ -41,7 +41,7 @@ int getUpperBound(BiomeType type) {
     case BiomeType::Forest:
       return 78;
     case BiomeType::Hillside:
-      return 82;
+      return 93;
     case BiomeType::Mountains:
       return 93;
     default:

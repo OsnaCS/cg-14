@@ -4,6 +4,7 @@
 #include "BlockType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
+#include "MapView.hpp"
 #include "PlayerAttributes.hpp"
 #include "PlayerInventory.hpp"
 
@@ -15,7 +16,7 @@ class Player {
 public:
 
 	//Constructor
-  Player(Map& m);
+  Player(Map& map, MapView& mapView);
 
   /**
    * @brief getHearts Get current number of hearts indicating health of the players
@@ -119,6 +120,7 @@ private:
   bool m_CtrlPressed;
   bool m_ShiftPressed;
   Map& m_map;
+  MapView& m_mapView;
   float m_fallen;
   PlayerAttributes m_attrib;
   PlayerInventory m_inventory;
