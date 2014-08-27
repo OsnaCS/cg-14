@@ -128,14 +128,42 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
             break;
 
             case KeyCode::E :
-            if(m_ePressed == false){
+            if(m_ePressed == false&&e.type == InputType::KeyPressed){
                 m_ePressed = true;
             }
+            break;
+           case KeyCode::K1:
+            m_blockType = 0;
 
             break;
-
+           case KeyCode::K2:
+            m_blockType = 1;
+            break;
+           case KeyCode::K3:
+            m_blockType = 2;
+            break;
+           case KeyCode::K4:
+            m_blockType = 3;
+            break;
+           case KeyCode::K5:
+            m_blockType = 4;
+            break;
+           case KeyCode::K6:
+            m_blockType = 5;
+            break;
+            case KeyCode::K7:
+             m_blockType = 6;
+            break;
+            case KeyCode::K8:
+             m_blockType = 7;
+            break;
+            case KeyCode::K9:
+            m_blockType = 8;
+            break;
+            case KeyCode::K0:
+            m_blockType = 9;
+            break;
             default:
-            //Do Nothing
             break;
                
         }
@@ -199,8 +227,12 @@ void Player::update(float timePassed)
   if(m_ePressed){
     m_ePressed = false;
     auto nextBlock = getLastAir();
-    m_map.setBlockType(getLastAir(),BlockType::Dirt);
-    m_mapView.notifyBlockUpdate(nextBlock);
+    //If there is only air or we are standing to near, don't place a block
+    if(nextBlock != m_position){
+        m_map.setBlockType(getLastAir(), m_inventory.getType(m_blockType) );
+        m_inventory.removeItem( m_inventory.getType(m_blockType) );
+        m_mapView.notifyBlockUpdate(nextBlock);
+        }
   }
   //handle block destroy
   if(m_rightMouseCaptured){

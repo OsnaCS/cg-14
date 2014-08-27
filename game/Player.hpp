@@ -126,6 +126,8 @@ private:
   float m_fallen;
   PlayerAttributes m_attrib;
   PlayerInventory m_inventory;
+  //BlockType m_selectedBlock;
+  int m_blockType;
 };
 
 

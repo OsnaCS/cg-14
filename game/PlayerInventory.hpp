@@ -46,6 +46,13 @@ public:
      */
     inline const std::map<BlockType, int>& getItems() const;
 
+    /**
+     * @brief getType
+     * @param idx
+     * @return
+     */
+    BlockType getType(int idx) const;
+
 
 private:
     const int MAX_DISPLAY_ITEMS;
@@ -66,6 +73,7 @@ const std::map<BlockType, int>& PlayerInventory::getItems() const
 {
     return m_items;
 }
+
 
 
 #endif // PLAYERINVENTORY_HPP

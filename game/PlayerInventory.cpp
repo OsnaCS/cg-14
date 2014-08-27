@@ -41,4 +41,19 @@ bool PlayerInventory::removeItem(BlockType item)
 
 }
 
+
+BlockType PlayerInventory::getType(int idx) const
+{
+    if ( idx >= m_items.size() )
+        return BlockType::Air;
+
+    auto it = m_items.begin();
+    for(  int i=0; i< m_items.size(); ++it, ++i ) {
+        if( i==idx ) {
+            return it->first;
+        }
+    }
+    return BlockType::Air;
+}
+
 ///////////////////////////////////END OF FILE/////////////////////////////////////
