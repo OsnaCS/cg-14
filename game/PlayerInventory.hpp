@@ -14,34 +14,35 @@ class PlayerInventory
 public:
 
     /**
-     * @brief PlayerInventory
-     * @param maxDisplayItems
+     * @brief PlayerInventory Constructor.
+     * @param maxDisplayItems maximum number of displayed items to be drawn.
      */
     PlayerInventory(int maxDisplayItems=20);
 
     /**
-     * @brief addItem
-     * @param item
-     * @return
+     * @brief addItem Add @sa BlockType item to internal container
+     * @param item Any item except @sa BlockType::Air or @sa BlockType::Sand
+     * @return true if this item is now stored in the container, false otherwise.
      */
     bool addItem(BlockType item);
 
     /**
-     * @brief removeItem
-     * @param item
-     * @return
+     * @brief removeItem Remove @sa BlockType item from the internal container
+     * @param item Item to be removed from the container
+     * @return true if the given item is removed from the container, false if no given item found
+     *              in the container.
      */
     bool removeItem(BlockType item);
 
     /**
-     * @brief maxDisplayItems
-     * @return
+     * @brief maxDisplayItems Get maximum "type" of items that allowed to be stored in the container.
+     * @return number of the maximum item
      */
     inline int maxDisplayItems() const;
 
     /**
-     * @brief getItems
-     * @return
+     * @brief getItems Get container
+     * @return container of inventory
      */
     inline const std::map<BlockType, int>& getItems() const;
 

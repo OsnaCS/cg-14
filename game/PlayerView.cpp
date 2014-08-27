@@ -3,14 +3,21 @@
 #include "ObjectLoader.hpp"
 #include "Camera.hpp"
 #include "lumina/util/Transformation.hpp"
-#include <map>
 #include "BlockType.hpp"
+
+#include <map>
 
 using namespace std;
 using namespace lumina;
 
-const float HEART_SIZE = 0.05f;
-const float HEART_POSY = -0.7f; 
+
+
+// Initial position of the inventory panel. Now, it is set at the bottom-left of the screen.
+const Vec2f INIT_INVENT_POS(-0.8f, -0.85f);
+
+// Size of each inventory item in the panel.
+const Vec2f INVENT_ITEM_SIZE(0.05f, 0.08f);
+
 
 PlayerView::PlayerView(Player& player)
     : m_player(player)
@@ -39,6 +46,14 @@ void PlayerView::draw( )
         m_inventoryTex.prime(0, [&,this](HotTex2D& hotTex)
         {
             hotprog.draw(hotTex, updateInventory(), PrimitiveType::TriangleStrip);
+        });
+    });
+
+    m_numberProg.prime([&](HotProgram& numHotProg)
+    {
+        m_numberTex.prime(0, [&](HotTex2D& numHotTex)
+        {
+            numHotProg.draw(numHotTex, updateInventoryNumbers(), PrimitiveType::TriangleStrip);
         });
     });
 
@@ -80,22 +95,22 @@ void PlayerView::init()
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
 
 
-    // Display hearts panel
+    // To display hearts panel
     initHeartPanel();
 
     // For center-marker at the center of the screen
     initCenterMarker();
 
-    // Display player's inventory
+    // To display player's inventory
     initInventory();
 
+    // To display number of inventory for each object's type
+    initInventoryNumber();
 }
 
 VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
 {
     const map<BlockType, int> items = m_player.getInventoryItems();
-    const Vec2f INIT_POS(-0.8f, -0.85f);
-    const float ITEM_SIZE = 0.07f;
 
     VertexSeq<Vec2f, Vec2f> inventoryPanel;
     inventoryPanel.create(4*items.size(), 5*m_player.maxDisplayItems() );
@@ -105,12 +120,17 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
         for ( int i=0;  it != items.end(); ++it, ++i )
         {
             Vec2f texCoord = getTexCoords(it->first, BlockSide::North);
-            hot.vertex[i*4+0].set( Vec2f(INIT_POS.x+  i  *ITEM_SIZE, INIT_POS.y), texCoord );
-            hot.vertex[i*4+1].set( Vec2f(INIT_POS.x+(i+1)*ITEM_SIZE, INIT_POS.y), texCoord + Vec2f(1/8.f, 0) );
-            hot.vertex[i*4+2].set( Vec2f(INIT_POS.x+(i+1)*ITEM_SIZE, INIT_POS.y-ITEM_SIZE)
+            hot.vertex[i*4+0].set( Vec2f(INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord );
+            hot.vertex[i*4+1].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord + Vec2f(1/8.f, 0) );
+            hot.vertex[i*4+2].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
                                                                                 , texCoord+Vec2f(1/8.f, 1/8.f) );
-            hot.vertex[i*4+3].set( Vec2f(INIT_POS.x+   i *ITEM_SIZE, INIT_POS.y-ITEM_SIZE)
+            hot.vertex[i*4+3].set( Vec2f(INIT_INVENT_POS.x+   i *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
                                                                                 , texCoord+Vec2f(0, 1/8.f) );
+            slog("inventory at i: ",i);
+            slog("pos[0] x: ", INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y );
+            slog("pos[1] x: ", INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y );
+            slog("pos[2] x: ", INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y);
+            slog("pos[3] x: ", INIT_INVENT_POS.x+   i *INVENT_ITEM_SIZE.x, " , y: ", INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y);
             hot.index[i*5+0] = i*4+0;
             hot.index[i*5+1] = i*4+1;
             hot.index[i*5+2] = i*4+2;
@@ -121,8 +141,64 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
     return inventoryPanel;
 }
 
+VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
+{
+    const map<BlockType, int> items = m_player.getInventoryItems();
 
-VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
+    // Initial position of the "number" is on the bottom-right of the inventory texture.
+    Vec2f init_pos = Vec2f(INIT_INVENT_POS.x + INVENT_ITEM_SIZE.x/2, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y/2);
+    // Item size of number texture
+    const Vec2f item_size = Vec2f(INVENT_ITEM_SIZE.x/2, INVENT_ITEM_SIZE.y/2);
+    // Gap for placing second digit. Otherwise the space between 2 digits of the same number will be too wide.
+    const Vec2f gap = Vec2f(INVENT_ITEM_SIZE.x/4, INVENT_ITEM_SIZE.y/4);
+
+    VertexSeq<Vec2f, Vec3f, Vec2f>  numInventory;
+    numInventory.create(4*2*items.size(), 5*2*m_player.maxDisplayItems() );
+    numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
+    {
+        auto it=items.begin();
+        int cnt = 0; int cntIdx = 0;
+        for ( int i=0;  it != items.end(); ++it, ++i )
+        {
+            vector<Vec2f> positions = positionOfNumber( it->second );
+            auto pos_it = positions.begin();
+            //slog("number i: ",i,",type: ",static_cast<int>(it->first), " : ", it->second, ", size_x: ",item_size.x, ", size_y: ",item_size.y);
+            for ( int j=0; pos_it != positions.end(); ++pos_it, ++j )
+            {
+                cnt += (j==1)?4:0;
+                cntIdx += (j==1)?5:0;
+                float offsetX = -2*j*item_size.x+j*gap.x; // if j=1, shift position[1] to the left as second digit number
+                //slog("offsetX ",offsetX, ", init_pos.x+    i*item_size.x: ", init_pos.x+    i*item_size.x);
+                hot.vertex[i*4+0+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
+                                       , positions[j] );
+                hot.vertex[i*4+1+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
+                                       , positions[j] + Vec2f(1/10.f, 0) );
+                hot.vertex[i*4+2+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                                        , positions[j]+Vec2f(1/10.f, 1.0f) );
+                hot.vertex[i*4+3+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                                        , positions[j]+Vec2f(0, 1.0f) );
+                //slog("pos[", i*4+0+cnt,"] x:", init_pos.x+  i  *item_size.x +offsetX, " ,y: ", init_pos.y, ", tex x:", positions[j].x, ",y:",positions[j].y );
+                //slog("pos[", i*4+1+cnt,"] x:", init_pos.x+(i+1)*item_size.x +offsetX, " ,y: ", init_pos.y, ", tex x:", (positions[j] + Vec2f(1/10.f, 0)).x, ",y:",(positions[j] + Vec2f(1/10.f, 0)).y);
+                //slog("pos[", i*4+2+cnt,"] x:", init_pos.x+(i+1)*item_size.x +offsetX, " ,y: ", init_pos.y-item_size.y);
+                //slog("pos[", i*4+3+cnt,"] x:", init_pos.x+   i *item_size.x +offsetX, " ,y: ",init_pos.y-item_size.y);
+                init_pos.x += (j==1)?0:INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
+                hot.index[i*5+0+cntIdx] = i*4+0;
+                hot.index[i*5+1+cntIdx] = i*4+1;
+                hot.index[i*5+2+cntIdx] = i*4+2;
+                hot.index[i*5+3+cntIdx] = i*4+3;
+                hot.index[i*5+4+cntIdx] = GLIndex::PrimitiveRestart;
+            }
+        }
+    });
+    return numInventory;
+
+}
+
+VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
+{
+
+   const float HEART_SIZE = 0.05f;
+   const float HEART_POSY = -0.7f;
 
   int activeHearts = m_player.getHearts();
   int maxHearts = m_player.getMaxHearts();
@@ -210,7 +286,7 @@ void PlayerView::initCenterMarker()
     m_centerMarker.create(4, 4);
     m_centerMarker.prime([](HotVertexSeq<Vec2f, Vec3f>& hot)
     {
-      /*color may change against the background...now,it is onl white cross.*/
+      /*color may change against the background...now,it is only white cross.*/
       hot.vertex[0].set( Vec2f(-0.04, 0.0), Vec3f(1,1,1) );
       hot.vertex[1].set( Vec2f( 0.04, 0.0), Vec3f(1,1,1));
       hot.vertex[2].set( Vec2f( 0.0,-0.05), Vec3f(1,1,1));
@@ -247,4 +323,54 @@ void PlayerView::initHeartPanel()
     m_program.perFragProc.blendFuncRGB = BlendFunction::Add;
     m_program.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
     m_program.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+}
+
+void PlayerView::initInventoryNumber()
+{
+    // Initialize numbers to draw on top of the texture inventory for counting
+    ImageBox image_box = loadJPEGImage("gfx/number.jpg");
+    m_numberTex.create(Vec2i(320,32), TexFormat::RGB8, image_box.data());
+    m_numberTex.params.filterMode = TexFilterMode::Trilinear;
+    m_numberTex.params.useMipMaps = true;
+
+    VShader vsNum;
+    vsNum.compile(loadShaderFromFile("shader/InventoryNumbers.vsh"));
+    FShader fsNum;
+    fsNum.compile(loadShaderFromFile("shader/InventoryNumbers.fsh"));
+    m_numberProg.create(vsNum, fsNum);
+    m_numberProg.perFragProc.blendFuncRGB = BlendFunction::Add;
+    m_numberProg.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+    m_numberProg.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+
+}
+
+
+std::vector<Vec2f> PlayerView::positionOfNumber(int num)
+{
+    // We have 10 numbers listed in the texture and we want the position of the
+    // corresponding number from the listed number. [0 1 2 .. 9].
+    // The postion of the texture will be given from the "top-left" referred at (0,0) of the image.
+    // Subsequenced image will be at (1/10)
+    // If number is greater than 9, e.g. 10, 0 will be placed at vector[0] and 1 is placed at vector[1].
+
+     std::vector<Vec2f> positions;
+     Vec2f pos(0.0, 0.0);
+     if ( num < 10 )
+     {
+          positions.push_back( Vec2f(pos.x+ num*1.0f/10, pos.y) );
+     }
+     else if ( num>=10 && num<=99)
+     {
+          string text = to_string(num);
+          // text[0] and text[1] are swapped oder after conversion. 10 yields text[1]=0 and text[0]=1
+          slog(num, "  at 1:  ->  ", (int)(toDigit(text[1])), ", at 0 -> ", (int)(toDigit(text[0])) );
+          positions.push_back( Vec2f(pos.x+ (int)(toDigit(text[1]))*1.0f/10, pos.y) );
+          positions.push_back( Vec2f(pos.x+ (int)(toDigit(text[0]))*1.0f/10, pos.y) );
+     }
+     else {
+         // The inventory panel will not display the number of the corresponding object.
+          slog("Not implemented. Because number of inventory of this particular object > 99");
+     }
+
+  return positions;
 }
