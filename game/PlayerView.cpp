@@ -143,7 +143,7 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
 VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
 {
 
-    // Initial position of the "number" is on the bottom-right of the inventory texture.
+    // Initial position of the "number" is on the bottom-right of th+e inventory texture.
     Vec2f init_pos = Vec2f(INIT_INVENT_POS.x + INVENT_ITEM_SIZE.x/2, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y/2);
     // Item size of number texture
     const Vec2f item_size = Vec2f(INVENT_ITEM_SIZE.x/2, INVENT_ITEM_SIZE.y/2);
@@ -366,7 +366,7 @@ std::vector<Vec2f> PlayerView::positionOfNumber(int num)
      }
      else {
          // The inventory panel will not display the number of the corresponding object.
-          slog("Not implemented. Because number of inventory of this particular object > 99");
+         // slog("Not implemented. Because number of inventory of this particular object > 99");
      }
 
   return positions;

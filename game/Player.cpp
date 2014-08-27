@@ -491,7 +491,7 @@ Vec3i Player::getNextBlock()
   //Return current position (where already air is);
   Vec3i resultNull = Vec3i(m_position.x, m_position.y+1, m_position.z);
   
-  while(fabs(x)+fabs(y)+fabs(z)<4){
+  while(sqrt(x*x+y*y+z*z)<4){
     x += m_direction.x*0.03;
     y += m_direction.y*0.03;
     z += m_direction.z*0.03;
@@ -515,7 +515,7 @@ Vec3i Player::getLastAir()
   //Return current position (where already air is);
   Vec3i resultNull = Vec3i(m_position.x, m_position.y, m_position.z);
   
-  while(fabs(x)+fabs(y)+fabs(z)<4){
+  while(sqrt(x*x+y*y+z*z)<4){
     x += m_direction.x*0.03;
     y += m_direction.y*0.03;
     z += m_direction.z*0.03;
