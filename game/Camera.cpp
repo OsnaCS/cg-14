@@ -12,7 +12,6 @@ Camera::Camera(Window& window) :
     m_position(Vec3f(0.0f, 80.0f, 0.0f))
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
-    ,m_mouseCaptured(false)
     ,m_ViewAngle(0.785f)
     ,m_backPlaneDistance(256.0f)
     ,m_window(window)
@@ -117,17 +116,7 @@ EventResult Camera::processEvent( const InputEvent& e, Window& win)
     }
 
     // Mouse handle
-    if(e.type == InputType::LMousePressed) {
-    	m_mouseCaptured = true;
-    	win.setCursorMode(CursorMode::Free);
-    }
-    if(e.type == InputType::LMouseReleased) {
-    	m_mouseCaptured = false;
-    	win.setCursorMode(CursorMode::Normal);
-    }
-
-    // Mouse
-    if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
+    if (e.type == InputType::MouseMoveDir)
     {
     	turn_side(-e.mouseInput.x / 300.0f);
     	turn_upDown(-e.mouseInput.y / 50.0f);

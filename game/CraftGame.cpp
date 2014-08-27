@@ -75,11 +75,13 @@ void CraftGame::init() {
       if(m_pause)
       {
         m_pause = false;
+        m_window.setCursorMode(CursorMode::Free);
         m_player.resetkeys();
       }
       else
       {
         m_pause = true;
+        m_window.setCursorMode(CursorMode::Normal);
         m_player.resetkeys();
       }
 
@@ -106,14 +108,16 @@ void CraftGame::init() {
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
     {
 
-      if(m_pause == false)
+      if(m_pause)
       {
-        m_pause = true;
+        m_pause = false;
+        m_window.setCursorMode(CursorMode::Free);
         m_player.resetkeys();
       }
       else
       {
-        m_pause = false;
+        m_pause = true;
+        m_window.setCursorMode(CursorMode::Normal);
         m_player.resetkeys();
       }
       return EventResult::Processed;
@@ -176,6 +180,7 @@ void CraftGame::init() {
         case 1:
         {
           m_pause = false;
+          m_window.setCursorMode(CursorMode::Free);
           m_player.resetkeys();
           return EventResult::Processed; 
           break;
@@ -539,4 +544,5 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     hotContext.swapBuffer();
 
   }
+
 }
