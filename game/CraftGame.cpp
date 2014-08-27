@@ -27,6 +27,19 @@ void CraftGame::init() {
   m_window.setVersionHint(3, 3);
   m_cheatmode = false;
 
+  //Toggle Pickaxe by pressing p
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+    if(!m_pause) 
+    {
+      return m_playerView.processEvent(e, m_window, m_cheatmode);
+    }
+
+    return EventResult::Skipped;
+
+  });
+
+
   // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) 
   {
@@ -222,6 +235,8 @@ void CraftGame::start() {
 
 void CraftGame::updateComponents(float delta) {
 
+  m_fps.printFPS(delta);
+
   // update game window
   m_window.update();
 
@@ -365,7 +380,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_lBuffer.attachRenderBuffer(zBuf);
 
   // time measurement
-  float sum = 0;
   auto now = chrono::system_clock::now();
 
   // run as long as the window is valid and the user hasn't pessed ESC
@@ -375,13 +389,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     auto diff = chrono::system_clock::now() - now;
     float delta = chrono::duration_cast<chrono::milliseconds>(diff).count() / 1000.f;
     now = chrono::system_clock::now();
-    sum += delta;
-
-    // print FPS
-    if(sum > 2) {
-      slog("FPS:", 1 / delta);
-      sum -= 2;
-    }
 
     // update game components
     updateComponents(delta);
@@ -434,6 +441,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       m_envir.draw(viewMatrix, projectionMatrix);
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
+
+      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
     // fourth pass (FXAA)
@@ -446,7 +455,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         });      
       });
 
-      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
     hotContext.getDefaultFrameBuffer().enableBlending(0);

@@ -21,5 +21,5 @@ void main() {
 	//texColor.xyz *= light.w;
 
 	o_color = vec4(texColor.xyz, 1);
-	// o_color = vec4(light.w);
+	//o_color = vec4(1);
 }
