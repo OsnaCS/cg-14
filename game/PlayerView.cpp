@@ -371,8 +371,8 @@ void PlayerView::initHeartPanel()
 void PlayerView::initInventoryNumber()
 {
     // Initialize numbers to draw on top of the texture inventory for counting
-    ImageBox image_box = loadJPEGImage("gfx/number.jpg");
-    m_numberTex.create(Vec2i(320,32), TexFormat::RGB8, image_box.data());
+    ImageBox image_box = loadPNGImage("gfx/number.png");
+    m_numberTex.create(Vec2i(320,32), TexFormat::RGBA8, image_box.data());
     m_numberTex.params.filterMode = TexFilterMode::Trilinear;
     m_numberTex.params.useMipMaps = true;
 
