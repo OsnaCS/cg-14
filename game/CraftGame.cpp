@@ -162,6 +162,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_mapView.init();
   m_playerView.init();
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
+  m_map.setBlockType(Vec3i(0, 80, 0), BlockType::Torch);
 
   //
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
@@ -325,7 +326,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
-      m_lBufferTex.prime(0, [&](HotTex2D& hotT) {
+      m_fxaaTex.prime(0, [&](HotTex2D& hotT) {
         tempP.prime([&](HotProgram& hotP) {
 
           hotP.uniform["u_pause"] = m_pause;

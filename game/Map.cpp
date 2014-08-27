@@ -1,4 +1,6 @@
 #include "Map.hpp"
+
+#include <algorithm>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -53,14 +55,20 @@ void Map::setBlockType(Vec3i pos, BlockType type) {
   pos.x = pos.x % 16;
   if(pos.x < 0)
     pos.x = pos.x + 16;
-
+ 
   pos.z = pos.z % 16;
   if(pos.z < 0)
     pos.z = pos.z + 16;
 
-  // TODO: remove torches from list if block is removed
+  // if a torch is placed, add it to the point lights vector
   if (type == BlockType::Torch) {
-    m_pointLights.push_back(pos);
+    m_pointLights.insert(pos);
+  } else {
+
+    // if an other block is placed where a torch was placed before, remove the torch from the point lights vector
+    if (exists(pos) && getBlockType(pos) == BlockType::Torch) {
+      m_pointLights.erase(pos);
+    }
   }
 
   m_map.at(pos2d).setBlockType(pos, type);

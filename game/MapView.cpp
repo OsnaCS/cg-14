@@ -3,7 +3,7 @@
 #include "ObjectLoader.hpp"
 
 #include <math.h>
-#include <vector>
+#include <set>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
 : m_map(map), m_cam(cam), m_envir(envir) {
@@ -143,9 +143,7 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 
 void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
-  vector<Vec3f> pointLights = m_map.getPointLights();
-  pointLights.push_back(Vec3f(16, 78, 16));
-  pointLights.push_back(Vec3f(0, 78, 0));
+  set<Vec3f> pointLights = m_map.getPointLights();
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
 
