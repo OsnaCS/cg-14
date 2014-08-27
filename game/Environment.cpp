@@ -4,8 +4,7 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(200), m_time(m_dayLength/5), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0),  
-m_cloudPosition1(10.0f,130.0f,10.0f), m_cloudPosition2(10.0f,130.0f,0.0f), m_cloudPosition3(0.0f,130.0f,10.0f), m_cloudPosition4(0.0f,130.0f,0.0f)  {
+: m_camera(camera), m_dayLength(200), m_time(m_dayLength/5), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0) {
 
 }
 
@@ -84,14 +83,17 @@ void Environment::drawCloudNormalPass(Mat4f viewMat, Mat4f projMat){
     hotprog.uniform["u_projection"] = projMat;
     hotprog.uniform["u_view"] = viewMat; 
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition1;
-    hotprog.draw(m_cloudSmall, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
-    hotprog.draw(m_cloudNormal, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
-    hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
-    hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
+  
+    for(auto vector : m_cloudPosition ){
+      hotprog.uniform["u_cloudPosition"] = vector.first;
+      if(vector.second == 0){
+        hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
+      } else if(vector.second == 1){
+        hotprog.draw(m_cloudNormal, PrimitiveType::TriangleStrip);
+      } else{
+        hotprog.draw(m_cloudSmall, PrimitiveType::TriangleStrip);
+      }
+    }
   }); 
 
 }
@@ -108,20 +110,21 @@ void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffe
     hotprog.uniform["s_depthTexture"] = 1;
     hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition1;
     TexCont cont;
     cont.addTexture(0, lBufferTex);
     cont.addTexture(1, gBufferDepth);
-    
 
     cont.prime([&](HotTexCont& hotCont){
-      hotprog.draw(hotCont, m_cloudSmall, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
-      hotprog.draw(hotCont, m_cloudNormal, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
-      hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
-    hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
-      hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
+      for(auto vector : m_cloudPosition ){
+        hotprog.uniform["u_cloudPosition"] = vector.first;
+        if(vector.second == 0){
+          hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
+        } else if(vector.second == 1){
+          hotprog.draw(hotCont, m_cloudNormal, PrimitiveType::TriangleStrip);
+        } else{
+          hotprog.draw(hotCont, m_cloudSmall, PrimitiveType::TriangleStrip);
+        }
+      }
     });
   });  
 
@@ -287,6 +290,18 @@ void Environment::init()
   m_cloudNormal = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(8.0f,2.0f,4.0f));
   m_cloudSmall = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
 
+  srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
+  int random;
+  for(int i=-10; i<10; i++){
+    for(int j =-10; j<10; j++){
+
+      random = rand() % 8;
+      if(random < 3){
+        m_cloudPosition.push_back(std::pair<Vec3f, int>(Vec3f(60 * i, 130, 60 * j), random));
+      }
+    }
+  }
+
 
 
   // m_programSphere.perFragProc.enableDepthTest();
@@ -327,23 +342,15 @@ void Environment::update(float delta)
 		m_pulse -= 2;
 	}
 
-  float help = m_time;
-  if(help > m_dayLength / 2){
+  for(auto& vector : m_cloudPosition){
+    vector.first.x += 2 * delta;
+    vector.first.z += 2 * delta;
 
-    help = m_dayLength - help;
+    if(vector.first.x > 600){
+      vector.first.x -= 1200;
+      vector.first.z -= 1200;
+    }
   }
-
-  m_cloudPosition1.x = help;
-  m_cloudPosition1.z = help;
-
-  m_cloudPosition2.x = -help;
-  m_cloudPosition2.z = help;
-
-  m_cloudPosition3.x = help;
-  m_cloudPosition3.z = -help;
-
-  m_cloudPosition4.x = -help;
-  m_cloudPosition4.z = -help;
 }
 
 void Environment::setDayLength(float sec) 
