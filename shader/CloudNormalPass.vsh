@@ -7,6 +7,7 @@ layout(location = 1) in vec3 i_normals;
 
 uniform mat4 u_projection;
 uniform mat4 u_view;
+uniform vec3 u_cloudPosition;
 
 // forward color to fragment shader (will be linear interpolated)
 out VertexData {
@@ -16,7 +17,7 @@ out VertexData {
 } outData;
 
 void main() {
-  vec4 viewPosition = u_view * vec4(i_pos+vec3(0,100,0), 1);
+  vec4 viewPosition = u_view * vec4(i_pos+u_cloudPosition, 1);
 
 //	outData.uv = i_uv;
   outData.depth = viewPosition.z;

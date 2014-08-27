@@ -40,6 +40,6 @@ void main() {
   //  discard;
   //}
 
-  o_color = vec4(1,1,1,(depthBack - depthFront)*u_backPlaneDistance/10);
+  o_color = vec4(light.x,light.y,light.z,(depthBack - depthFront)*u_backPlaneDistance/10);
 
 }

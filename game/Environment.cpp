@@ -4,7 +4,8 @@
 
 
 Environment::Environment(Camera& camera)
-: m_camera(camera), m_dayLength(200), m_time(m_dayLength/5), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0) {
+: m_camera(camera), m_dayLength(200), m_time(m_dayLength/5), m_day(0), m_orbitAngle(0.0), m_phase(0), m_sunAxis(0.5), m_moonAxis(1.0), m_pulse(0.0),  
+m_cloudPosition1(10.0f,130.0f,10.0f), m_cloudPosition2(10.0f,130.0f,0.0f), m_cloudPosition3(0.0f,130.0f,10.0f), m_cloudPosition4(0.0f,130.0f,0.0f)  {
 
 }
 
@@ -83,6 +84,13 @@ void Environment::drawCloudNormalPass(Mat4f viewMat, Mat4f projMat){
     hotprog.uniform["u_projection"] = projMat;
     hotprog.uniform["u_view"] = viewMat; 
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition1;
+    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
+    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
+    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
     hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
   }); 
 
@@ -100,12 +108,19 @@ void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffe
     hotprog.uniform["s_depthTexture"] = 1;
     hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition1;
     TexCont cont;
     cont.addTexture(0, lBufferTex);
     cont.addTexture(1, gBufferDepth);
     
 
     cont.prime([&](HotTexCont& hotCont){
+      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
+      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
+      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
       hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
     });
   });  
@@ -268,7 +283,7 @@ void Environment::init()
   m_programFinalCloud.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
   m_programFinalCloud.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
   
-  m_cloud = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
+  m_cloud = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(8.0f,2.0f,4.0f));
 
 
 
@@ -310,6 +325,23 @@ void Environment::update(float delta)
 		m_pulse -= 2;
 	}
 
+  float help = m_time;
+  if(help > m_dayLength / 2){
+
+    help = m_dayLength - help;
+  }
+
+  m_cloudPosition1.x = help;
+  m_cloudPosition1.z = help;
+
+  m_cloudPosition2.x = -help;
+  m_cloudPosition2.z = help;
+
+  m_cloudPosition3.x = help;
+  m_cloudPosition3.z = -help;
+
+  m_cloudPosition4.x = -help;
+  m_cloudPosition4.z = -help;
 }
 
 void Environment::setDayLength(float sec) 

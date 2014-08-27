@@ -54,6 +54,10 @@ private:
   float m_sunAxis;
   float m_moonAxis;
   float m_pulse;
+  Vec3f m_cloudPosition1;
+  Vec3f m_cloudPosition2;
+  Vec3f m_cloudPosition3;
+  Vec3f m_cloudPosition4;
 
   Vec3f getSunColor();
   float getSunIntensity();
