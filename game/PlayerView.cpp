@@ -117,7 +117,7 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
     const map<BlockType, int> items = m_player.getInventoryItems();
 
     VertexSeq<Vec2f, Vec2f> inventoryPanel;
-    inventoryPanel.create(4*items.size(), 5*m_player.maxDisplayItems() );
+    inventoryPanel.create(4*items.size(), 5*items.size() );
     inventoryPanel.prime([&](HotVertexSeq<Vec2f, Vec2f>& hot)
     {
         auto it=items.begin();
@@ -152,7 +152,7 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
 
     const map<BlockType, int> items = m_player.getInventoryItems();
     VertexSeq<Vec2f, Vec3f, Vec2f>  numInventory;
-    numInventory.create(4*2*m_player.maxDisplayItems(), 5*2*m_player.maxDisplayItems() );
+    numInventory.create(4*2*items.size(), 5*2*items.size() );
     numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
     {
         auto it=items.begin();
