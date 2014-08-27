@@ -28,7 +28,7 @@ void main() {
 
 	vec4 normalVec = texture(normalTex, inData.uv);
 
-  if(normalVec.w <= 0.25){
+  if(normalVec.w <= 0.4){
     discard;
   }
 
