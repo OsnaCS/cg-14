@@ -37,6 +37,8 @@ Vec2f getTexCoords(BlockType type, BlockSide side){
 
 	switch(type){
 
+		case BlockType::Water:
+		return m*Vec2f(1,0);
 				
 
 		case BlockType::Dirt:

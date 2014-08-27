@@ -106,13 +106,25 @@ void ChunkGenerator::setBiomes(Map& m, Chunk chunk, int x, int z, int biomeNoise
         // Multiplikation von Simplex Noise mit Gaußscher Glockenkurve für einen weicheren Biomübergang an den Bergen
         simpNoise = exp(-1 * term * term) * SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
         // Umrechnen von Intervall [-1,1] in Intervall [c,d]
-        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise) -7;
+        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise) - 9;
+        if(type == BiomeType::Hillside) {
+          noise -= 10;
+        }
       }
+      // // Wenn Biom Forest
+      // else if(67 <= biomeNoise && biomeNoise <= 69){
+      //   // Umrechnen von Intervall [70,126] in [-1.25,1.25] für Gaußsche Glockenkurve
+      //   double term2 = ((-1.0 * biomeNoise - (1.0) * biomeNoise + 69 * (1.0) - -1.0 * 67) / (69.0 - 67.0));
+      //   // Multiplikation von Simplex Noise mit Gaußscher Glockenkurve für einen weicheren Biomübergang an den Bergen
+      //   simpNoise = term2 * SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
+      //   // Umrechnen von Intervall [-1,1] in Intervall [c,d]
+      //   noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise);
+      // }
       else {
         // Berechne Werte im Intervall [-1,1] mit Simplex Noise
         simpNoise = SimplexNoise::noise(frequency * xi, frequency * zj, m_seed);
         // Umrechnen von Intervall [-1,1] in Intervall [c,d]
-        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise);
+        noise = SimplexNoise::noiseInt(lowerBound, upperBound, simpNoise) + 1;
       }
 
       // xi und zj umrechnen
@@ -125,12 +137,15 @@ void ChunkGenerator::setBiomes(Map& m, Chunk chunk, int x, int z, int biomeNoise
 	      zjj += 16;
 	    }
 
-      setBlockHeight(m, type, x, z, xii, zjj, noise);
+      setBlockHeight(m, type, x, z, xii, zjj, noise, biomeNoise);
     }
   }
 }
 
-void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int xi, int zj, int noise) {
+void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int xi, int zj, int noise, int biomeNoise) {
+  // Wasserhöhe
+  int waterHeight = 80 - 7;
+  // Rest
   for(int k = 0; k < 128; k++) {
     switch(type) {
       case BiomeType::Desert:
@@ -217,19 +232,28 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       		}
       		// Boden erzeugen
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
+          // FLussüberlauf
+          if(biomeNoise == 69 && noise <= waterHeight) {
+            for(int i = noise; i <= waterHeight; i++) {
+              map.getChunk({x, z}).setBlockType({xi, i, zj}, BlockType::Water);
+            }
+          }
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
         } 
         break;
 
       case BiomeType::Hillside:
-        if(k == noise && noise <= 77) {
-          srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
+        if(k == noise && noise <= 80) {
           int random = rand() % 512;
           if(random < 350){ 
             map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
           } else map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-        } else if (k == noise && noise > 77){
+          // Fluss in Hillside
+          for(int i = noise; i <= waterHeight; i++) {
+            map.getChunk({x, z}).setBlockType({xi, i, zj}, BlockType::Water);
+          }
+        } else if (k == noise && noise > 80){
           map.getChunk({x,z}).setBlockType({xi,k,zj}, BlockType::Stone);
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Dirt); //  Unter dem Noise-Wert gibt es nur Dirt
@@ -237,10 +261,14 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         break;
 
         case BiomeType::Mountains:
-        if(k == noise && noise > 72) {
+        if(k == noise && noise > 75) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-        } else if(k == noise && noise <= 72){
+        } else if(k == noise && noise <= 75){
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
+          // Seen in den Bergen
+          for(int i = noise; i <= waterHeight; i++) {
+            map.getChunk({x, z}).setBlockType({xi, i, zj}, BlockType::Water);
+          }
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone); //  Unter dem Noise-Wert gibt es nur Dirt
         } 
