@@ -212,3 +212,6 @@ void Map::loadWorld(string name) {
   m_map = maptoload;
 }
 
+bool Map::isBlockTypeVisible(BlockType blockType) {
+  return !(blockType == BlockType::Air || blockType == BlockType::Torch);
+}

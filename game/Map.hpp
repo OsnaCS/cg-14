@@ -104,6 +104,8 @@ public:
 		return m_pointLights;
 	}
 
+	bool isBlockTypeVisible(BlockType blockType);
+
 private: 
 	// Map with all Chunks
 	map<Vec2i, Chunk> m_map;

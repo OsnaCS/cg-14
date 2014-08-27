@@ -47,7 +47,7 @@ bool ChunkView::isFaceVisible(Vec3i blockWorldPos, BlockSide blockSide) {
 
   Vec3i checkPos = blockWorldPos + positionOffset;
   //wenn es existiert und nicht luft oder birchleaves ist (denn letzteres ist partiell durchsichtig)
-  return !(m_map->exists(checkPos) && (m_map->getBlockType(checkPos) != BlockType::SpruceLeaves && m_map->getBlockType(checkPos) != BlockType::Air 
+  return !(m_map->exists(checkPos) && (m_map->getBlockType(checkPos) != BlockType::SpruceLeaves && m_map->isBlockTypeVisible(m_map->getBlockType(checkPos))
     && m_map->getBlockType(checkPos) != BlockType::BirchLeaves));
 }
 
@@ -88,7 +88,7 @@ void ChunkView::updateView() {
       BlockType blockType = m_map->getBlockType(blockWorldPos);
 
       // if the block is not air count the visible faces
-	    if(blockType != BlockType::Air) {
+	    if(m_map->isBlockTypeVisible(blockType)) {
         faceCount += countVisibleFaces(blockWorldPos);
 	    }
 	  }
@@ -119,7 +119,7 @@ void ChunkView::updateView() {
         BlockType blockType = m_map->getBlockType(blockWorldPos);
 
         // if the block is not air add the visible faces to the sequence
-        if(blockType != BlockType::Air) {
+        if(m_map->isBlockTypeVisible(blockType)) {
           addBoxToSeq(hotSeq, j, k, blockType, blockWorldPos);
         }
       }
@@ -221,7 +221,7 @@ Vec4f ChunkView::getLightForFace(Vec3i blockWorldPos, BlockSide side) {
   // fill bit lookup
   int i = 0;
   for (Vec3i pos : checkPositions) {
-    lookup[i] = m_map->exists(pos) && m_map->getBlockType(pos) != BlockType::Air;
+    lookup[i] = m_map->exists(pos) && m_map->isBlockTypeVisible(m_map->getBlockType(pos));
     i++;
   }
 
