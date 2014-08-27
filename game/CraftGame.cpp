@@ -286,7 +286,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     m_lBuffer.prime([&](HotFrameBuffer& hotFB) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
 
-      //m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
+      m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
       m_mapView.drawLightingPass(viewMatrix, projectionMatrix, gCont);
     });
 

@@ -18,8 +18,6 @@ in VertexData {
 
 void main() {
 
-	
-
 	vec3 pos = inData.coordinates * texture(depthTexture, inData.uv).r + u_cameraPos;
 	vec3 lightRay = pos - u_lightPosition;
 	float dist = length(lightRay);
@@ -36,8 +34,6 @@ void main() {
 	else {
 		diffuseIntensity = lightIntense * abs(cosa); 
 	}
-
-	diffuseIntensity += 0.1;
 
 	o_color = vec4(diffuseIntensity, diffuseIntensity, diffuseIntensity, 1);
 }

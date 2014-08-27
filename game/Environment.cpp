@@ -217,7 +217,14 @@ void Environment::init()
 
   m_lightingPass.create(lightingVS, lightingFS);
   m_lightingPass.perFragProc.enableDepthTest();
+  m_lightingPass.perFragProc.enableDepthWrite(false);
   m_lightingPass.perFragProc.setDepthFunction(DepthFunction::Greater);
+  m_lightingPass.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_lightingPass.perFragProc.blendFuncA = BlendFunction::Add;
+  m_lightingPass.perFragProc.srcRGBParam = BlendParam::One;
+  m_lightingPass.perFragProc.dstRGBParam = BlendParam::One;
+  m_lightingPass.perFragProc.srcAParam = BlendParam::One;
+  m_lightingPass.perFragProc.dstAParam = BlendParam::One;
 }
 
 void Environment::update(float delta)
