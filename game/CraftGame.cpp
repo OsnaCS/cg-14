@@ -298,9 +298,9 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
 
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
+      m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
