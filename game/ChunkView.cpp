@@ -47,7 +47,8 @@ bool ChunkView::isFaceVisible(Vec3i blockWorldPos, BlockSide blockSide) {
 
   Vec3i checkPos = blockWorldPos + positionOffset;
   //wenn es existiert und nicht luft oder birchleaves ist (denn letzteres ist partiell durchsichtig)
-  return !(m_map->exists(checkPos) && (m_map->getBlockType(checkPos) != BlockType::Air && m_map->getBlockType(checkPos) != BlockType::BirchLeaves));
+  return !(m_map->exists(checkPos) && (m_map->getBlockType(checkPos) != BlockType::SpruceLeaves && m_map->getBlockType(checkPos) != BlockType::Air 
+    && m_map->getBlockType(checkPos) != BlockType::BirchLeaves));
 }
 
 /**

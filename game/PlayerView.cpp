@@ -73,10 +73,10 @@ void PlayerView::init()
   m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
   m_pickaxeTexture.params.useMipMaps = true;
 
-  // ImageBox image_box3 = loadJPEGImage("gfx/pickaxe_normals512.jpg");
-  // m_pickaxeNormals.create(Vec2i(512,512), TexFormat::RGB8, image_box3.data());
-  // m_pickaxeNormals.params.filterMode = TexFilterMode::Linear;
-  // m_pickaxeNormals.params.useMipMaps = true;
+  ImageBox image_box3 = loadJPEGImage("gfx/player_texture.jpg");
+  m_playerTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box3.data());
+  m_playerTexture.params.filterMode = TexFilterMode::Linear;
+  m_playerTexture.params.useMipMaps = true;
 
 	VShader vsNP;
 	vsNP.compile(loadShaderFromFile("shader/PickaxeNormalPass.vsh"));
@@ -85,6 +85,7 @@ void PlayerView::init()
     // create program and link the two shaders
 	m_normalPass.create(vsNP, fsNP);
 	m_normalPass.perFragProc.enableDepthTest();
+	m_finalPass.perFragProc.enableDepthWrite();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	VShader vsFP;
@@ -94,10 +95,10 @@ void PlayerView::init()
     // create program and link the two shaders
 	m_finalPass.create(vsFP, fsFP);
 	m_finalPass.perFragProc.enableDepthTest();
+	m_finalPass.perFragProc.enableDepthWrite();
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
-
 
     // To display hearts panel
     initHeartPanel();
@@ -190,6 +191,10 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
     });
     return numInventory;
 
+	m_playerFigure = loadOBJ("gfx/player.obj");
+
+	m_showPickaxe = false;
+
 }
 
 VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
@@ -229,35 +234,56 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
 
 void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
 
-  //Show pickaxe
-	m_normalPass.prime([&](HotProgram& hotPickaxe){
+	m_normalPass.prime([&](HotProgram& hotPlayer) {
+		Mat4f tmp = viewMat * getTransMatrixPlayer();
+		tmp = tmp.inverted();
+    tmp = tmp.transposed();
+		hotPlayer.uniform["u_view"] = viewMat* getTransMatrixPlayer();
+    hotPlayer.uniform["u_projection"] = projMat;
+    hotPlayer.uniform["u_transform"] = tmp;
 
-		hotPickaxe.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
-		hotPickaxe.uniform["u_projection"] = projMat;
+    TexCont contPlayer;
+    contPlayer.addTexture(0, m_playerTexture);
+      contPlayer.prime([&](HotTexCont& hotTexCont) { 
+      	hotPlayer.draw(hotTexCont, m_playerFigure, PrimitiveType::Triangle); 
+      });
+  });
 
-		TexCont cont; 
-		cont.addTexture(0, m_pickaxeTexture);
-		cont.prime([&](HotTexCont& hotTexCont){
-				hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);	
-		});
-	});
+
+  if(m_showPickaxe) {
+    // Show pickaxe
+    m_normalPass.prime([&](HotProgram& hotPickaxe) {
+    	Mat4f tmp = viewMat * getTransMatrixPlayer();
+			tmp = tmp.inverted();
+   	  tmp = tmp.transposed();
+      hotPickaxe.uniform["u_view"] = viewMat*getTransMatrix();
+      hotPickaxe.uniform["u_projection"] = projMat;
+      hotPickaxe.uniform["u_transform"] = tmp;
+
+      TexCont cont;
+      cont.addTexture(0, m_pickaxeTexture);
+      cont.prime([&](HotTexCont& hotTexCont) { 
+      	hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle); 
+      });
+    });
+  }
 }
 
 void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
 
-  m_finalPass.prime([&](HotProgram& hotP) {
-  	
-  	//Vec3f cross1 = cross(m_player.getPosition(), m_player.getDirection());
-    hotP.uniform["u_view"] = viewMat * translationMatrix(m_player.getPosition() + 2*m_player.getDirection() ) * scalingMatrix(Vec3f(0.25,0.25,0.25));
-    hotP.uniform["u_projection"] = projMat;
-    hotP.uniform["u_winSize"] = cam.getWindow().getSize();
-    hotP.uniform["s_lightTexture"] = 0;
-    hotP.uniform["s_colorTexture"] = 1;
-    
-    lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
-      m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
-        HotTexCont hotTexCont(hotLightingTex, hotTex);
-        hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+		m_finalPass.prime([&](HotProgram& hotPlayer) {
+
+      hotPlayer.uniform["u_view"] = viewMat * getTransMatrixPlayer();
+      hotPlayer.uniform["u_projection"] = projMat;
+      hotPlayer.uniform["u_winSize"] = cam.getWindow().getSize();
+      hotPlayer.uniform["s_lightTexture"] = 0;
+      hotPlayer.uniform["s_colorTexture"] = 1;
+
+      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+        m_playerTexture.prime(1, [&](HotTex2D& hotTex) {
+          HotTexCont hotTexContPlayer(hotLightingTex, hotTex);
+          hotPlayer.draw(hotTexContPlayer, m_playerFigure, PrimitiveType::Triangle);
+        });
       });
     });
   });
@@ -380,5 +406,93 @@ int PlayerView::calcSeqSize(const std::map<BlockType, int>& items)
         size += ( it->second > 9 )? 2: 1; // 1 or 2 digit place
     }
     return size;
+}
+
+  if(m_showPickaxe) {
+    m_finalPass.prime([&](HotProgram& hotP) {
+
+      hotP.uniform["u_view"] = viewMat * getTransMatrix();
+      hotP.uniform["u_projection"] = projMat;
+      hotP.uniform["u_winSize"] = cam.getWindow().getSize();
+      hotP.uniform["s_lightTexture"] = 0;
+      hotP.uniform["s_colorTexture"] = 1;
+
+      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+        m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
+          HotTexCont hotTexCont(hotLightingTex, hotTex);
+          hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+        });
+      });
+    });
+  }
+}
+
+Mat4f PlayerView::getTransMatrixPlayer(){
+
+	//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.6,0.6,0.6));
+
+		//Translation to origin
+		Mat4f translationOrigin = translationMatrix(Vec3f(0,0,0));
+
+		//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle+1.57f));
+
+  	//Translation to player height and to the front right
+  	Mat4f translation = translationMatrix(m_player.getPosition() - m_player.getDirection() + Vec3f(0, -1.1, 0));
+
+
+  	return translation * rotationY * translationOrigin * scaling;
+
+}
+
+Mat4f PlayerView::getTransMatrix(){
+	//Scaling
+		Mat4f scaling = scalingMatrix(Vec3f(0.15,0.15,0.15));
+
+		//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+  	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
+
+  	//Translation to player height and to the front right
+		Vec3f dir = m_player.getDirection().normalize();
+  	Vec3f cross1 = -cross(Vec3f(0,1,0), dir);
+  	cross1.normalize();
+  	Mat4f translation = translationMatrix(m_player.getPosition() + 2*m_player.getDirection() + 0.75f*cross1);
+
+  	return translation * rotationY * scaling;
+
+}
+
+EventResult PlayerView::processEvent(InputEvent& e, Window& win, bool cheatmode) {
+
+  if(e.type == InputType::KeyPressed) {
+    if((KeyCode)(e.keyInput.key) == KeyCode::T &&  !cheatmode) {
+      togglePickaxe();
+    }else if((KeyCode)(e.keyInput.key) == KeyCode::K){
+    	m_showPickaxe = false;
+    }
+  }
+  return EventResult::Skipped;
+}
+
+void PlayerView::togglePickaxe(){
+	m_showPickaxe = !m_showPickaxe;
 }
 

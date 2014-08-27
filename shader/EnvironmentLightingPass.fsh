@@ -7,6 +7,8 @@ layout(location = 0) out vec4 o_color;
 uniform sampler2D normalTexture;
 
 uniform vec3 u_lightRay;
+uniform float u_lightIntens;
+uniform float u_daytime;
 // uniform vec3 u_cameraPos;
 
 in VertexData {
@@ -20,19 +22,23 @@ void main() {
 
 
 	// --------------- Ambient Light --------------------
-	float ambienteIntensity = 0.6;
 
+	float ambienteIntensity = u_daytime;
+	if(ambienteIntensity > 0.5){
+		ambienteIntensity = 1 - ambienteIntensity;
+	}
 
+	ambienteIntensity += 0.1;
 
 	// --------------- Diffuse Light --------------------
 	float diffuseIntensity;
-	float angle = (dot(u_lightRay, normal)/(length(u_lightRay)*length(normal))); 
+	float cosa = (dot(-u_lightRay, ((normal*2)-1))/(length(u_lightRay)*length(normal)));
 	
-	if(angle > 0) {
+	if(cosa < 0) {
 		diffuseIntensity = 0;
 	} 
 	else {
-		diffuseIntensity = abs(angle); 
+		diffuseIntensity = u_lightIntens * abs(cosa); 
 	}
 
 
