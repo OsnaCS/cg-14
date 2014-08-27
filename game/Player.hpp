@@ -4,8 +4,9 @@
 #include "BlockType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
+#include "MapView.hpp"
 #include "PlayerAttributes.hpp"
-
+#include "PlayerInventory.hpp"
 
 /** @Class Player 
 */
@@ -15,7 +16,7 @@ class Player {
 public:
 
 	//Constructor
-  Player(Map& m);
+  Player(Map& map, MapView& mapView);
 
   /**
    * @brief getHearts Get current number of hearts indicating health of the players
@@ -43,6 +44,19 @@ public:
   		@return Vec3f position Get the Position in 3D Space
   */
   inline Vec3f getPosition();
+
+  /**
+   * @brief getInventoryItems Get items from player's inventory
+   * @return
+   */
+  const map<BlockType, int>& getInventoryItems() const;
+
+  /**
+    * @brief maxDisplayItems Maximum number of "listed" items
+    * @return
+    */
+   int maxDisplayItems() const;
+
 
   /** @brief Process all input Events by Mouse and Keyboard
 
@@ -108,8 +122,10 @@ private:
   bool m_CtrlPressed;
   bool m_ShiftPressed;
   Map& m_map;
+  MapView& m_mapView;
   float m_fallen;
   PlayerAttributes m_attrib;
+  PlayerInventory m_inventory;
 };
 
 

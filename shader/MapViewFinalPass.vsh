@@ -2,8 +2,8 @@
 
 // Our vertex consists just of a Vec2f (aka vec2) which represents position
 layout(location = 0) in vec3 i_pos;
-layout(location = 3) in vec2 i_uv;
-layout(location = 4) in float i_simpleLight;
+layout(location = 1) in vec2 i_uv;
+layout(location = 2) in float i_simpleLight;
 
 uniform mat4 u_projection;
 uniform mat4 u_view;
