@@ -184,6 +184,7 @@ void CraftGame::init() {
         {
           Vec4f posut = m_map.loadWorld("untitled2"); 
           m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
+          m_mapView.resetMapView();
           return EventResult::Processed; 
           break;
         }
