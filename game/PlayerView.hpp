@@ -11,17 +11,19 @@ class PlayerView {
 
 		void draw(Mat4f viewMatrix, Mat4f projectionMatrix);
 		void init();
-
-		void drawNormalPass(Mat4f viewMat, Mat4f projMat);
-		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer);
-		Mat4f getTransMatrix();
-		Mat4f getTransMatrixPlayer();
+		void drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam);
+		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer);
 		void togglePickaxe();
 		EventResult processEvent(InputEvent& e, Window& win, bool cheatmode);
 
+
 	private:
-        VertexSeq<Vec2f, Vec3f, Vec2f> updateHearts();
-        Player& m_player;
+    VertexSeq<Vec2f, Vec3f, Vec2f> updateHearts();
+    Mat4f getRotMatrixPlayer();
+    Mat4f getRotMatrixPickaxe();
+    Mat4f getTransMatrix();
+    Mat4f getTransMatrixPlayer();
+    Player& m_player;
       //VertexSeq m_heartPanel;
 	  Program m_program;
 	  Program m_normalPass;
