@@ -53,6 +53,7 @@ class PlayerView {
       void initHeartPanel();
       void initInventoryNumber();
       std::vector<Vec2f> positionOfNumber(int num);
+      int calcSeqSize(const std::map<BlockType, int>& items);
 
       Player& m_player;
 	  Program m_program;

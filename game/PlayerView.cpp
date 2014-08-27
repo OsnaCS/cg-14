@@ -152,7 +152,8 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
 
     const map<BlockType, int> items = m_player.getInventoryItems();
     VertexSeq<Vec2f, Vec3f, Vec2f>  numInventory;
-    numInventory.create(4*2*items.size(), 5*2*items.size() );
+    int seqSize = calcSeqSize(items);
+    numInventory.create(4*seqSize, 5*seqSize );
     numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
     {
         auto it=items.begin();
@@ -370,3 +371,14 @@ std::vector<Vec2f> PlayerView::positionOfNumber(int num)
 
   return positions;
 }
+
+int PlayerView::calcSeqSize(const std::map<BlockType, int>& items)
+{
+    int size = 0;
+    for(auto it = items.begin(); it != items.end(); ++it)
+    {
+        size += ( it->second > 9 )? 2: 1; // 1 or 2 digit place
+    }
+    return size;
+}
+
