@@ -445,7 +445,7 @@ bool Player::collide(float x, float y, float z)
     return true;
 }
 
-void Player::reset()
+void Player::reset(Vec3f pos)
 {
-  m_position = INIT_POSITION;
+  m_position = pos;
 }

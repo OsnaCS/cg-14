@@ -30,6 +30,7 @@ private:
 
   bool m_pause;
   Vec2f m_pos;
+  int m_button;
 
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;
@@ -48,6 +49,7 @@ private:
   Tex2D m_loadTex;
   Tex2D m_exitTex;
   Tex2D m_optionsTex;
+  Tex2D m_resSh;
   
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);

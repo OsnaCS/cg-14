@@ -15,6 +15,7 @@ CraftGame::CraftGame()
     ,m_playerView(m_player)
     ,m_pause(true)
     ,m_pos(0.0,0.0)
+    ,m_button(0)
 {
   m_running = true;
 }
@@ -104,11 +105,36 @@ void CraftGame::init() {
 
   m_window.addEventCallback([&](InputEvent e) 
   {
-    
+
     if(e.type == InputType::MouseMovePos && m_pause) 
     {
-
       m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
+      
+      if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100)
+      {
+        m_button = 1;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215)
+      {
+        m_button = 2;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 275 && m_pos.y <= 325)
+      {
+        m_button = 3;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 385 && m_pos.y <= 435)
+      {
+        m_button = 4;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 492 && m_pos.y <= 542)
+      {
+        m_button = 5;
+      }
+      else
+      {
+        m_button = 0;
+      }
+      
       return EventResult::Processed;
 
     }
@@ -119,19 +145,34 @@ void CraftGame::init() {
   
   m_window.addEventCallback([&](InputEvent e) 
   {
-    
-    // Resume
-    if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100) 
+
+    switch(m_button)
     {
-      m_pause = false;
-      return EventResult::Processed;
+      case 1: {m_pause = false; return EventResult::Processed; break;}
+      case 2: {Vec4f posut = m_map.loadWorld("untitled2"); m_player.reset(Vec3f(posut.x,posut.y,posut.z)); return EventResult::Processed; break;}
+      case 3: {m_map.saveWorld(); return EventResult::Processed; break;}
+      case 4: {return EventResult::Processed; break;}
+      case 5: {m_running = false; return EventResult::Processed; break;}
+      case 0: {return EventResult::Skipped; break;}
+    }
+
+/*
+    // Resume
+    if(m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100)
+    {
+      if(e.type == InputType::LMouseReleased) 
+      {
+        m_pause = false;
+        return EventResult::Processed;
+      }
     }
 
     // Load
     if(e.type == InputType::LMouseReleased && m_pause && m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215) 
     {
-      m_map.loadWorld("untitled2");
-      m_player.reset();
+      Vec4f posut = m_map.loadWorld("untitled2");
+      m_player.reset(Vec3f(posut.x,posut.y,posut.z));
+      m_mapView.resetMapView();
       return EventResult::Processed;
     }
 
@@ -153,7 +194,7 @@ void CraftGame::init() {
     {
       m_running = false;
       return EventResult::Processed;
-    }
+    }*/
 
     return EventResult::Skipped;
 
@@ -212,6 +253,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_resTex.create(Vec2i(680,90), TexFormat::RGBA8, image_resume.data());
   m_resTex.params.filterMode = TexFilterMode::Trilinear;
   m_resTex.params.useMipMaps = true;
+
+  ImageBox image_ressh = loadPNGImage("gfx/resSh.png");
+  m_resSh.create(Vec2i(680,90), TexFormat::RGBA8, image_ressh.data());
+  m_resSh.params.filterMode = TexFilterMode::Trilinear;
+  m_resSh.params.useMipMaps = true;
 
   ImageBox image_save = loadPNGImage("gfx/save.png");
   m_saveTex.create(Vec2i(680,90), TexFormat::RGBA8, image_save.data());
@@ -419,7 +465,12 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       pMenu.prime([&](HotProgram& hotP)
       {
 
+        slog(m_button);
+
         hotP.uniform["s_menupng"] = 0;
+        hotP.uniform["s_resSh"] = 5;
+        hotP.uniform["s_Sh"] = m_button;
+        hotP.uniform["s_number"] = 1;
 
         TexCont cont;
         cont.addTexture(0, m_resTex);
@@ -427,6 +478,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         cont.addTexture(2, m_saveTex);
         cont.addTexture(3, m_optionsTex);
         cont.addTexture(4, m_exitTex);
+        cont.addTexture(5, m_resSh);
 
 
         cont.prime([&](HotTexCont& hotTexCont) 
@@ -441,18 +493,22 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
             hotP.uniform["u_offset"] = (float)-0.3;
             hotP.uniform["s_menupng"] = 1;
+            hotP.uniform["s_number"] = 2;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.6;
             hotP.uniform["s_menupng"] = 2;
+            hotP.uniform["s_number"] = 3;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-0.9;
             hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 4;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-1.2;
             hotP.uniform["s_menupng"] = 4;
+            hotP.uniform["s_number"] = 5;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }

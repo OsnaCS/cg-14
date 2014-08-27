@@ -17,6 +17,7 @@ public:
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
 	void deleteChunkView(Vec2i chunkPos);
+	void resetMapView();
 
 	/**
 	* Checks if a chunk is visible

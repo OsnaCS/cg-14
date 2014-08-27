@@ -34,7 +34,7 @@ public:
   */
   void update();
 
-  void reset();
+  void reset(Vec3f);
 
   /** @brief Get the direction of the Players view
   		@return Vec3f direction The vector where the Player is looking at

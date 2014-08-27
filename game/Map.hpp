@@ -95,7 +95,7 @@ public:
 	/**
 	*	Soll die Dateien einlesen
 	*/
-	void loadWorld(string chunkname);
+	Vec4f loadWorld(string chunkname);
 
 	//map<Vec2i, Chunk> loadWorld("WeltDatei");
 
