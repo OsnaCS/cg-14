@@ -50,15 +50,6 @@ Player::Player( Map& m)
     ,m_attrib(MAX_HEARTS)
     ,m_inventory(10)
 {
-    m_inventory.addItem(BlockType::Cactus);
-    m_inventory.addItem(BlockType::Cactus);
-    m_inventory.addItem(BlockType::Cactus);
-    m_inventory.addItem(BlockType::Cactus);
-    m_inventory.addItem(BlockType::Birch);
-    m_inventory.addItem(BlockType::Stone);
-    m_inventory.addItem(BlockType::Stone);
-    m_inventory.addItem(BlockType::Wood);
-
 
 }
 
