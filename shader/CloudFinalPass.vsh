@@ -11,6 +11,7 @@ uniform mat4 u_view;
 out VertexData {
 	vec2 uv;
 	vec3 pos;
+	float depth;
 //	float simpleLight;
 } outData;
 
@@ -18,7 +19,10 @@ void main() {
 
   outData.uv = i_uv;
   outData.pos = i_pos;
+	vec4 viewPosition = u_view * vec4(i_pos+vec3(0,100,0), 1);
 
+//	outData.uv = i_uv;
+  outData.depth = viewPosition.z;
 //  outData.simpleLight = i_simpleLight;
 
   // write gl_Position -> make OpenGL happy

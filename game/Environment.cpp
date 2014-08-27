@@ -99,6 +99,7 @@ void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffe
     hotprog.uniform["s_lightTexture"] = 0;
     hotprog.uniform["s_depthTexture"] = 1;
     hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
+    hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
     TexCont cont;
     cont.addTexture(0, lBufferTex);
     cont.addTexture(1, gBufferDepth);
@@ -254,12 +255,18 @@ void Environment::init()
   m_programCloud.create(vsCloud, fsCloud);
   m_programCloud.perFragProc.enableDepthTest();
   m_programCloud.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_programCloud.primitiveProc.enableCulling();
+  //m_programCloud.primitiveProc.setCullFace(CullFace::Front);
   
   m_programFinalCloud.create(vsFinalCloud, fsFinalCloud);
   m_programFinalCloud.perFragProc.enableDepthTest();
   m_programFinalCloud.perFragProc.enableDepthWrite();
   m_programFinalCloud.perFragProc.setDepthFunction(DepthFunction::Less);
   m_programFinalCloud.primitiveProc.enableCulling();
+  m_programFinalCloud.primitiveProc.setCullFace(CullFace::Front);
+  m_programFinalCloud.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_programFinalCloud.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+  m_programFinalCloud.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
   
   m_cloud = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
 
