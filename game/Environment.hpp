@@ -37,7 +37,9 @@ private:
   VertexSeq<Vec3f> m_sphere;
   VertexSeq<Vec3f, Vec2f> m_sun;
   VertexSeq<Vec3f, Vec2f> m_moon;
-  VertexSeq<Vec3f,Vec3f,Vec2f> m_cloud;
+  VertexSeq<Vec3f,Vec3f,Vec2f> m_cloudBig;
+  VertexSeq<Vec3f,Vec3f,Vec2f> m_cloudNormal;
+  VertexSeq<Vec3f,Vec3f,Vec2f> m_cloudSmall;
   Program m_programSphere;
   Program m_programSun;
   Program m_programCloud;

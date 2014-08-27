@@ -85,13 +85,13 @@ void Environment::drawCloudNormalPass(Mat4f viewMat, Mat4f projMat){
     hotprog.uniform["u_view"] = viewMat; 
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition1;
-    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.draw(m_cloudSmall, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
-    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.draw(m_cloudNormal, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
-    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
-    hotprog.draw(m_cloud, PrimitiveType::TriangleStrip);
+    hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
   }); 
 
 }
@@ -115,13 +115,13 @@ void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffe
     
 
     cont.prime([&](HotTexCont& hotCont){
-      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+      hotprog.draw(hotCont, m_cloudSmall, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition2;
-      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+      hotprog.draw(hotCont, m_cloudNormal, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition3;
-      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+      hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
     hotprog.uniform["u_cloudPosition"] = m_cloudPosition4;
-      hotprog.draw(hotCont, m_cloud, PrimitiveType::TriangleStrip);
+      hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
     });
   });  
 
@@ -283,7 +283,9 @@ void Environment::init()
   m_programFinalCloud.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
   m_programFinalCloud.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
   
-  m_cloud = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(8.0f,2.0f,4.0f));
+  m_cloudBig = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(16.0f,4.0f,8.0f));
+  m_cloudNormal = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(8.0f,2.0f,4.0f));
+  m_cloudSmall = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
 
 
 
