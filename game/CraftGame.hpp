@@ -14,7 +14,7 @@ class CraftGame {
 public:
   CraftGame();
 
-  void init();
+  void init(Vec2i size, bool fullscreen);
   void start();
 
 private:
