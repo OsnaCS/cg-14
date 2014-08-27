@@ -41,6 +41,10 @@ void PlayerView::draw( )
         hotprog.draw(m_centerMarker, PrimitiveType::Line);
     });
 
+
+    if (  m_player.getInventoryItems().empty() )
+        return;
+
     m_inventoryProg.prime([&,this](HotProgram& hotprog)
     {
         m_inventoryTex.prime(0, [&,this](HotTex2D& hotTex)
