@@ -26,8 +26,11 @@ void main() {
 
 	normal = texTrans * (((texture(normalTex, inData.uv).xyz) - 0.5) * 2);
 
-	// Gibt ein Vec4 zurueck, wobei die 4. Komponente der Alpha-Wert ist
+	vec4 normalVec = texture(normalTex, inData.uv);
 
+  if(normalVec.w <= 0.25){
+    discard;
+  }
 
 	o_depth = vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
 
