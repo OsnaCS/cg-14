@@ -99,6 +99,9 @@ void PlayerView::init()
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
+  m_playerFigure = loadOBJ("gfx/player.obj");
+
+  m_showPickaxe = false;
 
     // To display hearts panel
     initHeartPanel();
@@ -111,6 +114,9 @@ void PlayerView::init()
 
     // To display number of inventory for each object's type
     initInventoryNumber();
+
+    
+
 }
 
 VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
@@ -190,10 +196,6 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
         }
     });
     return numInventory;
-
-	m_playerFigure = loadOBJ("gfx/player.obj");
-
-	m_showPickaxe = false;
 
 }
 
@@ -286,7 +288,24 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& 
         });
       });
     });
-  });
+
+  if(m_showPickaxe) {
+    m_finalPass.prime([&](HotProgram& hotP) {
+
+      hotP.uniform["u_view"] = viewMat * getTransMatrix();
+      hotP.uniform["u_projection"] = projMat;
+      hotP.uniform["u_winSize"] = cam.getWindow().getSize();
+      hotP.uniform["s_lightTexture"] = 0;
+      hotP.uniform["s_colorTexture"] = 1;
+
+      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
+        m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
+          HotTexCont hotTexCont(hotLightingTex, hotTex);
+          hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
+        });
+      });
+    });
+  }
 }
 
 void PlayerView::initInventory()
@@ -406,25 +425,6 @@ int PlayerView::calcSeqSize(const std::map<BlockType, int>& items)
         size += ( it->second > 9 )? 2: 1; // 1 or 2 digit place
     }
     return size;
-}
-
-  if(m_showPickaxe) {
-    m_finalPass.prime([&](HotProgram& hotP) {
-
-      hotP.uniform["u_view"] = viewMat * getTransMatrix();
-      hotP.uniform["u_projection"] = projMat;
-      hotP.uniform["u_winSize"] = cam.getWindow().getSize();
-      hotP.uniform["s_lightTexture"] = 0;
-      hotP.uniform["s_colorTexture"] = 1;
-
-      lBuffer.prime(0, [&](HotTex2D& hotLightingTex) {
-        m_pickaxeTexture.prime(1, [&](HotTex2D& hotTex) {
-          HotTexCont hotTexCont(hotLightingTex, hotTex);
-          hotP.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle);
-        });
-      });
-    });
-  }
 }
 
 Mat4f PlayerView::getTransMatrixPlayer(){
