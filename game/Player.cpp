@@ -198,13 +198,16 @@ void Player::update(float timePassed)
 
   if(m_ePressed){
     m_ePressed = false;
+    auto nextBlock = getLastAir();
     m_map.setBlockType(getLastAir(),BlockType::Dirt);
+    m_mapView.notifyBlockUpdate(nextBlock);
   }
   //handle block destroy
   if(m_rightMouseCaptured){
     m_rightMouseCaptured = false;
     auto nextBlock = getNextBlock();
     if (m_map.exists(nextBlock)) {
+      m_inventory.addItem(m_map.getBlockType(nextBlock));
       m_map.setBlockType(nextBlock, BlockType::Air);
       m_mapView.notifyBlockUpdate(nextBlock);
     }
