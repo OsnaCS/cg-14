@@ -1,6 +1,6 @@
 #version 330 core
 
-
+out vec4 o_color;
 
 in VertexData
 {
@@ -18,5 +18,5 @@ void main()
         tempTex.w = 1-tempTex.y;
         tempTex.y = 0;
         tempTex.z = 0;
-        gl_FragColor = tempTex;
+        o_color = tempTex;
 }
