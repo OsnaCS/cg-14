@@ -6,7 +6,7 @@
 out vec4 o_color;
 
 in VertexData {
-	vec2 uv;
+	vec3 uvi;
 	vec3 pos;
   float simpleLight;
 } inData;
@@ -14,7 +14,7 @@ in VertexData {
 uniform ivec2 u_winSize;
 
 uniform sampler2D s_lightTexture;
-uniform sampler2D s_colorTexture;
+uniform sampler2DArray s_colorTexture;
 uniform sampler2D s_depthTexture;
 
 uniform float u_time;
@@ -24,7 +24,7 @@ void main() {
 
 	vec4 light = texture(s_lightTexture, gl_FragCoord.xy / u_winSize);
 	vec4 depth = texture(s_depthTexture, gl_FragCoord.xy / u_winSize);
-	vec4 texColor = texture(s_colorTexture, inData.uv);
+	vec4 texColor = texture(s_colorTexture, inData.uvi);
 	
 	texColor.xyz *= light.xyz;
   texColor.xyz *= inData.simpleLight;
@@ -99,5 +99,4 @@ void main() {
   }
 
 	o_color = vec4(texColor.xyz, 1);
-
 }

@@ -32,7 +32,8 @@ Color8A getColor(BlockType type)
 
 }
 
-Vec2f getTexCoords(BlockType type, BlockSide side){
+// alter Texturzugriff
+Vec2f getInventoryCoords(BlockType type, BlockSide side){
 	float m = 0.125f;
 
 	switch(type){
@@ -149,6 +150,111 @@ Vec2f getTexCoords(BlockType type, BlockSide side){
 
 
 		default: return m*Vec2f(7,7);
+		
+	}
+}
+
+// neuer TexturZugriff
+int getTexCoords(BlockType type, BlockSide side){
+	switch(type){
+
+		case BlockType::Water:
+		return 1;
+
+		case BlockType::Dirt:
+		return 2;
+
+		case BlockType::Wood:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+				return 11;
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 12;
+		}
+		
+		case BlockType::Stone:
+		return 8;
+
+		case BlockType::Sand:
+		return 9;
+
+		case BlockType::Grass:
+		switch(side){
+			case BlockSide::Top: 
+				return 0;
+			case BlockSide::Bottom:
+				return 2;
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 3;
+		}
+
+		case BlockType::Cactus:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+				return 5;
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 4;
+		}
+
+		case BlockType::Birch:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+				return 11;
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 10;
+		}
+
+		case BlockType::Spruce:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+				return 11;
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 12;
+		}
+
+		case BlockType::BirchLeaves:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 6;
+		}
+
+		case BlockType::SpruceLeaves:
+		switch(side){
+			case BlockSide::Top: 
+			case BlockSide::Bottom:
+			case BlockSide::North:
+			case BlockSide::South:
+			case BlockSide::West:
+			case BlockSide::East:
+				return 7;
+		}
+
+		default: 
+			return 2;
 		
 	}
 }

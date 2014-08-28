@@ -98,11 +98,11 @@ void ChunkView::updateView() {
       continue;
     }
 
-    VertexSeq<Vec3f, Vec2f, float, uint8_t> sequence;
+    VertexSeq<Vec3f, Vec3f, float, uint8_t> sequence;
     sequence.create(4 * faceCount, 5 * faceCount);
 
     sequence.prime([&](
-      HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq) {
+      HotVertexSeq<Vec3f, Vec3f, float, uint8_t>& hotSeq) {
 
     	// vertex and index indices
     	uint j = 0;
@@ -251,15 +251,15 @@ Vec4f ChunkView::getLightForFace(Vec3i blockWorldPos, BlockSide side) {
   return Vec4f(colors[0], colors[1], colors[2], colors[3]);
 }
 
-void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType blockType, Vec3i blockWorldPos) {
+void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec3f, float, uint8_t>& hotSeq, uint& vertexIndex, uint& indexIndex, BlockType blockType, Vec3i blockWorldPos) {
 
   // texture coords
-  Vec2f south = getTexCoords(blockType,BlockSide::South);
-  Vec2f east = getTexCoords(blockType, BlockSide::East);
-  Vec2f north = getTexCoords(blockType, BlockSide::North);
-  Vec2f west = getTexCoords(blockType, BlockSide::West);
-  Vec2f top = getTexCoords(blockType, BlockSide::Top);
-  Vec2f bottom = getTexCoords(blockType, BlockSide::Bottom);
+  int south = getTexCoords(blockType,BlockSide::South);
+  int east = getTexCoords(blockType, BlockSide::East);
+  int north = getTexCoords(blockType, BlockSide::North);
+  int west = getTexCoords(blockType, BlockSide::West);
+  int top = getTexCoords(blockType, BlockSide::Top);
+  int bottom = getTexCoords(blockType, BlockSide::Bottom);
 
   // block size
   float s = 0.5f;
@@ -271,10 +271,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- positive z (front)
   if (isFaceVisible(blockWorldPos, BlockSide::South)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::South);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), south, light.x, 3);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), south + Vec2f(0, 1/8.f), light.w, 3);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), south + Vec2f(1/8.f, 0), light.y, 3);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), south + Vec2f(1/8.f, 1/8.f), light.z, 3);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), Vec3f(0,0,south), light.x, 3);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), Vec3f(0,1,south), light.w, 3);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), Vec3f(1,0,south), light.y, 3);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), Vec3f(1,1,south), light.z, 3);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -289,10 +289,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- positive x (right)
   if (isFaceVisible(blockWorldPos, BlockSide::East)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::East);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), east, light.x, 5);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), east+Vec2f(0, 1/8.f), light.w, 5);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), east+Vec2f(1/8.f, 0), light.y, 5);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), east+Vec2f(1/8.f, 1/8.f), light.z, 5);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), Vec3f(0,0,east), light.x, 5);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), Vec3f(0,1,east), light.w, 5);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), Vec3f(1,0,east), light.y, 5);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), Vec3f(1,1,east), light.z, 5);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -307,10 +307,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- negative z (back)
   if (isFaceVisible(blockWorldPos, BlockSide::North)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::North);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), north, light.x, 2);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), north+Vec2f(0, 1/8.f), light.w, 2);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), north+Vec2f(1/8.f, 0), light.y, 2);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), north+Vec2f(1/8.f, 1/8.f), light.z, 2);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), Vec3f(0,0,north), light.x, 2);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), Vec3f(0,1,north), light.w, 2);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), Vec3f(1,0,north), light.y, 2);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), Vec3f(1,1,north), light.z, 2);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -325,10 +325,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- negative x (left)
   if (isFaceVisible(blockWorldPos, BlockSide::West)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::West);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), west, light.x, 4);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), west+Vec2f(0, 1/8.f), light.w, 4);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), west+Vec2f(1/8.f, 0), light.y, 4);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), west+Vec2f(1/8.f, 1/8.f), light.z, 4);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), Vec3f(0,0,west), light.x, 4);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), Vec3f(0,1,west), light.w, 4);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), Vec3f(1,0,west), light.y, 4);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), Vec3f(1,1,west), light.z, 4);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -343,10 +343,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- positive y (top)
   if (isFaceVisible(blockWorldPos, BlockSide::Top)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::Top);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), top, light.x, 0);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), top+Vec2f(0, 1/8.f), light.w, 0);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), top+Vec2f(1/8.f, 0), light.y, 0);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), top+Vec2f(1/8.f, 1/8.f), light.z, 0);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, -s), Vec3f(0,0,top), light.x, 0);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, s, s), Vec3f(0,1,top), light.w, 0);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, s, -s), Vec3f(1,0,top), light.y, 0);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(s, s, s), Vec3f(1,1,top), light.z, 0);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -361,10 +361,10 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   // -- negative y (bottom)
   if (isFaceVisible(blockWorldPos, BlockSide::Bottom)) {
     Vec4f light = getLightForFace(blockWorldPos, BlockSide::Bottom);
-    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), bottom, light.y, 1);
-    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), bottom+Vec2f(0, 1/8.f), light.x, 1);
-    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), bottom+Vec2f(1/8.f, 0), light.z, 1);
-    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), bottom+Vec2f(1/8.f, 1/8.f), light.w, 1);
+    hotSeq.vertex[vertexIndexOffset + 0 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, s), Vec3f(0,0,bottom), light.y, 1);
+    hotSeq.vertex[vertexIndexOffset + 1 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, s), Vec3f(0,1,bottom), light.x, 1);
+    hotSeq.vertex[vertexIndexOffset + 2 + vertexIndex].set(blockWorldPos + Vec3f(s, -s, -s), Vec3f(1,0,bottom), light.z, 1);
+    hotSeq.vertex[vertexIndexOffset + 3 + vertexIndex].set(blockWorldPos + Vec3f(-s, -s, -s), Vec3f(1,1,bottom), light.w, 1);
 
     hotSeq.index[indexIndexOffset + 0 + indexIndex] = vertexIndexOffset + 0 + vertexIndex;
     hotSeq.index[indexIndexOffset + 1 + indexIndex] = vertexIndexOffset + 1 + vertexIndex;
@@ -382,7 +382,7 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
 
 
 void ChunkView::draw(HotProgram& hotProg, HotTexCont& hotCont) {
-  for(VertexSeq<Vec3f, Vec2f, float, uint8_t>& sequence : m_chunkSequences) {
+  for(VertexSeq<Vec3f, Vec3f, float, uint8_t>& sequence : m_chunkSequences) {
     if(sequence) {
       hotProg.draw(hotCont, sequence, PrimitiveType::TriangleStrip);
     }

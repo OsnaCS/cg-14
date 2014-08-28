@@ -1,8 +1,11 @@
 #include "MapView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
 #include "ObjectLoader.hpp"
+#include "TexArray.hpp"
 
 #include <math.h>
+#include <vector>
+#include <string>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
 : m_map(map), m_cam(cam), m_envir(envir) {
@@ -11,15 +14,48 @@ MapView::MapView(Map& map, Camera& cam, Environment& envir)
 
 void MapView::init() {
 
-  ImageBox image_box = loadPNGImage("gfx/texture.png");
-  m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, image_box.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
+  // Texturen und Normalen laden
+  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);                      // Textur
 
-  ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
-  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
-  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_normalTexture.params.useMipMaps = true;
+  // Dateiname der PNGs
+  vector<string> names = {"grass_top","water","dirt","grass_side","cactus_side", 
+  "cactus_top","birch_leaves","spruce_leaves","stone","sand","birch_side",
+  "wood_top","spruce_side"};
+
+  // Speichere die Texturen in Vector:
+  for(int i = 0; i < names.size(); i++) {
+    // Texturen laden
+    ImageBox image_box = loadPNGImage("gfx/blocks/" + names[i] + ".png");
+    m_colorTexture.addData(i,image_box.data());
+  }
+
+
+  m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);  // Normalen zur Textur
+
+  for(int i = 0; i < names.size(); i++) {
+    // Normalen zu den Texturen laden
+    ImageBox image_box_normal = loadPNGImage("gfx/blocks/" + names[i] + "_normal.png");
+    m_normalTexture.addData(i,image_box_normal.data());  
+  }
+  
+
+  // Lade alle Normalen in Reihenfolge:
+
+  // m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
+  // m_colorTexture.params.useMipMaps = true;
+
+  // TexArray texArray; 
+  // texArray.create(Vec2i(dimension), TexFormat, anzahl_d_texturen_im_array);
+  // texArray.addData(0,image_box.data()); //index an dssen stelle ich die textur im array platzieren will
+
+
+  
+
+  // // Alter TexturZugriff
+  // ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
+  // m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
+  // m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
+  // m_normalTexture.params.useMipMaps = true;
 
 
   VShader vs;
