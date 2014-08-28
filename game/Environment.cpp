@@ -137,11 +137,10 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
   m_lightingPass.prime([&](HotProgram& hotProg) {
 
     hotProg.uniform["normalTexture"] = 0;
-    // hotProg.uniform["depthTexture"] = 1;
-    // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
+    hotProg.uniform["depthTexture"] = 1;
+    hotProg.uniform["u_cameraPos"] = m_camera.get_position();
     hotProg.uniform["u_lightRay"] = getSkyLightDir();
     hotProg.uniform["u_lightIntens"] = getSkyLightIntensity();
-    //hotProg.uniform["u_ambient"] = m_time / m_dayLength;
     hotProg.uniform["u_ambient"] = getAmbientIntensity();
 
     Vec3f direction = m_camera.get_direction();

@@ -26,7 +26,7 @@ void main() {
 	
 	texColor.xyz *= light.xyz;
   texColor.xyz *= inData.simpleLight;
-	texColor.xyz *= light.w;
+	texColor.xyz *= (light.w + 1);
 
 	vec3 fogColor = vec3(0.8,0.8,0.8);
 
