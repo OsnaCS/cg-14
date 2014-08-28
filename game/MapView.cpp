@@ -5,7 +5,7 @@
 #include <math.h>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
-: m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4) {
+: m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4), m_flickeringDelta(0.f) {
 
 }
 
@@ -214,7 +214,9 @@ set<Vec3f> MapView::getVisibleTorches() {
   return torches;
 }
 
-void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
+void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer, float delta) {
+
+  m_flickeringDelta += delta;
 
   set<Vec3f> pointLights = getVisibleTorches();
 
@@ -224,8 +226,8 @@ void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
       hotProg.uniform["normalTexture"] = 0;
       hotProg.uniform["depthTexture"] = 1;
-      hotProg.uniform["u_lightIntens"] = 5.f;
-      hotProg.uniform["u_lightPosition"] = pointLight;
+      hotProg.uniform["u_lightIntens"] = 4.f + 1 * sin(5 * m_flickeringDelta + pointLight.x);
+      hotProg.uniform["u_lightPosition"] = pointLight + Vec3f(0, 0.1 * sin(20 * m_flickeringDelta + pointLight.y), 0);
       hotProg.uniform["u_cameraPos"] = m_cam.get_position();
 
       Vec3f direction = m_cam.get_direction();

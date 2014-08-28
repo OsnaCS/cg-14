@@ -15,7 +15,7 @@ public:
 
 	MapView(Map& map, Camera& cam, Environment& envir);
 	void drawNormalPass(Mat4f viewMat, Mat4f projMat);
-	void drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer);
+	void drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer, float delta);
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
 	void notifyBlockUpdate(Vec3i blockPos);
@@ -53,4 +53,5 @@ private:
 	int m_visibleChunkRange;
 	VertexSeq<Vec3f, Vec3f, Vec2f> m_torch;
 	Tex2D m_torchTexture;
+	float m_flickeringDelta;
 };
