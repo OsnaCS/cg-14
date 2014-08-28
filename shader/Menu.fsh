@@ -18,7 +18,6 @@ void main()
 {
 
 	vec4 save = vec4(0.0);
-	
 
 	if((s_Sh == s_number) && texture(s_resSh, inData.uv).w > 0.1)
 	{
@@ -32,18 +31,6 @@ void main()
 	{
 		discard;
 	}
-
-/*
-  if(texture2D(s_menupng, inData.uv).w > 0.1)
-  {
-  	save = texture(s_menupng, inData.uv);
-	}
-	else 
-	{
-		discard;
-	}
-*/
-
 
   // übernehmen der Farbe
 	o_color = vec4(save.xyz, 1);

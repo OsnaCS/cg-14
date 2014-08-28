@@ -36,7 +36,6 @@ Player::Player(Map& map, MapView& mapView)
     ,m_yMovementspeed(0.0f)
     ,m_zMovementspeed(0.0f)
     ,m_timePassed(0.0f)
-    ,m_mouseCaptured(false)
     ,m_rightMouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
@@ -169,22 +168,14 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
         }
     }
 
-    // Mouse handle
-    if(e.type == InputType::LMousePressed) {
-      m_mouseCaptured = true;
-      win.setCursorMode(CursorMode::Free);
-    }
-    if(e.type == InputType::LMouseReleased) {
-      m_mouseCaptured = false;
-      win.setCursorMode(CursorMode::Normal);
-    }
     //Right Click
     if(e.type == InputType::RMousePressed) {
       m_rightMouseCaptured = true;
     }
+
     if(!cheatmode){
       // Mouse
-      if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
+      if (e.type == InputType::MouseMoveDir)
       {
         turn_side(-e.mouseInput.x / 300.0f);
         turn_upDown(-e.mouseInput.y / 50.0f);

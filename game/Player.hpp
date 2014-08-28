@@ -115,7 +115,6 @@ private:
   float m_yMovementspeed;
   float m_zMovementspeed;
   float m_timePassed;
-  bool m_mouseCaptured;
   bool m_rightMouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
