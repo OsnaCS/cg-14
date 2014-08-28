@@ -18,6 +18,7 @@ public:
 	void init();
 	bool notifiBlockUpdate(Vec3i blockPos);
 	void deleteChunkView(Vec2i chunkPos);
+	void resetMapView();
 
 	/**
 	* Checks if a chunk is visible

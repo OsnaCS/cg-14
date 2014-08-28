@@ -200,6 +200,10 @@ void MapView::deleteChunkView(Vec2i chunkPos){
   m_mapView.erase(chunkPos);
 }
 
+void MapView::resetMapView(){
+  m_mapView.erase(m_mapView.begin(), m_mapView.end());
+}
+
 bool MapView::exists(Vec2i pos) {
   return m_mapView.count(pos) > 0;
 }
