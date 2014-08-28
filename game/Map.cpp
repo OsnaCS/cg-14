@@ -140,8 +140,6 @@ void Map::saveWorld() {
 
 Vec4f Map::loadWorld(string name) {
 
-  m_map.clear();
-
   string mappath = "save/" + name + "/";
 
   // Für den Fall, dass der MapOrdner nicht existiert, wird eine Exception geworfen
@@ -150,6 +148,8 @@ Vec4f Map::loadWorld(string name) {
     remove(mappath.c_str());
     throw OutOfRangeEx("[Map] Map does not exist");
   }
+
+  m_map.clear();
 
   map<Vec2i, Chunk> maptoload;
   ifstream f; // Datei-Handle

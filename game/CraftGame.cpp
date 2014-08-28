@@ -16,6 +16,7 @@ CraftGame::CraftGame()
     ,m_pause(true)
     ,m_pos(0.0,0.0)
     ,m_button(0)
+    ,m_optionen(false)
 {
   m_running = true;
 }
@@ -135,7 +136,46 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.addEventCallback([&](InputEvent e) 
   {
 
-    if(e.type == InputType::MouseMovePos && m_pause) 
+    if(e.type == InputType::MouseMovePos && m_pause && !m_optionen) 
+    {
+
+      m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
+
+      // Startposition des ersten Buttons
+      float starty = m_size.y/20.0+20;
+      // Größe um die die Buttons versetzt nach unten liegen
+      float offset = (m_size.y/6.0);
+      
+      if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty && m_pos.y <= starty + 50)
+      {
+        m_button = 1;
+      }
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + offset && m_pos.y <= starty + offset + 50)
+      {
+        m_button = 2;
+      }
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 2) && m_pos.y <= starty + (offset * 2) + 50)
+      {
+        m_button = 3;
+      }
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 3) && m_pos.y <= starty + (offset * 3) + 50)
+      {
+        m_button = 4;
+      }
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 4) && m_pos.y <= starty + (offset * 4) + 50)
+      {
+        m_button = 5;
+      }
+      else
+      {
+        m_button = 0;
+      }
+      
+      return EventResult::Processed;
+
+    }
+
+    if(e.type == InputType::MouseMovePos && m_pause && m_optionen) 
     {
 
       m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
@@ -181,7 +221,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.addEventCallback([&](InputEvent e) 
   {
 
-    if(e.type == InputType::LMouseReleased && m_pause)
+    if(e.type == InputType::LMouseReleased && m_pause && !m_optionen)
     {
 
       switch(m_button)
@@ -197,9 +237,21 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         case 2: 
         {
-          Vec4f posut = m_map.loadWorld("untitled2"); 
-          m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
-          m_mapView.resetMapView();
+          // Mapnamen einlesen, das Fenster wird nicht aktualiesiert während der Zeit
+          try
+          {
+            string str;
+            getline(cin, str);
+            Vec4f posut = m_map.loadWorld(str);
+
+            m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
+            m_mapView.resetMapView();
+          }
+          catch(OutOfRangeEx e)
+          {
+            cout << "Could not readfilename!" << endl;
+          }
+
           return EventResult::Processed; 
           break;
         }
@@ -211,7 +263,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         case 4: 
         {
-          slog("Keine Optionen!");
+          m_optionen = true;
           return EventResult::Processed; 
           break;
         }
@@ -223,6 +275,59 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         default: 
         {
+          return EventResult::Skipped; 
+          break;
+        }
+
+      }
+
+    }
+
+    if(e.type == InputType::LMouseReleased && m_pause && m_optionen)
+    {
+
+      switch(m_button)
+      {
+
+        case 1:
+        {
+          m_pause = false;
+          m_optionen = false;
+          return EventResult::Processed; 
+          break;
+        }
+        case 2: 
+        {
+          m_pause = false;
+          m_optionen = false;
+          return EventResult::Processed; 
+          break;
+        }
+        case 3: 
+        {
+          m_pause = false;
+          m_optionen = false;
+          return EventResult::Processed; 
+          break;
+        }
+        case 4: 
+        {
+          m_pause = false;
+          m_optionen = false;
+          return EventResult::Processed; 
+          break;
+        }
+        case 5: 
+        {
+          m_pause = false;
+          m_optionen = false; 
+          return EventResult::Processed; 
+          break;
+        }
+        default: 
+        {
+          m_pause = false;
+          m_optionen = false;
           return EventResult::Skipped; 
           break;
         }
@@ -519,7 +624,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         cont.prime([&](HotTexCont& hotTexCont) 
         {
 
-          if(m_pause)
+          if(m_pause && !m_optionen)
           {
 
             hotP.uniform["u_offset"] = (float)0.0;
@@ -547,13 +652,44 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }
+          else if(m_pause && m_optionen)
+          {
+            hotP.uniform["u_offset"] = (float)0.0;
+            hotP.uniform["s_menupng"] = 3;
+
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)));
+            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 2;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*2;
+            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 3;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*3;
+            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 4;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*4;
+            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 5;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+          }
 
         });
 
       });
 
+      if(!m_pause)
+      {
 
-      m_playerView.draw();
+        m_playerView.draw();
+
+      }
 
     });
 
