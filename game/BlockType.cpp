@@ -62,7 +62,7 @@ Vec2f getTexCoords(BlockType type, BlockSide side){
 
 
 		case BlockType::Sand:
-		return m*Vec2f(2,1);
+			return m*Vec2f(2,1);
 		
 
 		case BlockType::Grass:

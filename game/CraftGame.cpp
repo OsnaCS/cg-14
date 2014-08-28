@@ -29,8 +29,8 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.resize(size);
   m_window.setFullscreen(fullscreen);
   m_cheatmode = false;
-
   m_size = size;
+  m_camera.setScreenRatio(m_size);
 
   //Toggle Pickaxe by pressing p
   m_window.addEventCallback([&](InputEvent e) 
@@ -443,6 +443,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_lBufferTex.params.filterMode = TexFilterMode::Nearest;
   m_lBuffer.create(m_window.getSize());
   m_lBuffer.attachColor(0, m_lBufferTex);
+  m_lBuffer.enableBlending(0);
 
   //Texture for FXAA:
   m_fxaaTex.create(m_window.getSize(), TexFormat::RGB8);
@@ -556,6 +557,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
 
       m_envir.drawLightingPass(viewMatrix, projectionMatrix, gCont);
+      m_mapView.drawLightingPass(viewMatrix, projectionMatrix, gCont);
     });
 
     // third pass (final)

@@ -9,13 +9,11 @@ uniform mat4 u_projection;
 uniform mat4 u_view;
 uniform mat4 u_transform;
 
-out VertexData
-{
+out VertexData {
 		vec2 uv;
 		vec3 normal;
 		float depth;
 } outData;
-
 
 void main()
 {

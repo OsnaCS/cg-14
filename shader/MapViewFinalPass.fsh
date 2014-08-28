@@ -1,7 +1,5 @@
 #version 330 core
 
-
-
 // we need to output a color
 out vec4 o_color;
 
@@ -31,7 +29,6 @@ void main() {
 	texColor.xyz *= light.w;
 
 	vec3 fogColor = vec3(0.8,0.8,0.8);
-	vec3 fogColor2 = vec3(0,0,0);
 
 	// Modulo Berechnung von Zeit durch Tageslänge/4
   int m_time4 = int(u_time / (u_daylength/4));
