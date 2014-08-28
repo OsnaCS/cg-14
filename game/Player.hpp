@@ -35,6 +35,8 @@ public:
   */
   void update(float timePassed);
 
+  void reset(Vec3f);
+
   /** @brief Get the direction of the Players view
   		@return Vec3f direction The vector where the Player is looking at
   */
@@ -76,6 +78,8 @@ public:
   		@return EventResult Give back the result of processing (Skipped/Processed)
   */
   lumina::EventResult processEvent( lumina::InputEvent& e, Window& win, bool cheatmode);
+
+  void resetkeys();
 
 private:
 	// Get the sign of the Movement

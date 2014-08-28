@@ -21,6 +21,7 @@ class PlayerView {
          */
 		PlayerView(Player& player);
 
+
         /**
          * @brief init Initalize the player's status, graphics and its inventory e.g. heart status panel,
          *             objects in inventory, picked-axe and centered-marker (to hit with picked-axe).
@@ -33,21 +34,24 @@ class PlayerView {
          *             (ii) inventory and
          *             (iii) centered-marker (to hit with axe)
          */
-        void draw();
+    void draw();
 
         /**
          * @brief drawNormalPass
          * @param viewMat
          * @param projMat
          */
-		void drawNormalPass(Mat4f viewMat, Mat4f projMat);
-		void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer);
+    void drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam);
+    void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer);
 		Mat4f getTransMatrix();
 		Mat4f getTransMatrixPlayer();
+
 		void togglePickaxe();
 		EventResult processEvent(InputEvent& e, Window& win, bool cheatmode);
 
+
 	private:
+
       VertexSeq<Vec2f, Vec3f, Vec2f> updateHearts();
       VertexSeq<Vec2f, Vec2f> updateInventory();
       VertexSeq<Vec2f, Vec3f, Vec2f> updateInventoryNumbers();
@@ -60,6 +64,13 @@ class PlayerView {
       int calcSeqSize(const std::map<BlockType, int>& items);
 
       Player& m_player;
+
+
+    Mat4f getRotMatrixPlayer();
+    Mat4f getRotMatrixPickaxe();
+
+      //VertexSeq m_heartPanel;
+
 	  Program m_program;
 	  Program m_normalPass;
 	  Program m_finalPass;

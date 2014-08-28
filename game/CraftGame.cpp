@@ -13,16 +13,20 @@ CraftGame::CraftGame()
     ,m_envir(m_camera)
     ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
-    ,m_pause(false)
+    ,m_pause(true)
+    ,m_pos(0.0,0.0)
+    ,m_button(0)
 {
   m_running = true;
 }
 
-void CraftGame::init() {
+void CraftGame::init(Vec2i size, bool fullscreen) {
 
   // configure window
   m_window.setTitle("CraftGame ComputerGrafikPraktikum 2014");
   m_window.setVersionHint(3, 3);
+  m_window.resize(size);
+  m_window.setFullscreen(fullscreen);
   m_cheatmode = false;
 
   //Toggle Pickaxe by pressing p
@@ -41,6 +45,7 @@ void CraftGame::init() {
   // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) 
   {
+
     if(!m_pause) 
     {
       return m_player.processEvent(e, m_window, m_cheatmode);
@@ -52,6 +57,7 @@ void CraftGame::init() {
 
   m_window.addEventCallback([&](InputEvent e) 
   { 
+
     if(!m_pause)
     {
       return m_camera.processEvent(e, m_window); 
@@ -65,12 +71,26 @@ void CraftGame::init() {
   {
     // if the inputType was a KeyInput and the key was just pressed and the
     // key was Escape -> set m_running to false to stop program
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) {
-      m_running = false;
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) 
+    {
+      //m_running = false;
+      if(m_pause)
+      {
+        m_pause = false;
+        m_player.resetkeys();
+      }
+      else
+      {
+        m_pause = true;
+        m_player.resetkeys();
+      }
+
       return EventResult::Processed;
     }
     // if the keyInpuit is k
-    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) {
+    if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::K  && !m_pause) 
+    {
+
       if(m_cheatmode)
       {
         m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
@@ -80,7 +100,9 @@ void CraftGame::init() {
       {
         m_cheatmode = true;
       }
+
       return EventResult::Processed;
+
     }
 
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
@@ -89,10 +111,12 @@ void CraftGame::init() {
       if(m_pause == false)
       {
         m_pause = true;
+        m_player.resetkeys();
       }
       else
       {
         m_pause = false;
+        m_player.resetkeys();
       }
       return EventResult::Processed;
 
@@ -102,8 +126,103 @@ void CraftGame::init() {
 
   });
 
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+
+    if(e.type == InputType::MouseMovePos && m_pause) 
+    {
+      m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
+      
+      if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100)
+      {
+        m_button = 1;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215)
+      {
+        m_button = 2;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 275 && m_pos.y <= 325)
+      {
+        m_button = 3;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 385 && m_pos.y <= 435)
+      {
+        m_button = 4;
+      }
+      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 492 && m_pos.y <= 542)
+      {
+        m_button = 5;
+      }
+      else
+      {
+        m_button = 0;
+      }
+      
+      return EventResult::Processed;
+
+    }
+
+    return EventResult::Skipped;
+
+  });
+  
+  m_window.addEventCallback([&](InputEvent e) 
+  {
+
+    if(e.type == InputType::LMouseReleased && m_pause)
+    {
+
+      switch(m_button)
+      {
+
+        case 1:
+        {
+          m_pause = false;
+          m_player.resetkeys();
+          return EventResult::Processed; 
+          break;
+        }
+        case 2: 
+        {
+          Vec4f posut = m_map.loadWorld("untitled2"); 
+          m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
+          m_mapView.resetMapView();
+          return EventResult::Processed; 
+          break;
+        }
+        case 3: 
+        {
+          m_map.saveWorld(); 
+          return EventResult::Processed; 
+          break;
+        }
+        case 4: 
+        {
+          return EventResult::Processed; 
+          break;
+        }
+        case 5: 
+        {
+          m_running = false; 
+          return EventResult::Processed; 
+          break;
+        }
+        default: 
+        {
+          return EventResult::Skipped; 
+          break;
+        }
+
+      }
+
+    }
+
+    return EventResult::Skipped;
+
+  });
+
   // resize window
-  m_window.resize(Vec2i(1280, 720));
+  // m_window.resize(Vec2i(1280, 720));
 }
 
 void CraftGame::start() {
@@ -145,18 +264,45 @@ void CraftGame::updateComponents(float delta) {
   // generate new chunks if neccessary
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
-  if(m_mapView.size() > 100) {
+  if(m_mapView.size() > 100) 
+  {
 
     m_mapView.clearMapView(m_map.getChunkPos(m_camera.get_position()));
+
   }
 }
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
-  ImageBox image_save = loadJPEGImage("gfx/save.jpg");
-  m_colorTexture.create(Vec2i(680,90), TexFormat::RGB8, image_save.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
+  ImageBox image_resume = loadPNGImage("gfx/resume.png");
+  m_resTex.create(Vec2i(680,90), TexFormat::RGBA8, image_resume.data());
+  m_resTex.params.filterMode = TexFilterMode::Trilinear;
+  m_resTex.params.useMipMaps = true;
+
+  ImageBox image_ressh = loadPNGImage("gfx/resSh.png");
+  m_resSh.create(Vec2i(680,90), TexFormat::RGBA8, image_ressh.data());
+  m_resSh.params.filterMode = TexFilterMode::Trilinear;
+  m_resSh.params.useMipMaps = true;
+
+  ImageBox image_save = loadPNGImage("gfx/save.png");
+  m_saveTex.create(Vec2i(680,90), TexFormat::RGBA8, image_save.data());
+  m_saveTex.params.filterMode = TexFilterMode::Trilinear;
+  m_saveTex.params.useMipMaps = true;
+
+  ImageBox image_load = loadPNGImage("gfx/load.png");
+  m_loadTex.create(Vec2i(680,90), TexFormat::RGBA8, image_load.data());
+  m_loadTex.params.filterMode = TexFilterMode::Trilinear;
+  m_loadTex.params.useMipMaps = true;
+
+  ImageBox image_exit = loadPNGImage("gfx/exit.png");
+  m_exitTex.create(Vec2i(680,90), TexFormat::RGBA8, image_exit.data());
+  m_exitTex.params.filterMode = TexFilterMode::Trilinear;
+  m_exitTex.params.useMipMaps = true;
+
+  ImageBox image_options = loadPNGImage("gfx/options.png");
+  m_optionsTex.create(Vec2i(680,90), TexFormat::RGBA8, image_options.data());
+  m_optionsTex.params.filterMode = TexFilterMode::Trilinear;
+  m_optionsTex.params.useMipMaps = true;
 
   m_envir.init();
   m_mapView.init();
@@ -164,7 +310,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
   //
-  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
+  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB32F);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create(m_window.getSize());
   m_gBuffer.attachColor(0, m_gBufferNormal);
@@ -206,7 +352,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   });
 
   m_fullScreenQuad2.create(4);
-  m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) {
+  m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) 
+  {
     hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
     hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
     hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));
@@ -277,8 +424,12 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(1, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
-      m_playerView.drawNormalPass(viewMatrix, projectionMatrix);
+
+      m_playerView.drawNormalPass(viewMatrix, projectionMatrix, m_camera);
+      m_envir.drawCloudNormalPass(viewMatrix, projectionMatrix); 
+
     });
 
     // second pass (lighting)
@@ -296,8 +447,9 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
 
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
+      m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
@@ -333,37 +485,62 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
 
-      // Für Blur
-      m_fBufferTex.prime(0, [&](HotTex2D& hotT)
-      // Für Textur
-      //m_colorTexture.prime(0, [&](HotTex2D& hotT)
+      pMenu.prime([&](HotProgram& hotP)
       {
 
-        pMenu.prime([&](HotProgram& hotP)
+        hotP.uniform["s_menupng"] = 0;
+        hotP.uniform["s_resSh"] = 5;
+        hotP.uniform["s_Sh"] = m_button;
+        hotP.uniform["s_number"] = 1;
+
+        TexCont cont;
+        cont.addTexture(0, m_resTex);
+        cont.addTexture(1, m_loadTex);
+        cont.addTexture(2, m_saveTex);
+        cont.addTexture(3, m_optionsTex);
+        cont.addTexture(4, m_exitTex);
+        cont.addTexture(5, m_resSh);
+
+
+        cont.prime([&](HotTexCont& hotTexCont) 
         {
 
           if(m_pause)
           {
+
             hotP.uniform["u_offset"] = (float)0.0;
 
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.4;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["u_offset"] = (float)-0.3;
+            hotP.uniform["s_menupng"] = 1;
+            hotP.uniform["s_number"] = 2;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.8;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["u_offset"] = (float)-0.6;
+            hotP.uniform["s_menupng"] = 2;
+            hotP.uniform["s_number"] = 3;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+
+            hotP.uniform["u_offset"] = (float)-0.9;
+            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_number"] = 4;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-1.2;
-            hotP.draw(hotT, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
+            hotP.uniform["s_menupng"] = 4;
+            hotP.uniform["s_number"] = 5;
+            hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
           }
-       
+
         });
 
       });
 
+
       m_playerView.draw();
+
     });
 
     // swap buffer

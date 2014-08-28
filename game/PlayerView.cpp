@@ -27,40 +27,37 @@ PlayerView::PlayerView(Player& player)
  
 void PlayerView::draw( )
 {
-
-	m_program.prime([&](HotProgram& hotprog)
-	{
-        m_colorTexture.prime(0, [&](HotTex2D& hotTex)
-        {
-			hotprog.draw(hotTex, updateHearts(), PrimitiveType::TriangleStrip);
-		});
-	});	
-
-    m_markerProgram.prime([this](HotProgram& hotprog)
+m_program.prime([&](HotProgram& hotprog)
+  {
+    m_colorTexture.prime(0, [&](HotTex2D& hotTex)
     {
-        hotprog.draw(m_centerMarker, PrimitiveType::Line);
+      hotprog.draw(hotTex, updateHearts(), PrimitiveType::TriangleStrip);
     });
+  }); 
+
+  m_markerProgram.prime([this](HotProgram& hotprog)
+  {
+    hotprog.draw(m_centerMarker, PrimitiveType::Line);
+  });
 
 
-    if (  m_player.getInventoryItems().empty() )
-        return;
+  if (  m_player.getInventoryItems().empty() )
+     return;
 
-    m_inventoryProg.prime([&,this](HotProgram& hotprog)
+  m_inventoryProg.prime([&,this](HotProgram& hotprog)
     {
-        m_inventoryTex.prime(0, [&,this](HotTex2D& hotTex)
-        {
-            hotprog.draw(hotTex, updateInventory(), PrimitiveType::TriangleStrip);
-        });
-    });
-
-    m_numberProg.prime([&](HotProgram& numHotProg)
+    m_inventoryTex.prime(0, [&,this](HotTex2D& hotTex)
     {
-        m_numberTex.prime(0, [&](HotTex2D& numHotTex)
-        {
-            numHotProg.draw(numHotTex, updateInventoryNumbers(), PrimitiveType::TriangleStrip);
-        });
+      hotprog.draw(hotTex, updateInventory(), PrimitiveType::TriangleStrip);
     });
-
+  });
+  m_numberProg.prime([&](HotProgram& numHotProg)
+  {
+    m_numberTex.prime(0, [&](HotTex2D& numHotTex)
+    {
+      numHotProg.draw(numHotTex, updateInventoryNumbers(), PrimitiveType::TriangleStrip);
+    });
+  });
 }
 
 
@@ -68,7 +65,7 @@ void PlayerView::init()
 {
     // Pickaxe
 	//Initialize of the texture
-	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture512.jpg");
+	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture.jpg");
   m_pickaxeTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box2.data());
   m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
   m_pickaxeTexture.params.useMipMaps = true;
@@ -234,15 +231,16 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
     return heartPanel;
 }
 
-void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
+void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
 
 	m_normalPass.prime([&](HotProgram& hotPlayer) {
-		Mat4f tmp = viewMat * getTransMatrixPlayer();
+		Mat4f tmp = getRotMatrixPlayer();
 		tmp = tmp.inverted();
     tmp = tmp.transposed();
 		hotPlayer.uniform["u_view"] = viewMat* getTransMatrixPlayer();
     hotPlayer.uniform["u_projection"] = projMat;
     hotPlayer.uniform["u_transform"] = tmp;
+    hotPlayer.uniform["u_backPlaneDistance"] = cam.getBackPlaneDistance();
 
     TexCont contPlayer;
     contPlayer.addTexture(0, m_playerTexture);
@@ -255,12 +253,13 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   if(m_showPickaxe) {
     // Show pickaxe
     m_normalPass.prime([&](HotProgram& hotPickaxe) {
-    	Mat4f tmp = viewMat * getTransMatrixPlayer();
+    	Mat4f tmp = getRotMatrixPickaxe();
 			tmp = tmp.inverted();
    	  tmp = tmp.transposed();
       hotPickaxe.uniform["u_view"] = viewMat*getTransMatrix();
       hotPickaxe.uniform["u_projection"] = projMat;
       hotPickaxe.uniform["u_transform"] = tmp;
+      hotPickaxe.uniform["u_backPlaneDistance"] = cam.getBackPlaneDistance();
 
       TexCont cont;
       cont.addTexture(0, m_pickaxeTexture);
@@ -271,7 +270,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
   }
 }
 
-void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera cam, Tex2D& lBuffer) {
+void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer) {
 
 		m_finalPass.prime([&](HotProgram& hotPlayer) {
 
@@ -455,6 +454,19 @@ Mat4f PlayerView::getTransMatrixPlayer(){
 
 }
 
+Mat4f PlayerView::getRotMatrixPlayer(){
+	//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+	return rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle+1.57f));
+}
+
 Mat4f PlayerView::getTransMatrix(){
 	//Scaling
 		Mat4f scaling = scalingMatrix(Vec3f(0.15,0.15,0.15));
@@ -478,6 +490,19 @@ Mat4f PlayerView::getTransMatrix(){
 
   	return translation * rotationY * scaling;
 
+}
+
+Mat4f PlayerView::getRotMatrixPickaxe(){
+	//Rotation Y-axis in player direction
+    float angle;
+    Vec3f direc = m_player.getDirection();
+    direc.y = 0;
+		float cosinus = dot(Vec3f(0.0f, 0.0f, -1.0f), direc)/direc.length();
+		angle = acos(cosinus);
+		if(m_player.getDirection().x >0) {
+			angle = -angle;
+		}
+  	return rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
 }
 
 EventResult PlayerView::processEvent(InputEvent& e, Window& win, bool cheatmode) {

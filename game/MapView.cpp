@@ -16,8 +16,8 @@ void MapView::init() {
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
 
-  ImageBox imageBoxNormal = loadPNGImage("gfx/normals_small.png");
-  m_normalTexture.create(Vec2i(512,512), TexFormat::RGBA8, imageBoxNormal.data());
+  ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
+  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
   m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
   m_normalTexture.params.useMipMaps = true;
 
@@ -194,6 +194,10 @@ void MapView::notifyBlockUpdate(Vec3i blockPos) {
 
 void MapView::deleteChunkView(Vec2i chunkPos){
   m_mapView.erase(chunkPos);
+}
+
+void MapView::resetMapView(){
+  m_mapView.erase(m_mapView.begin(), m_mapView.end());
 }
 
 bool MapView::exists(Vec2i pos) {

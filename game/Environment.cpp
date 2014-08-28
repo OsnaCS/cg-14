@@ -78,6 +78,59 @@ void Environment::draw(Mat4f viewMat, Mat4f projMat){
   });
 }
 
+void Environment::drawCloudNormalPass(Mat4f viewMat, Mat4f projMat){
+  m_programCloud.prime([&](HotProgram& hotprog){
+    hotprog.uniform["u_projection"] = projMat;
+    hotprog.uniform["u_view"] = viewMat; 
+    hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+  
+    for(auto vector : m_cloudPosition ){
+      hotprog.uniform["u_cloudPosition"] = vector.first;
+      if(vector.second == 0){
+        hotprog.draw(m_cloudBig, PrimitiveType::TriangleStrip);
+      } else if(vector.second == 1){
+        hotprog.draw(m_cloudNormal, PrimitiveType::TriangleStrip);
+      } else{
+        hotprog.draw(m_cloudSmall, PrimitiveType::TriangleStrip);
+      }
+    }
+  }); 
+
+}
+
+void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBufferTex, Tex2D& gBufferDepth){
+  m_programFinalCloud.prime([&](HotProgram& hotprog){
+    //hotprog.uniform["u_projection"] = projMat;
+    //hotprog.uniform["u_view"] = viewMat; 
+    
+
+    hotprog.uniform["u_view"] = viewMat;
+    hotprog.uniform["u_projection"] = projMat;
+    hotprog.uniform["s_lightTexture"] = 0;
+    hotprog.uniform["s_depthTexture"] = 1;
+    hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
+    hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+    TexCont cont;
+    cont.addTexture(0, lBufferTex);
+    cont.addTexture(1, gBufferDepth);
+
+    cont.prime([&](HotTexCont& hotCont){
+      for(auto vector : m_cloudPosition ){
+        hotprog.uniform["u_cloudPosition"] = vector.first;
+        if(vector.second == 0){
+          hotprog.draw(hotCont, m_cloudBig, PrimitiveType::TriangleStrip);
+        } else if(vector.second == 1){
+          hotprog.draw(hotCont, m_cloudNormal, PrimitiveType::TriangleStrip);
+        } else{
+          hotprog.draw(hotCont, m_cloudSmall, PrimitiveType::TriangleStrip);
+        }
+      }
+    });
+  });  
+
+}
+
+
 void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
@@ -170,6 +223,17 @@ void Environment::init()
   vsMoon.compile(loadShaderFromFile("shader/Moon.vsh"));
   fsMoon.compile(loadShaderFromFile("shader/Moon.fsh"));
 
+  //Cloudshader 
+  VShader vsCloud;
+  FShader fsCloud;
+  vsCloud.compile(loadShaderFromFile("shader/CloudNormalPass.vsh"));
+  fsCloud.compile(loadShaderFromFile("shader/CloudNormalPass.fsh"));
+
+  VShader vsFinalCloud;
+  FShader fsFinalCloud;
+  vsFinalCloud.compile(loadShaderFromFile("shader/CloudFinalPass.vsh"));
+  fsFinalCloud.compile(loadShaderFromFile("shader/CloudFinalPass.fsh"));
+
   // create program and link the two shaders
   m_programSun.create(vsSun, fsSun);
   m_programSun.perFragProc.blendFuncRGB = BlendFunction::Add;
@@ -202,6 +266,41 @@ void Environment::init()
     hot.vertex[3].set(Vec3f(-1, 10*cos(m_moonAxis)-sin(m_moonAxis),-10*sin(m_moonAxis)-cos(m_moonAxis)), Vec2f(-2, -2));
 
   });
+
+
+//Create Cloud for testing
+  // create program and link the two shaders
+  m_programCloud.create(vsCloud, fsCloud);
+  m_programCloud.perFragProc.enableDepthTest();
+  m_programCloud.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_programCloud.primitiveProc.enableCulling();
+  //m_programCloud.primitiveProc.setCullFace(CullFace::Front);
+  
+  m_programFinalCloud.create(vsFinalCloud, fsFinalCloud);
+  m_programFinalCloud.perFragProc.enableDepthTest();
+  m_programFinalCloud.perFragProc.enableDepthWrite();
+  m_programFinalCloud.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_programFinalCloud.primitiveProc.enableCulling();
+  m_programFinalCloud.primitiveProc.setCullFace(CullFace::Front);
+  m_programFinalCloud.perFragProc.blendFuncRGB = BlendFunction::Add;
+  m_programFinalCloud.perFragProc.srcRGBParam = BlendParam::SrcAlpha;
+  m_programFinalCloud.perFragProc.dstRGBParam = BlendParam::OneMinusSrcAlpha;
+  
+  m_cloudBig = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(16.0f,4.0f,8.0f));
+  m_cloudNormal = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(8.0f,2.0f,4.0f));
+  m_cloudSmall = createBox<VAttr::Position, VAttr::Normal, VAttr:: TexUV>(Vec3f(4.0f,1.0f,2.0f));
+
+  srand(time(0) + clock() + random()); // Zufallsgenerator initialisieren
+  int random, noise;
+  for(int i=-15; i<15; i++){
+    for(int j =-15; j<15; j++){
+      noise = rand() % 40;
+      random = rand() % 8;
+      if(random < 3){
+        m_cloudPosition.push_back(std::pair<Vec3f, int>(Vec3f(60 * i + noise, 130, 60 * j + 1.2 * noise), random));
+      }
+    }
+  }
 
 
 
@@ -243,6 +342,15 @@ void Environment::update(float delta)
 		m_pulse -= 2;
 	}
 
+  for(auto& vector : m_cloudPosition){
+    vector.first.x += 2 * delta;
+    vector.first.z += 2 * delta;
+
+    if(vector.first.x > 900){
+      vector.first.x -= 1800;
+      vector.first.z -= 1800;
+    }
+  }
 }
 
 void Environment::setDayLength(float sec) 

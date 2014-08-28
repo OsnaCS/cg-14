@@ -138,7 +138,9 @@ void Map::saveWorld() {
   mapfile.close();
 }
 
-void Map::loadWorld(string name) {
+Vec4f Map::loadWorld(string name) {
+
+  m_map.clear();
 
   string mappath = "save/" + name + "/";
 
@@ -197,5 +199,9 @@ void Map::loadWorld(string name) {
   f.close();
 
   m_map = maptoload;
+
+  Vec3f pos = Vec3f(0.0f, 80.5f, 0.0f);
+
+  return Vec4f(pos.x, pos.y, pos.z, 0);
 }
 
