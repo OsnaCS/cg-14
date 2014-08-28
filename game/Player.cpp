@@ -18,7 +18,7 @@ const float BASIC_SPEED = 0.2f;
 const float FAST_SPEED = 0.4f;
 
 const float FALL_SPEED = -0.03f;
-const float JUMP_SPEED = 0.5f;
+const float JUMP_SPEED = 0.33f;
 
 const float CAMERA_HIGH = 1.8f;
 const int MAX_HEARTS = 10;
@@ -36,15 +36,18 @@ Player::Player(Map& map, MapView& mapView)
     ,m_yMovementspeed(0.0f)
     ,m_zMovementspeed(0.0f)
     ,m_timePassed(0.0f)
+    ,m_leftMouseCaptured(false)
     ,m_rightMouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
     ,m_aPressed(false)
     ,m_dPressed(false)
     ,m_ePressed(false)
+    ,m_mining(true)
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
+    ,m_cheatmode(false)
     ,m_map(map)
     ,m_mapView(mapView)
     ,m_fallen(0)
@@ -57,7 +60,8 @@ Player::Player(Map& map, MapView& mapView)
 EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 {
     //Key Pressed and Released
-    if(e.type == InputType::KeyPressed || e.type == InputType::KeyReleased){
+    m_cheatmode = cheatmode;
+    if((e.type == InputType::KeyPressed || e.type == InputType::KeyReleased ) &&  !cheatmode){
 
         switch( (KeyCode)(e.keyInput.key))
         {
@@ -124,6 +128,8 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
                 m_movingspeed = BASIC_SPEED;
             }
 
+
+
             break;
 
             case KeyCode::E :
@@ -131,6 +137,19 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
                 m_ePressed = true;
             }
             break;
+            /*
+            //Pickace 
+            case KeyCode::T :
+            if(m_mining == false&&e.type == InputType::KeyPressed){
+                m_mining = true;
+                m_rightMouseCaptured = false;
+            }else if(e.type == InputType::KeyPressed){
+              m_mining = false;
+              m_rightMouseCaptured = false;
+            }
+            break;
+            */
+
            case KeyCode::K1:
             m_blockType = 0;
 
@@ -172,6 +191,11 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
     if(e.type == InputType::RMousePressed) {
       m_rightMouseCaptured = true;
     }
+    //Left Click
+    if(e.type == InputType::LMousePressed) {
+      m_leftMouseCaptured = true;
+    }
+
 
     if(!cheatmode){
       // Mouse
@@ -215,8 +239,8 @@ void Player::turn_upDown(float deltaY)
 void Player::update(float timePassed)
 {
 
-  if(m_ePressed){
-    m_ePressed = false;
+  if(m_rightMouseCaptured&&!m_cheatmode){
+    m_rightMouseCaptured = false;
     auto nextBlock = getLastAir();
     //If there is only air or we are standing to near, don't place a block
     if(nextBlock != m_position){
@@ -226,8 +250,8 @@ void Player::update(float timePassed)
         }
   }
   //handle block destroy
-  if(m_rightMouseCaptured){
-    m_rightMouseCaptured = false;
+  if(m_leftMouseCaptured&&!m_cheatmode){
+    m_leftMouseCaptured = false;
     auto nextBlock = getNextBlock();
     if (m_map.exists(nextBlock)) {
       m_inventory.addItem(m_map.getBlockType(nextBlock));

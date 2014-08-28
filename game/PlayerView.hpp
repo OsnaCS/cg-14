@@ -41,12 +41,11 @@ class PlayerView {
          * @param viewMat
          * @param projMat
          */
-    void drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam);
-    void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer);
+    void drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, bool cheatmode);
+    void drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer, bool cheatmode);
 		Mat4f getTransMatrix();
 		Mat4f getTransMatrixPlayer();
 
-		void togglePickaxe();
 		EventResult processEvent(InputEvent& e, Window& win, bool cheatmode);
 
 
@@ -74,19 +73,18 @@ class PlayerView {
 	  Program m_program;
 	  Program m_normalPass;
 	  Program m_finalPass;
-      Program m_markerProgram;
-      Program m_inventoryProg;
-      Program m_numberProg;
+    Program m_markerProgram;
+    Program m_inventoryProg;
+    Program m_numberProg;
 	  Tex2D m_pickaxeTexture;
 	  Tex2D m_playerTexture;
 	  Tex2D m_colorTexture;
-      Tex2D m_inventoryTex;
-      Tex2D m_numberTex;
+    Tex2D m_inventoryTex;
+    Tex2D m_numberTex;
 	  VertexSeq<Vec3f, Vec3f, Vec2f> m_pickaxe;
 
     VertexSeq<Vec2f, Vec3f> m_centerMarker;
 	  VertexSeq<Vec3f, Vec3f, Vec2f> m_playerFigure;
-	  bool m_showPickaxe;
 
 };
 

@@ -15,12 +15,15 @@ MapView::MapView(Map& map, Camera& cam, Environment& envir)
 void MapView::init() {
 
   // Texturen laden
-  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);
+  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 14);
 
   // Dateiname der PNGs
-  vector<string> names = {"grass_top","water","dirt","grass_side","cactus_side", 
-  "cactus_top","birch_leaves","spruce_leaves","stone","sand","birch_side",
-  "wood_top","spruce_side"};
+  vector<string> names = {
+    "grass_top", // 0
+    "water","dirt","grass_side","cactus_side","cactus_top",     // 1,2,3,4,5
+    "birch_leaves","spruce_leaves","stone","sand","birch_side", // 6,7,8,9,10
+    "wood_top","spruce_side","oak_side"                         // 11,12,13
+  };
 
   // Speichere die Texturen in Vector:
   for(int i = 0; i < names.size(); i++) {
@@ -32,7 +35,7 @@ void MapView::init() {
 
 
   // Normalen laden
-  m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);  // Normalen zur Textur
+  m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 14);  // Normalen zur Textur
 
   for(int i = 0; i < names.size(); i++) {
     // Normalen zu den Texturen laden

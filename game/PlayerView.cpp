@@ -84,6 +84,8 @@ void PlayerView::init()
 	m_normalPass.perFragProc.enableDepthTest();
 	m_normalPass.perFragProc.enableDepthWrite();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_normalPass.primitiveProc.enableCulling();
+
 
 	VShader vsFP;
 	vsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.vsh"));
@@ -94,11 +96,11 @@ void PlayerView::init()
 	m_finalPass.perFragProc.enableDepthTest();
 	m_finalPass.perFragProc.enableDepthWrite();
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_finalPass.primitiveProc.enableCulling();
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
   m_playerFigure = loadOBJ("gfx/player.obj");
 
-  m_showPickaxe = false;
 
     // To display hearts panel
     initHeartPanel();
@@ -231,8 +233,8 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
     return heartPanel;
 }
 
-void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
-
+void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam,  bool cheatmode) {
+if(cheatmode){
 	m_normalPass.prime([&](HotProgram& hotPlayer) {
 		Mat4f tmp = getRotMatrixPlayer();
 		tmp = tmp.inverted();
@@ -244,9 +246,9 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
 
   	hotPlayer.draw(m_playerFigure, PrimitiveType::Triangle); 
   });
+}
 
-
-  if(m_showPickaxe) {
+ if(!cheatmode){
     // Show pickaxe
     m_normalPass.prime([&](HotProgram& hotPickaxe) {
     	Mat4f tmp = getRotMatrixPickaxe();
@@ -262,8 +264,8 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
   }
 }
 
-void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer) {
-
+void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer,  bool cheatmode) {
+if(cheatmode){
 		m_finalPass.prime([&](HotProgram& hotPlayer) {
 
       hotPlayer.uniform["u_view"] = viewMat * getTransMatrixPlayer();
@@ -279,8 +281,8 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D&
         });
       });
     });
-
-  if(m_showPickaxe) {
+}
+  if(!cheatmode) {
     m_finalPass.prime([&](HotProgram& hotP) {
 
       hotP.uniform["u_view"] = viewMat * getTransMatrix();
@@ -439,7 +441,7 @@ Mat4f PlayerView::getTransMatrixPlayer(){
   	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle+1.57f));
 
   	//Translation to player height and to the front right
-  	Mat4f translation = translationMatrix(m_player.getPosition() - m_player.getDirection() + Vec3f(0, -1.1, 0));
+  	Mat4f translation = translationMatrix(m_player.getPosition()  + Vec3f(0, -1.1, 0));
 
 
   	return translation * rotationY * translationOrigin * scaling;
@@ -495,21 +497,5 @@ Mat4f PlayerView::getRotMatrixPickaxe(){
 			angle = -angle;
 		}
   	return rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
-}
-
-EventResult PlayerView::processEvent(InputEvent& e, Window& win, bool cheatmode) {
-
-  if(e.type == InputType::KeyPressed) {
-    if((KeyCode)(e.keyInput.key) == KeyCode::T &&  !cheatmode) {
-      togglePickaxe();
-    }else if((KeyCode)(e.keyInput.key) == KeyCode::K){
-    	m_showPickaxe = false;
-    }
-  }
-  return EventResult::Skipped;
-}
-
-void PlayerView::togglePickaxe(){
-	m_showPickaxe = !m_showPickaxe;
 }
 

@@ -31,19 +31,6 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_size = size;
   m_camera.setScreenRatio(m_size);
 
-  //Toggle Pickaxe by pressing p
-  m_window.addEventCallback([&](InputEvent e) 
-  {
-    if(!m_pause) 
-    {
-      return m_playerView.processEvent(e, m_window, m_cheatmode);
-    }
-
-    return EventResult::Skipped;
-
-  });
-
-
   // add event callback (capture by reference
   m_window.addEventCallback([&](InputEvent e) 
   {
@@ -270,7 +257,7 @@ void CraftGame::updateComponents(float delta) {
   }
   else
   {
-    m_player.update(0.0f);
+    m_player.update(delta);
     
     m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
   }
@@ -416,6 +403,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       m_envir.update(delta);
     }
 
+    /*
     if(m_cheatmode)
     {
       m_camera.update();
@@ -426,7 +414,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       
       m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
     }
-
+*/
     auto viewMatrix = m_camera.get_matrix();
     auto projectionMatrix = m_camera.get_ProjectionMatrix();
 
@@ -439,7 +427,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
 
-      m_playerView.drawNormalPass(viewMatrix, projectionMatrix, m_camera);
+      m_playerView.drawNormalPass(viewMatrix, projectionMatrix, m_camera, m_cheatmode);
       m_envir.drawCloudNormalPass(viewMatrix, projectionMatrix); 
 
     });
@@ -463,7 +451,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
-      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
+      m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex, m_cheatmode);
     });
 
     // fourth pass (FXAA)
