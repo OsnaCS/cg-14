@@ -28,6 +28,7 @@ void MapView::init() {
     ImageBox image_box = loadPNGImage("gfx/blocks/" + names[i] + ".png");
     m_colorTexture.addData(i,image_box.data());
   }
+  m_colorTexture.generateMipMaps();
 
 
   m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);  // Normalen zur Textur
@@ -37,25 +38,8 @@ void MapView::init() {
     ImageBox image_box_normal = loadPNGImage("gfx/blocks/" + names[i] + "_normal.png");
     m_normalTexture.addData(i,image_box_normal.data());  
   }
+  m_normalTexture.generateMipMaps();
   
-
-  // Lade alle Normalen in Reihenfolge:
-
-  // m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  // m_colorTexture.params.useMipMaps = true;
-
-  // TexArray texArray; 
-  // texArray.create(Vec2i(dimension), TexFormat, anzahl_d_texturen_im_array);
-  // texArray.addData(0,image_box.data()); //index an dssen stelle ich die textur im array platzieren will
-
-
-  
-
-  // // Alter TexturZugriff
-  // ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
-  // m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
-  // m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
-  // m_normalTexture.params.useMipMaps = true;
 
 
   VShader vs;
