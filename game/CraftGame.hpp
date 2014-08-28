@@ -14,7 +14,7 @@ class CraftGame {
 public:
   CraftGame();
 
-  void init();
+  void init(Vec2i size, bool fullscreen);
   void start();
 
 private:
@@ -30,6 +30,8 @@ private:
   PlayerView m_playerView;
 
   bool m_pause;
+  Vec2f m_pos;
+  int m_button;
 
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;
@@ -44,8 +46,13 @@ private:
   FrameBuffer m_fxaaBuffer;
   FPSCounter m_fps;
 
-  Tex2D m_colorTexture;
-
+  Tex2D m_resTex;
+  Tex2D m_saveTex;
+  Tex2D m_loadTex;
+  Tex2D m_exitTex;
+  Tex2D m_optionsTex;
+  Tex2D m_resSh;
+  
   void run(lumina::HotRenderContext& hotContext);
   lumina::EventResult onEvent(lumina::InputEvent e);
   void updateComponents(float delta);

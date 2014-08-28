@@ -38,4 +38,7 @@ private:
   void setCactusTree(Map& map, int x, int z, int xi, int zj, int noise);
   void setPalmTree(Map& map, int x, int z, int xi, int zj, int noise);
 
+  // Liefert true, wenn ein Baum in der näheren Umgebung bereits gesetzt ist
+  bool isTreeInNeighborhood(Map& map, int x, int z, int xi, int zj, int height);
+
 };

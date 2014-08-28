@@ -151,8 +151,8 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       case BiomeType::Desert:
         if(k == noise) {
         	// Bäume setzen
-          int treeDist = rand() % 10000;
           if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+            int treeDist = rand() % 10000;
           	if(treeDist <= 20) {
             	setCactusTree(map, x, z, xi, zj, noise);	
           	}
@@ -167,8 +167,8 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       case BiomeType::DesertPlain:
         if(k == noise) {
         	// Bäume setzen
-          int treeDist = rand() % 10000;
           if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+            int treeDist = rand() % 10000;
           	if(treeDist <= 5) {
             	setCactusTree(map, x, z, xi, zj, noise);	
           	}
@@ -186,9 +186,9 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         case BiomeType::Plains:
         if(k == noise) {
         	// Bäume setzen
-          int treeDist = rand() % 10000;
           if(xi >= 6 && xi <= 9 && zj >= 6 && zj <= 9) {
-          	if(treeDist <= 30) {
+          	int treeDist = rand() % 10000;
+            if(treeDist <= 30) {
             	setPalmTree(map, x, z, xi, zj, noise);	
           	}
       		}
@@ -202,12 +202,13 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       case BiomeType::PlainForest:
         if(k == noise) {
         	// Bäume setzen
-          int treeDist = rand() % 10000;
-          if(xi >= 3 && xi <= 13 && zj >= 3 && zj <= 13) {
+          bool isTree = ChunkGenerator::isTreeInNeighborhood(map, x, z, xi, zj, noise+1); // Baum in Umgebung?
+          if(xi >= 3 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
+            int treeDist = rand() % 10000;
           	if(treeDist <= 100) {
             	setSpruceTree(map, x, z, xi, zj, noise);	
           	}
-      			if(31 <= treeDist && treeDist <= 60) {
+      			if(131 <= treeDist && treeDist <= 160) {
       				setBirchTree(map, x, z, xi, zj, noise);	
       			}
       		}
@@ -221,8 +222,9 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         case BiomeType::Forest:
         if(k == noise) {
           // Bäume setzen
-          int treeDist = rand() % 10000;
-          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          bool isTree = ChunkGenerator::isTreeInNeighborhood(map, x, z, xi, zj, noise+1); // Baum in Umgebung?
+          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
+            int treeDist = rand() % 10000;
           	if(treeDist <= 100) {
             	setSpruceTree(map, x, z, xi, zj, noise);	
           	}
@@ -594,4 +596,19 @@ void ChunkGenerator::setPalmTree(Map& map, int x, int z, int xi, int zj, int noi
   // 1st row
   k++;
   map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Sand);
+}
+
+
+bool ChunkGenerator::isTreeInNeighborhood(Map& map, int x, int z, int xi, int zj, int height) {
+  for(int i = -2; i <= 2; i++) {
+    for(int j = -2; j <= 2; j++) {
+      for(int k = -2; k <= 2; k++) {
+        BlockType neighbor = map.getChunk({x,z}).getBlockType({xi+i,height+k,zj+j});
+        if(neighbor == BlockType::Birch || neighbor == BlockType::Spruce) { 
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
