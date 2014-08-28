@@ -14,8 +14,8 @@ MapView::MapView(Map& map, Camera& cam, Environment& envir)
 
 void MapView::init() {
 
-  // Texturen und Normalen laden
-  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);                      // Textur
+  // Texturen laden
+  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);
 
   // Dateiname der PNGs
   vector<string> names = {"grass_top","water","dirt","grass_side","cactus_side", 
@@ -31,6 +31,7 @@ void MapView::init() {
   m_colorTexture.generateMipMaps();
 
 
+  // Normalen laden
   m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);  // Normalen zur Textur
 
   for(int i = 0; i < names.size(); i++) {
