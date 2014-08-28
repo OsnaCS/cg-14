@@ -21,6 +21,7 @@ private:
   long m_seed;
   long m_biome_seed;
   bool m_setWater;
+  bool m_setTrees;
   int m_waterHeight;
 
   /**

@@ -24,12 +24,10 @@ ChunkGenerator::ChunkGenerator() {
   // Wasserhöhe
   m_waterHeight = 80 - 6;
 
-  // Am Anfang entscheiden, ob Welt mit Wasser oder ohne
-  if(m_seed % 2 == 0) {
-    m_setWater = true;
-  } else {
-    m_setWater = true;
-  }
+  // Welt mit Wasser oder ohne
+  m_setWater = true;
+  // Welt mit Bäumen oder ohne
+  m_setTrees = true;
   
 }
 
@@ -166,7 +164,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       case BiomeType::Desert:
         if(k == noise) {
         	// Bäume setzen
-          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          if(m_setTrees && xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
             int treeDist = rand() % 10000;
           	if(treeDist <= 20) {
             	setCactusTree(map, x, z, xi, zj, noise);	
@@ -182,7 +180,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
       case BiomeType::DesertPlain:
         if(k == noise) {
         	// Bäume setzen
-          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
+          if(m_setTrees && xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13) {
             int treeDist = rand() % 10000;
           	if(treeDist <= 5) {
             	setCactusTree(map, x, z, xi, zj, noise);	
@@ -201,7 +199,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         case BiomeType::Plains:
         if(k == noise) {
         	// Bäume setzen
-          if(xi >= 6 && xi <= 9 && zj >= 6 && zj <= 9) {
+          if(m_setTrees && xi >= 6 && xi <= 9 && zj >= 6 && zj <= 9) {
           	int treeDist = rand() % 10000;
             if(treeDist <= 30) {
             	setPalmTree(map, x, z, xi, zj, noise);	
@@ -218,7 +216,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         if(k == noise) {
         	// Bäume setzen
           bool isTree = ChunkGenerator::isTreeInNeighborhood(map, x, z, xi, zj, noise+1); // Baum in Umgebung?
-          if(xi >= 3 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
+          if(m_setTrees && xi >= 3 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
             int treeDist = rand() % 10000;
           	if(treeDist <= 100) {
             	setSpruceTree(map, x, z, xi, zj, noise);	
@@ -238,7 +236,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
         if(k == noise) {
           // Bäume setzen
           bool isTree = ChunkGenerator::isTreeInNeighborhood(map, x, z, xi, zj, noise+1); // Baum in Umgebung?
-          if(xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
+          if(m_setTrees && xi >= 2 && xi <= 13 && zj >= 3 && zj <= 13 && isTree == false) {
             int treeDist = rand() % 10000;
           	if(treeDist <= 100) {
             	setSpruceTree(map, x, z, xi, zj, noise);	
@@ -266,10 +264,6 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
           if(random < 350){ 
             map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
           } else map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
-          // // Fluss in Hillside
-          // for(int i = noise; i <= m_waterHeight; i++) {
-          //   map.getChunk({x, z}).setBlockType({xi, i, zj}, BlockType::Water);
-          // }
         } else if (k == noise && noise > 80){
           map.getChunk({x,z}).setBlockType({xi,k,zj}, BlockType::Stone);
         } else if(k <= noise && k >= noise - 3) {
@@ -282,10 +276,6 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
         } else if(k == noise && noise <= 75){
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Grass);
-          // // Seen in den Bergen
-          // for(int i = noise; i <= m_waterHeight; i++) {
-          //   map.getChunk({x, z}).setBlockType({xi, i, zj}, BlockType::Water);
-          // }
         } else if(k <= noise && k >= noise - 3) {
           map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone); //  Unter dem Noise-Wert gibt es nur Dirt
         } 
