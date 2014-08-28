@@ -74,6 +74,10 @@ public:
         return m_window;
     }
 
+    void setScreenRatio(Vec2i ratio) {
+        m_screenRatio = static_cast<float>(ratio[0]) / ratio[1];
+    }
+
 private:
     void move_left();
     void move_right();

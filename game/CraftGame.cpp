@@ -28,8 +28,8 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.resize(size);
   m_window.setFullscreen(fullscreen);
   m_cheatmode = false;
-
   m_size = size;
+  m_camera.setScreenRatio(m_size);
 
   //Toggle Pickaxe by pressing p
   m_window.addEventCallback([&](InputEvent e) 

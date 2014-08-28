@@ -24,8 +24,7 @@ Camera::Camera(Window& window) :
     m_movedKeys.CtrlPressed = false;
     m_movedKeys.ShiftPressed = false;
     m_up =  cross(cross(m_direction.normalized(), Vec3f(0.f, 1.f, 0.f)), m_direction);
-    Vec2i s = m_window.getSize();
-    m_screenRatio = static_cast<float>(s[0]) / s[1];
+    setScreenRatio(m_window.getSize());
 }
 
 Mat4f Camera::get_matrix()
