@@ -36,7 +36,6 @@ Player::Player(Map& map, MapView& mapView)
     ,m_yMovementspeed(0.0f)
     ,m_zMovementspeed(0.0f)
     ,m_timePassed(0.0f)
-    ,m_mouseCaptured(false)
     ,m_rightMouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
@@ -169,22 +168,14 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
         }
     }
 
-    // Mouse handle
-    if(e.type == InputType::LMousePressed) {
-      m_mouseCaptured = true;
-      win.setCursorMode(CursorMode::Free);
-    }
-    if(e.type == InputType::LMouseReleased) {
-      m_mouseCaptured = false;
-      win.setCursorMode(CursorMode::Normal);
-    }
     //Right Click
     if(e.type == InputType::RMousePressed) {
       m_rightMouseCaptured = true;
     }
+
     if(!cheatmode){
       // Mouse
-      if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
+      if (e.type == InputType::MouseMoveDir)
       {
         turn_side(-e.mouseInput.x / 300.0f);
         turn_upDown(-e.mouseInput.y / 50.0f);
@@ -503,17 +494,13 @@ void Player::movement()
 
 }
 
-bool Player::collide(float x, float y, float z)
-{
-  Vec3i pos = Vec3i(static_cast<int>(round(x)),static_cast<int>(round(y)),static_cast<int>(round(z)));
-  if(m_map.exists(pos) && m_map.getBlockType(pos) == BlockType::Air){
-      return false;
-    }
-
+bool Player::collide(float x, float y, float z) {
+  Vec3i pos = Vec3i(static_cast<int>(round(x)), static_cast<int>(round(y)), static_cast<int>(round(z)));
+  if(m_map.isBlockTypeVisible(m_map.getBlockType(pos))||m_map.getBlockType(pos)==BlockType::Torch){
     return true;
+  }
+  return false;
 }
-
-
 
 Vec3i Player::getNextBlock()
 {
@@ -589,4 +576,3 @@ void Player::resetkeys()
   m_CtrlPressed = false;
   m_ShiftPressed = false;
 }
-

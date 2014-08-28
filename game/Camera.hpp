@@ -74,6 +74,10 @@ public:
         return m_window;
     }
 
+    void setScreenRatio(Vec2i ratio) {
+        m_screenRatio = static_cast<float>(ratio[0]) / ratio[1];
+    }
+
 private:
     void move_left();
     void move_right();
@@ -89,7 +93,6 @@ private:
     lumina::Vec3f m_direction;
     lumina::Vec3f m_up;
     float m_movingspeed;
-    bool m_mouseCaptured;
     Movement m_movedKeys;
     float m_ViewAngle;
     float m_backPlaneDistance;

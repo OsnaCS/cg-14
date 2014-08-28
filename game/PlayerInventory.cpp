@@ -7,8 +7,9 @@ using namespace std;
 PlayerInventory::PlayerInventory(int maxDisplayItems)
     : MAX_DISPLAY_ITEMS(maxDisplayItems)
 {
-
-
+    for(int i=0; i <99; i++){
+        addItem(BlockType::Torch);
+    }
 }
 
 
