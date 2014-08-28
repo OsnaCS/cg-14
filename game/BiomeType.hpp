@@ -6,7 +6,7 @@ using namespace lumina;
 
 enum class BiomeType
 {
-	Desert, DesertPlain, Plains, PlainForest, Forest, Hillside, Mountains,
+	Desert, DesertPlain, Plains, PlainForest, Forest, Hillside, Mountains, WaterHillside, WaterMountains,
 
 	COUNT
 };
