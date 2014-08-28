@@ -426,8 +426,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
 
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
-      m_playerView.drawNormalPass(viewMatrix, projectionMatrix);
+
+      m_playerView.drawNormalPass(viewMatrix, projectionMatrix, m_camera);
       m_envir.drawCloudNormalPass(viewMatrix, projectionMatrix); 
+
     });
 
     // second pass (lighting)
