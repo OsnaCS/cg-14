@@ -398,9 +398,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // update game components
     updateComponents(delta);
 
-    // poll events
-    m_window.update();
-
     if(!m_pause)
     {
       m_envir.update(delta);

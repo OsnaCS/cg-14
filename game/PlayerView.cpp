@@ -129,7 +129,7 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
         auto it=items.begin();
         for ( int i=0;  it != items.end(); ++it, ++i )
         {
-            Vec2f texCoord = getTexCoords(it->first, BlockSide::North);
+            Vec2f texCoord = getInventoryCoords(it->first, BlockSide::North);
             hot.vertex[i*4+0].set( Vec2f(INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord );
             hot.vertex[i*4+2].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord + Vec2f(1/8.f, 0) );
             hot.vertex[i*4+3].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)

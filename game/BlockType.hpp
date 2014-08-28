@@ -24,4 +24,5 @@ enum class BlockSide{
 */
 Color8A getColor(BlockType type);
 
-Vec2f getTexCoords(BlockType type, BlockSide side);
+int getTexCoords(BlockType type, BlockSide side);
+Vec2f getInventoryCoords(BlockType type, BlockSide side);

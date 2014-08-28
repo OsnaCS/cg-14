@@ -7,6 +7,7 @@
 #include "Map.hpp"
 #include "Camera.hpp"
 #include "Environment.hpp"
+#include "TexArray.hpp"
 
 class MapView
 {
@@ -41,13 +42,13 @@ private:
 	Map& m_map;
 	Camera& m_cam;
 	Environment& m_envir;
-	Tex2D m_colorTexture;
+	TexArray m_colorTexture;
 	Program m_program;
 	Program m_normalPass;
 	Program m_normalPassTorches;
 	Program m_finalPass;
+	TexArray m_normalTexture;
 	Program m_finalPassTorches;
-	Tex2D m_normalTexture;
 	Tex2D m_pickaxeTexture;
 	Program m_lightingPass;
 	int m_visibleChunkRange;

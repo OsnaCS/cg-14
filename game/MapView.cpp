@@ -1,8 +1,11 @@
 #include "MapView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
 #include "ObjectLoader.hpp"
+#include "TexArray.hpp"
 
 #include <math.h>
+#include <vector>
+#include <string>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
 : m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4), m_flickeringDelta(0.f) {
@@ -11,15 +14,33 @@ MapView::MapView(Map& map, Camera& cam, Environment& envir)
 
 void MapView::init() {
 
-  ImageBox image_box = loadPNGImage("gfx/texture.png");
-  m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, image_box.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
+  // Texturen laden
+  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);
 
-  ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
-  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
-  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_normalTexture.params.useMipMaps = true;
+  // Dateiname der PNGs
+  vector<string> names = {"grass_top","water","dirt","grass_side","cactus_side", 
+  "cactus_top","birch_leaves","spruce_leaves","stone","sand","birch_side",
+  "wood_top","spruce_side"};
+
+  // Speichere die Texturen in Vector:
+  for(int i = 0; i < names.size(); i++) {
+    // Texturen laden
+    ImageBox image_box = loadPNGImage("gfx/blocks/" + names[i] + ".png");
+    m_colorTexture.addData(i,image_box.data());
+  }
+  m_colorTexture.generateMipMaps();
+
+
+  // Normalen laden
+  m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 13);  // Normalen zur Textur
+
+  for(int i = 0; i < names.size(); i++) {
+    // Normalen zu den Texturen laden
+    ImageBox image_box_normal = loadPNGImage("gfx/blocks/" + names[i] + "_normal.png");
+    m_normalTexture.addData(i,image_box_normal.data());  
+  }
+  m_normalTexture.generateMipMaps();
+  
 
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -74,10 +95,12 @@ void MapView::init() {
   m_finalPass.primitiveProc.enableCulling();
 
   // --------- Final Pass - Torches -------------
+  FShader finalTorchesFS;
+  finalTorchesFS.compile(loadShaderFromFile("shader/MapViewFinalTorchesPass.fsh"));
   VShader finalTorchesVS;
   finalTorchesVS.compile(loadShaderFromFile("shader/MapViewFinalTorchesPass.vsh"));
 
-  m_finalPassTorches.create(finalTorchesVS, finalFS);
+  m_finalPassTorches.create(finalTorchesVS, finalTorchesFS);
   m_finalPassTorches.perFragProc.enableDepthTest();
   m_finalPassTorches.perFragProc.enableDepthWrite();
   m_finalPassTorches.perFragProc.setDepthFunction(DepthFunction::Less);
