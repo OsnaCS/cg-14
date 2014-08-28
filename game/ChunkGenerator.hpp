@@ -20,6 +20,8 @@ public:
 private:
   long m_seed;
   long m_biome_seed;
+  bool m_setWater;
+  int m_waterHeight;
 
   /**
    * @param map Map

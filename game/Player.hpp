@@ -4,8 +4,9 @@
 #include "BlockType.hpp"
 #include "Chunk.hpp"
 #include "Map.hpp"
+#include "MapView.hpp"
 #include "PlayerAttributes.hpp"
-
+#include "PlayerInventory.hpp"
 
 /** @Class Player 
 */
@@ -15,7 +16,7 @@ class Player {
 public:
 
 	//Constructor
-  Player(Map& m);
+  Player(Map& map, MapView& mapView);
 
   /**
    * @brief getHearts Get current number of hearts indicating health of the players
@@ -32,7 +33,7 @@ public:
   /** @brief Processing all actual movements
   For every pressed key, the movement will be added and processed.
   */
-  void update();
+  void update(float timePassed);
 
   void reset(Vec3f);
 
@@ -45,6 +46,19 @@ public:
   		@return Vec3f position Get the Position in 3D Space
   */
   inline Vec3f getPosition();
+
+  /**
+   * @brief getInventoryItems Get items from player's inventory
+   * @return
+   */
+  const map<BlockType, int>& getInventoryItems() const;
+
+  /**
+    * @brief maxDisplayItems Maximum number of "listed" items
+    * @return
+    */
+   int maxDisplayItems() const;
+
 
   /** @brief Process all input Events by Mouse and Keyboard
 
@@ -85,6 +99,10 @@ private:
   //Check the position for case of air (x/y/z coordinates)
 	bool collide(float x, float y, float z);
  
+  //Get the next Block in the lookingdirection
+  Vec3i getNextBlock(); 
+  Vec3i getLastAir();
+
   void turn_side(float deltaX);
   void turn_upDown(float deltaY);
   
@@ -96,16 +114,23 @@ private:
 	float m_xMovementspeed;
   float m_yMovementspeed;
   float m_zMovementspeed;
+  float m_timePassed;
+  bool m_rightMouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
   bool m_aPressed;
   bool m_dPressed;
+  bool m_ePressed;
   bool m_SpacePressed;
   bool m_CtrlPressed;
   bool m_ShiftPressed;
   Map& m_map;
+  MapView& m_mapView;
   float m_fallen;
   PlayerAttributes m_attrib;
+  PlayerInventory m_inventory;
+  //BlockType m_selectedBlock;
+  int m_blockType;
 };
 
 
@@ -126,7 +151,6 @@ int Player::get_sign(float x) {
     const float eps = 0.0001;
     return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
 }
-
 
 
 ///////////////////////////////END OF FILE/////////////////////////////////////

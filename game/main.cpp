@@ -3,7 +3,7 @@
 #include <string>
 
 int main(int argc, char **argv) {
-  Vec2i size(1920, 1080);
+  Vec2i size(800, 600);
   bool fullscreen = false;
 
   for(int i = 0; i < argc; ++i) {

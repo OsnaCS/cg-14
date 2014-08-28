@@ -6,16 +6,15 @@ layout(location = 2) in vec2 i_texPos;
 
 out VertexData
 {
-	vec3 color;
-	vec2 texPos;
+        vec3 color;
+        vec2 texPos;
 } outData;
 
 
 void main()
 {
 
-	gl_Position = vec4(i_windowpos,0, 1);
-
-	outData.color = i_color;
-	outData.texPos = i_texPos;
+        gl_Position = vec4(i_windowpos,0, 1);
+        outData.color = i_color;
+        outData.texPos = i_texPos;
 }
