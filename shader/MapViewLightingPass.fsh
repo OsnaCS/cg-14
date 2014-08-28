@@ -38,13 +38,13 @@ void main() {
 	}
 
 	// --------------- Specular Light --------------------
-	float specularPower = 0.5;
+	float specularPower = 1;
 	float specularExponent = 14;
 
 	vec3 reflected = ((normal + lightRay) * dot(normal, -lightRay)) * 2;
-	vec3 eyeRay = normalize(u_cameraPos - pos);				// from position to eye
+	vec3 eyeRay = normalize(u_cameraPos - pos);
 	float cosRA = dot(reflected, eyeRay) / (length(reflected) * length(eyeRay));
-	float specularIntensity = specularPower * u_lightIntens * pow(cosRA, specularExponent);
+	float specularIntensity = specularPower * lightIntense * pow(cosRA, specularExponent);
 
 	o_color = vec4(diffuseIntensity, diffuseIntensity, diffuseIntensity, specularIntensity);
 }

@@ -212,8 +212,8 @@ set<Vec3f> MapView::getVisibleTorches() {
   set<Vec3f> torches;
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - m_visibleChunkRange + 1; x <= activeChunk.x + m_visibleChunkRange + 1; x++) {
-    for(int z = activeChunk.y - m_visibleChunkRange + 1; z <= activeChunk.y + m_visibleChunkRange + 1; z++) {
+  for(int x = activeChunk.x - (m_visibleChunkRange + 1); x <= activeChunk.x + (m_visibleChunkRange + 1); x++) {
+    for(int z = activeChunk.y - (m_visibleChunkRange + 1); z <= activeChunk.y + (m_visibleChunkRange + 1); z++) {
 
       Vec2i chunkViewPos(x, z);
 

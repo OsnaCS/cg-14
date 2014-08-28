@@ -34,10 +34,8 @@ void main() {
 	}
 
 	// --------------- Specular Light --------------------
-	float specularPower = 4.5;
+	float specularPower = 1;
 	float specularExponent = 10;
-
-
 
 	vec3 reflected = ((normal + u_lightRay) * dot(normal, -u_lightRay)) * 2;
 	vec3 eyeRay = normalize(u_cameraPos - pos);				// from position to eye

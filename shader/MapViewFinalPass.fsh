@@ -23,10 +23,16 @@ void main() {
 	vec4 light = texture(s_lightTexture, gl_FragCoord.xy / u_winSize);
 	vec4 depth = texture(s_depthTexture, gl_FragCoord.xy / u_winSize);
 	vec4 texColor = texture(s_colorTexture, inData.uvi);
-	
+
+  // change specular power of water	
+  float specularPower = 0.5;
+  if (inData.uvi.z == 1) {
+    specularPower = 1;
+  }
+
 	texColor.xyz *= light.xyz;
   texColor.xyz *= inData.simpleLight;
-	texColor.xyz *= (light.w + 1);
+	texColor.xyz *= ((light.w * specularPower) + 1);
 
 	vec3 fogColor = vec3(0.8,0.8,0.8);
 
