@@ -51,7 +51,12 @@ public:
    * @brief getInventoryItems Get items from player's inventory
    * @return
    */
-  const map<BlockType, int>& getInventoryItems() const;
+  map<BlockType, int>& getInventoryItems();
+
+  PlayerInventory getInventory()
+  {
+    return m_inventory;
+  }
 
   /**
     * @brief maxDisplayItems Maximum number of "listed" items
@@ -151,6 +156,8 @@ int Player::get_sign(float x) {
     const float eps = 0.0001;
     return (x > eps)? 1 : ( fabs(x) < eps)? 0: -1;
 }
+
+
 
 
 ///////////////////////////////END OF FILE/////////////////////////////////////

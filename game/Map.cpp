@@ -87,7 +87,7 @@ bool Map::exists(Vec3i pos) {
   return m_map.count(getChunkPos(pos)) > 0;
 }
 
-void Map::saveWorld() {
+void Map::saveWorld(map<BlockType, int>& inventar) {
 
   string saveFolder = "save/";
   string newFolder = "save/" + m_name + "/";
@@ -96,6 +96,12 @@ void Map::saveWorld() {
   std::ofstream mapfile;
   string mapname = "save/" + m_name + "/mapfile.txt";
   mapfile.open(mapname.c_str());
+
+  for(map<BlockType, int>::iterator it2 = inventar.begin(); it2 != inventar.end(); it2++) 
+  {
+    stringstream s;                         // string Stream erzeugen
+    mapfile << static_cast<int>(it2->first) << "." << it2->second << endl;;
+  }
 
   // Für jeden Vector in der Map eine Datei erstellen
   // zusätzlich die Map abspeichern
@@ -140,13 +146,14 @@ void Map::saveWorld() {
   mapfile.close();
 }
 
-Vec4f Map::loadWorld(string name) {
+Vec4f Map::loadWorld(string name, PlayerInventory pInv) 
+{
 
   string mappath = "save/" + name + "/";
 
   // Für den Fall, dass der MapOrdner nicht existiert, wird eine Exception geworfen
-  if(!mkdir(mappath.c_str(), 0777)) {
-
+  if(!mkdir(mappath.c_str(), 0777)) 
+  {
     remove(mappath.c_str());
     throw OutOfRangeEx("[Map] Map does not exist");
   }
@@ -154,12 +161,15 @@ Vec4f Map::loadWorld(string name) {
   m_map.clear();
 
   map<Vec2i, Chunk> maptoload;
+  map<BlockType, int> newInv;
+
   ifstream f; // Datei-Handle
   string s;
   f.open("save/" + name + "/mapfile.txt"); // Öffne Datei aus Parameter
 
   // Öffne das MapFile und gehe alle Einträge durch
-  while(!f.eof()) {
+  while(!f.eof()) 
+  {
 
     size_t pos;
     string subs1, subs2;
@@ -168,33 +178,50 @@ Vec4f Map::loadWorld(string name) {
 
     if(s.length() == 0)
       break;
-    ifstream e;
-    string s2;
-    e.open("save/" + name + "/" + s + ".txt");
 
-    pos = s.find("_");
-    subs1 = s.substr(0, pos);
-    subs2 = s.substr(pos + 1);
+    size_t found = s.find(".");
+    if (found!=std::string::npos)
+    {
+      cout << s.substr(0, found) << endl;
+      cout << s.substr(found+1) << endl;
+      newInv[static_cast<BlockType>(stoi(s.substr(0, found)))] = stoi(s.substr(found + 1));
+    }
+    else
+    {
 
-    Chunk c = Chunk();
-    int i = 0;
-    while(!e.eof()) {
+      ifstream e;
+      string s2;
+      e.open("save/" + name + "/" + s + ".txt");
 
-      getline(e, s2);
+      pos = s.find("_");
+      subs1 = s.substr(0, pos);
+      subs2 = s.substr(pos + 1);
 
-      while(s2.length() > 0) {
+      Chunk c = Chunk();
+      int i = 0;
+      while(!e.eof()) 
+      {
 
-        pos = s2.find(" ");
-        string blt = s2.substr(0, pos);
-        c.m_blocks[i] = static_cast<BlockType>(atoi(blt.c_str()));
-        s2 = s2.substr(pos + 1);
-        i++;
+        getline(e, s2);
+
+        while(s2.length() > 0) 
+        {
+
+          pos = s2.find(" ");
+          string blt = s2.substr(0, pos);
+          c.m_blocks[i] = static_cast<BlockType>(atoi(blt.c_str()));
+          s2 = s2.substr(pos + 1);
+          i++;
+        }
+
+        maptoload[Vec2i(atoi(subs1.c_str()), atoi(subs2.c_str()))] = c;
+
       }
 
-      maptoload[Vec2i(atoi(subs1.c_str()), atoi(subs2.c_str()))] = c;
-    }
+      e.close();
 
-    e.close();
+    }
+  
   }
 
   // Datei wieder schließen
@@ -204,9 +231,16 @@ Vec4f Map::loadWorld(string name) {
 
   Vec3f pos = Vec3f(0.0f, 80.5f, 0.0f);
 
+  pInv.setInventory(newInv);
+
   return Vec4f(pos.x, pos.y, pos.z, 0);
 }
 
 bool Map::isBlockTypeVisible(BlockType blockType) {
   return !(blockType == BlockType::Air || blockType == BlockType::Torch);
+}
+
+void Map::clear()
+{
+  m_map.clear();
 }

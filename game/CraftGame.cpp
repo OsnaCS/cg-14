@@ -242,9 +242,10 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           {
             string str;
             getline(cin, str);
-            Vec4f posut = m_map.loadWorld(str);
+            Vec4f posut = m_map.loadWorld(str, m_player.getInventory());
+            cout << m_player.getInventory().getItems().size() << "CraftGame" << endl;
 
-            m_player.reset(Vec3f(posut.x,posut.y,posut.z)); 
+            m_player.reset(Vec3f(posut.x,posut.y,posut.z));
             m_mapView.resetMapView();
           }
           catch(OutOfRangeEx e)
@@ -261,7 +262,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           getline(cin, str);
           m_map.setName(str);
 
-          m_map.saveWorld();
+          m_map.saveWorld(m_player.getInventoryItems());
           return EventResult::Processed; 
           break;
         }
@@ -294,12 +295,6 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
       switch(m_button)
       {
 
-        case 1:
-        {
-          m_optionen = false;
-          return EventResult::Processed; 
-          break;
-        }
         case 2: 
         {
           m_optionen = false;
@@ -315,6 +310,10 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         case 4: 
         {
           m_optionen = false;
+          m_player.reset(Vec3f(0.0f, 80.5f, 0.0f)); 
+          m_mapView.resetMapView();
+          m_map.clear();
+          m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
           return EventResult::Processed; 
           break;
         }

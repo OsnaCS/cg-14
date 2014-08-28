@@ -2,6 +2,7 @@
 
 #include "Chunk.hpp"
 #include "BlockType.hpp"
+#include "PlayerInventory.hpp"
 #include <map>
 
 using namespace std;
@@ -78,26 +79,25 @@ public:
 	*/
 	BlockType getBlockType(Vec3i pos);
 
+	void clear();
+
 	/**
 	* returns if a Block exists for the given Position
 	*
 	* @param pos 3D Position of the Block in the complete Map
 	* @return true if the Block exists
 	*/
-
 	bool exists(Vec3i pos);
 
 	/**
 	* Save's the World
 	*/
-	void saveWorld();
+	void saveWorld(map<BlockType, int>& inventar);
 
 	/**
 	*	Soll die Dateien einlesen
 	*/
-	Vec4f loadWorld(string chunkname);
-
-	//map<Vec2i, Chunk> loadWorld("WeltDatei");
+	Vec4f loadWorld(string chunkname, PlayerInventory pInv);
 
 	bool isBlockTypeVisible(BlockType blockType);
 

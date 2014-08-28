@@ -44,7 +44,7 @@ public:
      * @brief getItems Get container
      * @return container of inventory
      */
-    inline const std::map<BlockType, int>& getItems() const;
+    inline std::map<BlockType, int>& getItems();
 
     /**
      * @brief getType
@@ -53,9 +53,16 @@ public:
      */
     BlockType getType(int idx) const;
 
+    void setInventory(std::map<BlockType, int> newInv);
+
+    void reset()
+    {
+        m_items.clear();
+    }
+
 
 private:
-    const int MAX_DISPLAY_ITEMS;
+    int MAX_DISPLAY_ITEMS;
     std::map<BlockType, int> m_items;
 
 };
@@ -69,7 +76,7 @@ int PlayerInventory::maxDisplayItems() const
 }
 
 
-const std::map<BlockType, int>& PlayerInventory::getItems() const
+std::map<BlockType, int>& PlayerInventory::getItems()
 {
     return m_items;
 }
