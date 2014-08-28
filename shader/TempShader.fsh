@@ -29,27 +29,27 @@ void main()
 		vec4 save = vec4(0.0);
 
 		// horizontaler teil des fragment shaders für Blur
-		save += texture2D(tex, vec2(inData.uv.x - 4.0*blurSize, inData.uv.y)) * 0.05;
-	  save += texture2D(tex, vec2(inData.uv.x - 3.0*blurSize, inData.uv.y)) * 0.09;
-	  save += texture2D(tex, vec2(inData.uv.x - 2.0*blurSize, inData.uv.y)) * 0.12;
-	  save += texture2D(tex, vec2(inData.uv.x - blurSize, inData.uv.y)) * 0.15;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y)) * 0.16;
-	  save += texture2D(tex, vec2(inData.uv.x + blurSize, inData.uv.y)) * 0.15;
-	  save += texture2D(tex, vec2(inData.uv.x + 2.0*blurSize, inData.uv.y)) * 0.12;
-	  save += texture2D(tex, vec2(inData.uv.x + 3.0*blurSize, inData.uv.y)) * 0.09;
-	  save += texture2D(tex, vec2(inData.uv.x + 4.0*blurSize, inData.uv.y)) * 0.05;
+		save += texture(tex, vec2(inData.uv.x - 4.0*blurSize, inData.uv.y)) * 0.05;
+	  save += texture(tex, vec2(inData.uv.x - 3.0*blurSize, inData.uv.y)) * 0.09;
+	  save += texture(tex, vec2(inData.uv.x - 2.0*blurSize, inData.uv.y)) * 0.12;
+	  save += texture(tex, vec2(inData.uv.x - blurSize, inData.uv.y)) * 0.15;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y)) * 0.16;
+	  save += texture(tex, vec2(inData.uv.x + blurSize, inData.uv.y)) * 0.15;
+	  save += texture(tex, vec2(inData.uv.x + 2.0*blurSize, inData.uv.y)) * 0.12;
+	  save += texture(tex, vec2(inData.uv.x + 3.0*blurSize, inData.uv.y)) * 0.09;
+	  save += texture(tex, vec2(inData.uv.x + 4.0*blurSize, inData.uv.y)) * 0.05;
 
 	  // vertikaler teil des fragment shaders für Blur
 	  // ließe sich evtl auch auslagern in eigenen Shader
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y - 4.0*blurSize2)) * 0.05;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y - 3.0*blurSize2)) * 0.09;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y - 2.0*blurSize2)) * 0.12;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y - blurSize2)) * 0.15;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y)) * 0.16;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + blurSize2)) * 0.15;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + 2.0*blurSize2)) * 0.12;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + 3.0*blurSize2)) * 0.09;
-	  save += texture2D(tex, vec2(inData.uv.x, inData.uv.y + 4.0*blurSize2)) * 0.05;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y - 4.0*blurSize2)) * 0.05;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y - 3.0*blurSize2)) * 0.09;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y - 2.0*blurSize2)) * 0.12;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y - blurSize2)) * 0.15;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y)) * 0.16;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y + blurSize2)) * 0.15;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y + 2.0*blurSize2)) * 0.12;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y + 3.0*blurSize2)) * 0.09;
+	  save += texture(tex, vec2(inData.uv.x, inData.uv.y + 4.0*blurSize2)) * 0.05;
 
 	  // Um das ganze Schwarzweiß zu machen
 		float graur = save.x * 0.299;
