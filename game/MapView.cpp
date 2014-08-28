@@ -226,7 +226,7 @@ void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer, f
 
       hotProg.uniform["normalTexture"] = 0;
       hotProg.uniform["depthTexture"] = 1;
-      hotProg.uniform["u_lightIntens"] = 4.f + 1 * sin(5 * m_flickeringDelta + pointLight.x);
+      hotProg.uniform["u_lightIntens"] = 2.f + 0.5f * sin(5 * m_flickeringDelta + pointLight.x);
       hotProg.uniform["u_lightPosition"] = pointLight + Vec3f(0, 0.1 * sin(20 * m_flickeringDelta + pointLight.y), 0);
       hotProg.uniform["u_cameraPos"] = m_cam.get_position();
 
