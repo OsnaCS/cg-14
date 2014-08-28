@@ -18,7 +18,7 @@ public:
 	void drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer);
 	void drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D& dBuffer);
 	void init();
-	bool notifiBlockUpdate(Vec3i blockPos);
+	void notifyBlockUpdate(Vec3i blockPos);
 	void deleteChunkView(Vec2i chunkPos);
 	void resetMapView();
 

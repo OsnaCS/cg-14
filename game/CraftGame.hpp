@@ -32,6 +32,7 @@ private:
   bool m_pause;
   Vec2f m_pos;
   int m_button;
+  Vec2i m_size;
 
   Tex2D m_gBufferNormal;
   Tex2D m_gBufferDepth;

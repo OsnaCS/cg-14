@@ -16,8 +16,8 @@ void MapView::init() {
   m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
   m_colorTexture.params.useMipMaps = true;
 
-  ImageBox imageBoxNormal = loadPNGImage("gfx/normals_small.png");
-  m_normalTexture.create(Vec2i(512,512), TexFormat::RGBA8, imageBoxNormal.data());
+  ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
+  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
   m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
   m_normalTexture.params.useMipMaps = true;
 
@@ -335,30 +335,26 @@ bool MapView::isChunkVisible(Vec2i& chunkPos) {
   return false;
 }
 
-bool MapView::notifiBlockUpdate(Vec3i blockPos) {
+void MapView::notifyBlockUpdate(Vec3i blockPos) {
 
-  deleteChunkView(m_map.getChunkPos(blockPos));
+  Vec2i chunkPos = m_map.getChunkPos(blockPos);
+  deleteChunkView(chunkPos);
 
   if(blockPos.x % 16 == 0) {
-
-    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(-1, 0));
+    deleteChunkView(chunkPos + Vec2i(-1, 0));
   }
 
-  if(blockPos.x % 16 == 15) {
-
-    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(1, 0));
+  if(blockPos.x % 16 == 15 || blockPos.x % 16 == -1) {
+    deleteChunkView(chunkPos + Vec2i(1, 0));
   }
 
   if(blockPos.z % 16 == 0) {
-
-    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(0, -1));
+    deleteChunkView(chunkPos + Vec2i(0, -1));
   }
 
-  if(blockPos.z % 16 == 15) {
-
-    deleteChunkView(m_map.getChunkPos(blockPos) + Vec2i(0, 1));
+  if(blockPos.z % 16 == 15 || blockPos.z % 16 == -1) {
+    deleteChunkView(chunkPos + Vec2i(0, 1));
   }
-
 }
 
 void MapView::deleteChunkView(Vec2i chunkPos){

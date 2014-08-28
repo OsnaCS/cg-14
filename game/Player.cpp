@@ -10,15 +10,17 @@ const float BLOCK_DIFFERENCE_Y = 0.5f;
 const float BLOCK_DIFFERENCE_Z = 0.5f;
 
 //To not collide into other blocks you have to stay at least away an amount of FREE_SPACE
-const float FREE_SPACE = 0.05f;
+const float FREE_SPACE = 0.3f;
 
 //The Speeds are for normal walking, running, falling and Jumping
+const float FRAME_PER_MOVE = 30;
 const float BASIC_SPEED = 0.2f; 
 const float FAST_SPEED = 0.4f;
 
 const float FALL_SPEED = -0.03f;
 const float JUMP_SPEED = 0.5f;
 
+const float CAMERA_HIGH = 1.8f;
 const int MAX_HEARTS = 10;
 //Not used right now, but in near future
 //const float TIME_STEP  = 1.0f;
@@ -26,24 +28,28 @@ const int MAX_HEARTS = 10;
 const Vec3f INIT_POSITION = Vec3f(0.0f, 80.5f, 0.0f);
 
 
-Player::Player( Map& m)
+Player::Player(Map& map, MapView& mapView)
     :m_position(INIT_POSITION)
     ,m_direction(Vec3f(0.0f, 0.0f, -1.0f))
     ,m_movingspeed(0.3f)
     ,m_xMovementspeed(0.0f)
     ,m_yMovementspeed(0.0f)
     ,m_zMovementspeed(0.0f)
-    ,m_mouseCaptured(false)
+    ,m_timePassed(0.0f)
+    ,m_rightMouseCaptured(false)
     ,m_wPressed(false)
     ,m_sPressed(false)
     ,m_aPressed(false)
     ,m_dPressed(false)
+    ,m_ePressed(false)
     ,m_SpacePressed(false)
     ,m_CtrlPressed(false)
     ,m_ShiftPressed(false)
-    ,m_map(m)
+    ,m_map(map)
+    ,m_mapView(mapView)
     ,m_fallen(0)
     ,m_attrib(MAX_HEARTS)
+    ,m_inventory(10)
 {
 
 }
@@ -120,26 +126,56 @@ EventResult Player::processEvent( InputEvent& e , Window& win, bool cheatmode)
 
             break;
 
+            case KeyCode::E :
+            if(m_ePressed == false&&e.type == InputType::KeyPressed){
+                m_ePressed = true;
+            }
+            break;
+           case KeyCode::K1:
+            m_blockType = 0;
+
+            break;
+           case KeyCode::K2:
+            m_blockType = 1;
+            break;
+           case KeyCode::K3:
+            m_blockType = 2;
+            break;
+           case KeyCode::K4:
+            m_blockType = 3;
+            break;
+           case KeyCode::K5:
+            m_blockType = 4;
+            break;
+           case KeyCode::K6:
+            m_blockType = 5;
+            break;
+            case KeyCode::K7:
+             m_blockType = 6;
+            break;
+            case KeyCode::K8:
+             m_blockType = 7;
+            break;
+            case KeyCode::K9:
+            m_blockType = 8;
+            break;
+            case KeyCode::K0:
+            m_blockType = 9;
+            break;
             default:
-            //Do Nothing
             break;
                
         }
     }
 
-    // Mouse handle
-    if(e.type == InputType::LMousePressed) {
-      m_mouseCaptured = true;
-      win.setCursorMode(CursorMode::Free);
-    }
-    if(e.type == InputType::LMouseReleased) {
-      m_mouseCaptured = false;
-      win.setCursorMode(CursorMode::Normal);
+    //Right Click
+    if(e.type == InputType::RMousePressed) {
+      m_rightMouseCaptured = true;
     }
 
     if(!cheatmode){
       // Mouse
-      if (m_mouseCaptured && e.type == InputType::MouseMoveDir)
+      if (e.type == InputType::MouseMoveDir)
       {
         turn_side(-e.mouseInput.x / 300.0f);
         turn_upDown(-e.mouseInput.y / 50.0f);
@@ -176,8 +212,33 @@ void Player::turn_upDown(float deltaY)
 }
 
 
-void Player::update()
+void Player::update(float timePassed)
 {
+
+  if(m_ePressed){
+    m_ePressed = false;
+    auto nextBlock = getLastAir();
+    //If there is only air or we are standing to near, don't place a block
+    if(nextBlock != m_position){
+        m_map.setBlockType(getLastAir(), m_inventory.getType(m_blockType) );
+        m_inventory.removeItem( m_inventory.getType(m_blockType) );
+        m_mapView.notifyBlockUpdate(nextBlock);
+        }
+  }
+  //handle block destroy
+  if(m_rightMouseCaptured){
+    m_rightMouseCaptured = false;
+    auto nextBlock = getNextBlock();
+    if (m_map.exists(nextBlock)) {
+      m_inventory.addItem(m_map.getBlockType(nextBlock));
+      m_map.setBlockType(nextBlock, BlockType::Air);
+      m_mapView.notifyBlockUpdate(nextBlock);
+    }
+  }
+  
+  m_timePassed += timePassed*1000;
+  while(m_timePassed >= FRAME_PER_MOVE){
+    m_timePassed -= FRAME_PER_MOVE;
     //TODO
     //Check for too much high // to less high
 
@@ -197,7 +258,7 @@ void Player::update()
         move_down();
     }  
     movement();
-
+  }
     if ( m_attrib.getHearts() == 0 ) {
         m_attrib.setHearts(MAX_HEARTS); // reset the game
         m_position = INIT_POSITION; // reset position
@@ -274,14 +335,18 @@ void Player::move_down()
 void Player::movement()
 {
   Vec3i pos = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y)),static_cast<int>(round(m_position.z)) );
-  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?1:-1) )),
+  //1*get_sign(m_yMovementspeed) > 0?2:-1 ==> If the  y Movement is negative, look 1 down, else look 2 up
+  Vec3i posY = Vec3i(static_cast<int>(round(m_position.x)),static_cast<int>(round(m_position.y+(1*get_sign(m_yMovementspeed) > 0?2:-1) )),
               static_cast<int>(round(m_position.z)) );
   
+  float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;
+     
   if( pos.y <= 0 || pos.y>=127 )
     return;
 
 
   //Y-Movement
+  //Check collision for air
   if( !collide(pos.x, pos.y, pos.z))
    {
         //slog("Speed: ",m_yMovementspeed);
@@ -296,14 +361,14 @@ void Player::movement()
           m_position.y += m_yMovementspeed;
         }else{
           //Hit the floor
-          float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;  
+          //float delta = m_position.y - pos.y + BLOCK_DIFFERENCE_Y;  
           if(m_yMovementspeed+FALL_SPEED < delta){
             m_yMovementspeed = -delta;
             m_position.y += m_yMovementspeed;
             //If the distance fallen is bigger than 4, 
             //the player takes damage equal to 2 powered by fallen-5
             if(m_fallen < -4){
-                m_attrib.updateHeartsBy( static_cast<int>(-pow(2, abs(m_fallen+5))) );
+                m_attrib.updateHeartsBy( static_cast<int>(-pow(2, abs(m_fallen+4))) );
             }
             //Reset Movementspeed
             m_yMovementspeed = 0;
@@ -328,14 +393,8 @@ void Player::movement()
     //slog("m_pos.y: ", m_position.y, " pos.y: ", pos.y);
     //slog("m_dir.x: ", m_direction.x, " m_direction.z: ",m_direction.z, " m_direction.y: ", m_direction.y);
 
-
-    //slog("test collision at x+gap: ",pos.x+block_x, ",  y: ",pos.y, ", z+gap: ",pos.z+block_z );
-
    //Check if we can move for XZ-direction
-   if(    !collide(pos.x, pos.y, pos.z)
-      // && !collide( m_position.x+ block_x , m_position.y+1.2, m_position.z+ block_z )
-      // && !collide( m_position.x+ block_x , m_position.y, m_position.z+ block_z )  
-    )
+   if(!collide(pos.x, pos.y, pos.z))
    {
         //Free Moving because of free space in moving direction.
         //The movement is only in the current block
@@ -439,6 +498,65 @@ bool Player::collide(float x, float y, float z) {
   Vec3i pos = Vec3i(static_cast<int>(round(x)), static_cast<int>(round(y)), static_cast<int>(round(z)));
   return m_map.isBlockTypeVisible(m_map.getBlockType(pos));
 }
+
+Vec3i Player::getNextBlock()
+{
+  float x = 0;
+  float y = 0;
+  float z = 0;
+
+  //Return current position (where already air is);
+  Vec3i resultNull = Vec3i(m_position.x, m_position.y+1, m_position.z);
+  
+  while(sqrt(x*x+y*y+z*z)<4){
+    x += m_direction.x*0.03;
+    y += m_direction.y*0.03;
+    z += m_direction.z*0.03;
+    
+    if(collide(m_position.x+x,m_position.y+y+CAMERA_HIGH,m_position.z+z)){
+      Vec3i pos = Vec3i(static_cast<int>(round(x+m_position.x)),static_cast<int>(round(y+m_position.y+CAMERA_HIGH)),static_cast<int>(round(z+m_position.z)));
+
+      return pos;
+    }
+  }
+  return resultNull;
+}
+
+
+Vec3i Player::getLastAir()
+{
+  float x = 0;
+  float y = 0;
+  float z = 0;
+
+  //Return current position (where already air is);
+  Vec3i resultNull = Vec3i(m_position.x, m_position.y, m_position.z);
+  
+  while(sqrt(x*x+y*y+z*z)<4){
+    x += m_direction.x*0.03;
+    y += m_direction.y*0.03;
+    z += m_direction.z*0.03;
+    
+    if(collide(m_position.x+x,m_position.y+y+CAMERA_HIGH,m_position.z+z)){
+      Vec3i pos = Vec3i(static_cast<int>(round(x+m_position.x-m_direction.x*0.03)),
+                        static_cast<int>(round(y+m_position.y+CAMERA_HIGH-m_direction.y*0.03)),
+                        static_cast<int>(round(z+m_position.z-m_direction.z*0.03)));
+      return pos;
+    }
+  }
+  return resultNull;
+}
+
+const map<BlockType, int>& Player::getInventoryItems() const
+{
+    return m_inventory.getItems();
+}
+
+
+ int Player::maxDisplayItems() const
+ {
+     return m_inventory.maxDisplayItems();
+ }
 
 void Player::reset(Vec3f pos)
 {

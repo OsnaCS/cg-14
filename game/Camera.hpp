@@ -89,7 +89,6 @@ private:
     lumina::Vec3f m_direction;
     lumina::Vec3f m_up;
     float m_movingspeed;
-    bool m_mouseCaptured;
     Movement m_movedKeys;
     float m_ViewAngle;
     float m_backPlaneDistance;
