@@ -496,7 +496,10 @@ void Player::movement()
 
 bool Player::collide(float x, float y, float z) {
   Vec3i pos = Vec3i(static_cast<int>(round(x)), static_cast<int>(round(y)), static_cast<int>(round(z)));
-  return m_map.isBlockTypeVisible(m_map.getBlockType(pos));
+  if(m_map.isBlockTypeVisible(m_map.getBlockType(pos))||m_map.getBlockType(pos)==BlockType::Torch){
+    return true;
+  }
+  return false;
 }
 
 Vec3i Player::getNextBlock()
