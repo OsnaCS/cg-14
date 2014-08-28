@@ -9,7 +9,7 @@ using namespace lumina;
 */
 enum class BlockType
 {
-	Air, Dirt, Wood, Stone, Water, Sand, Grass, Cactus, Birch, Spruce, BirchLeaves, SpruceLeaves, PineLeaves
+	Air, Dirt, Wood, Stone, Water, Sand, Grass, Cactus, Birch, Spruce, BirchLeaves, SpruceLeaves, PineLeaves, Torch
 };
 
 // North := back side
