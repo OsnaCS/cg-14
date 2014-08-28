@@ -133,9 +133,11 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
   });
 
+  // Fürs Menü
   m_window.addEventCallback([&](InputEvent e) 
   {
 
+    // Hauptmenü
     if(e.type == InputType::MouseMovePos && m_pause && !m_optionen) 
     {
 
@@ -175,6 +177,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
     }
 
+    // Optionsmenü
     if(e.type == InputType::MouseMovePos && m_pause && m_optionen) 
     {
 
@@ -184,12 +187,8 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
       float starty = m_size.y/20.0+20;
       // Größe um die die Buttons versetzt nach unten liegen
       float offset = (m_size.y/6.0);
-      
-      if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty && m_pos.y <= starty + 50)
-      {
-        m_button = 1;
-      }
-      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + offset && m_pos.y <= starty + offset + 50)
+
+      if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + offset && m_pos.y <= starty + offset + 50)
       {
         m_button = 2;
       }
@@ -221,6 +220,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.addEventCallback([&](InputEvent e) 
   {
 
+    // Hauptmenü
     if(e.type == InputType::LMouseReleased && m_pause && !m_optionen)
     {
 
@@ -257,7 +257,11 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         case 3: 
         {
-          m_map.saveWorld(); 
+          string str;
+          getline(cin, str);
+          m_map.setName(str);
+
+          m_map.saveWorld();
           return EventResult::Processed; 
           break;
         }
@@ -283,6 +287,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
     }
 
+    // Optionsmenü
     if(e.type == InputType::LMouseReleased && m_pause && m_optionen)
     {
 
@@ -291,43 +296,37 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
         case 1:
         {
-          m_pause = false;
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
         case 2: 
         {
-          m_pause = false;
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
         case 3: 
         {
-          m_pause = false;
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
         case 4: 
         {
-          m_pause = false;
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
         case 5: 
         {
-          m_pause = false;
-          m_optionen = false; 
+          m_optionen = false;
           return EventResult::Processed; 
           break;
         }
         default: 
         {
-          m_pause = false;
-          m_optionen = false;
+
           return EventResult::Skipped; 
           break;
         }
@@ -622,7 +621,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         cont.addTexture(4, m_exitTex);
         cont.addTexture(5, m_resSh);
 
-
         cont.prime([&](HotTexCont& hotTexCont) 
         {
 
@@ -677,7 +675,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*4;
-            hotP.uniform["s_menupng"] = 3;
+            hotP.uniform["s_menupng"] = 2;
             hotP.uniform["s_number"] = 5;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
           }
