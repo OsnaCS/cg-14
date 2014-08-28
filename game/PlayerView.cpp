@@ -50,7 +50,7 @@ void PlayerView::init()
 
   // Pickaxe
 	//Initialize of the texture
-	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture512.jpg");
+	ImageBox image_box2 = loadJPEGImage("gfx/pickaxe_texture.jpg");
   m_pickaxeTexture.create(Vec2i(512,512), TexFormat::RGB8, image_box2.data());
   m_pickaxeTexture.params.filterMode = TexFilterMode::Linear;
   m_pickaxeTexture.params.useMipMaps = true;
