@@ -323,7 +323,7 @@ void ChunkGenerator::setBlockHeight(Map& map, BiomeType type, int x, int z, int 
     }
     
     //untere Ebenen werden gleich generiert
-    if(k < (noise - 3) && k >= noise - 10) {
+    if(k < (noise - 3)) {
       map.getChunk({x, z}).setBlockType({xi, k, zj}, BlockType::Stone);
     }
   }

@@ -9,7 +9,7 @@ using namespace std;
 
 CraftGame::CraftGame()
     :m_camera(m_window)
-    ,m_player(m_map)
+    ,m_player(m_map, m_mapView)
     ,m_envir(m_camera)
     ,m_mapView(m_map, m_camera, m_envir)
     ,m_playerView(m_player)
@@ -256,7 +256,7 @@ void CraftGame::updateComponents(float delta) {
   }
   else
   {
-    m_player.update();
+    m_player.update(0.0f);
     
     m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
   }
@@ -310,7 +310,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
 
   //
-  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);
+  m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB32F);
   m_gBufferDepth.create(m_window.getSize(), TexFormat::R32F);
   m_gBuffer.create(m_window.getSize());
   m_gBuffer.attachColor(0, m_gBufferNormal);
@@ -410,7 +410,7 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     }
     else
     {
-      m_player.update();
+      m_player.update(delta);
       
       m_camera.updateFromPlayer(m_player.getPosition(), m_player.getDirection());
     }
@@ -424,8 +424,12 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearColor(1, Color32fA(0, 0, 0, 1));
       hotFB.clearDepth(1.f);
 
+
       m_mapView.drawNormalPass(viewMatrix, projectionMatrix);
-      m_playerView.drawNormalPass(viewMatrix, projectionMatrix);
+
+      m_playerView.drawNormalPass(viewMatrix, projectionMatrix, m_camera);
+      m_envir.drawCloudNormalPass(viewMatrix, projectionMatrix); 
+
     });
 
     // second pass (lighting)
@@ -443,8 +447,9 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
       hotFB.clearDepth(1.f);
 
       m_envir.draw(viewMatrix, projectionMatrix);
-      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
 
+      m_mapView.drawFinalPass(viewMatrix, projectionMatrix, m_lBufferTex, m_gBufferDepth);
+      m_envir.drawCloudFinalPass(viewMatrix,projectionMatrix, m_lBufferTex, m_gBufferDepth);
       m_playerView.drawFinalPass(viewMatrix, projectionMatrix, m_camera, m_lBufferTex);
     });
 
@@ -533,7 +538,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
 
-      m_playerView.draw(viewMatrix, projectionMatrix);
+
+      m_playerView.draw();
 
     });
 
