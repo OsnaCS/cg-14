@@ -308,7 +308,6 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_mapView.init();
   m_playerView.init();
   m_chunkGenerator.chunkGeneration(m_map, m_camera.get_position(), m_mapView);
-  m_map.setBlockType(Vec3i(0, 80, 0), BlockType::Torch);
 
   //
   m_gBufferNormal.create(m_window.getSize(), TexFormat::RGB8);

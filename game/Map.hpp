@@ -3,7 +3,6 @@
 #include "Chunk.hpp"
 #include "BlockType.hpp"
 #include <map>
-#include <set>
 
 using namespace std;
 
@@ -100,16 +99,11 @@ public:
 
 	//map<Vec2i, Chunk> loadWorld("WeltDatei");
 
-	set<Vec3f> getPointLights() {
-		return m_pointLights;
-	}
-
 	bool isBlockTypeVisible(BlockType blockType);
 
 private: 
 	// Map with all Chunks
 	map<Vec2i, Chunk> m_map;
-	set<Vec3f> m_pointLights;
 
 	//Name of the Map
 	string m_name;

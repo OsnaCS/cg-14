@@ -67,7 +67,7 @@ void PlayerView::init()
   // create program and link the two shaders
 	m_normalPass.create(vsNP, fsNP);
 	m_normalPass.perFragProc.enableDepthTest();
-	m_finalPass.perFragProc.enableDepthWrite();
+	m_normalPass.perFragProc.enableDepthWrite();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
 
 	VShader vsFP;
@@ -129,11 +129,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
     hotPlayer.uniform["u_transform"] = tmp;
     hotPlayer.uniform["u_backPlaneDistance"] = cam.getBackPlaneDistance();
 
-    TexCont contPlayer;
-    contPlayer.addTexture(0, m_playerTexture);
-      contPlayer.prime([&](HotTexCont& hotTexCont) { 
-      	hotPlayer.draw(hotTexCont, m_playerFigure, PrimitiveType::Triangle); 
-      });
+  	hotPlayer.draw(m_playerFigure, PrimitiveType::Triangle); 
   });
 
 
@@ -148,11 +144,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
       hotPickaxe.uniform["u_transform"] = tmp;
       hotPickaxe.uniform["u_backPlaneDistance"] = cam.getBackPlaneDistance();
 
-      TexCont cont;
-      cont.addTexture(0, m_pickaxeTexture);
-      cont.prime([&](HotTexCont& hotTexCont) { 
-      	hotPickaxe.draw(hotTexCont, m_pickaxe, PrimitiveType::Triangle); 
-      });
+    	hotPickaxe.draw(m_pickaxe, PrimitiveType::Triangle); 
     });
   }
 }

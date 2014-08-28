@@ -21,7 +21,7 @@ void main() {
 	vec3 pos = inData.coordinates * texture(depthTexture, inData.uv).r + u_cameraPos;
 	vec3 lightRay = pos - u_lightPosition;
 	float dist = length(lightRay);
-	float lightIntense = 3 * u_lightIntens / (0.05 + dist * dist);
+	float lightIntense = 3 * u_lightIntens / (0.05 + ((dist * dist) * 0.25));
 	vec3 normal = texture(normalTexture, inData.uv).xyz;
 
 	// --------------- Diffuse Light --------------------

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 
 #include "ChunkView.hpp"
 #include "Map.hpp"
@@ -33,6 +34,8 @@ public:
 private:
 
 	void drawChunks(HotProgram& hotP, HotTexCont& hotTexCont);
+	set<Vec3f> getVisibleTorches();
+	Mat4f getTorchTransformationMatrix();
 
 	map<Vec2i, ChunkView> m_mapView;
 	Map& m_map;
@@ -41,8 +44,13 @@ private:
 	Tex2D m_colorTexture;
 	Program m_program;
 	Program m_normalPass;
+	Program m_normalPassTorches;
 	Program m_finalPass;
+	Program m_finalPassTorches;
 	Tex2D m_normalTexture;
 	Tex2D m_pickaxeTexture;
 	Program m_lightingPass;
+	int m_visibleChunkRange;
+	VertexSeq<Vec3f, Vec3f, Vec2f> m_torch;
+	Tex2D m_torchTexture;
 };

@@ -3,10 +3,9 @@
 #include "ObjectLoader.hpp"
 
 #include <math.h>
-#include <set>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
-: m_map(map), m_cam(cam), m_envir(envir) {
+: m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4) {
 
 }
 
@@ -21,7 +20,6 @@ void MapView::init() {
   m_normalTexture.create(Vec2i(512,512), TexFormat::RGBA8, imageBoxNormal.data());
   m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
   m_normalTexture.params.useMipMaps = true;
-
 
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -45,6 +43,25 @@ void MapView::init() {
   m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_normalPass.primitiveProc.enableCulling();
 
+  // --------- Normal Pass - Torches -------------
+  m_torch = loadOBJ("gfx/torch.obj");
+  ImageBox torchImage = loadJPEGImage("gfx/torch_texture.jpg");
+  m_torchTexture.create(Vec2i(512,512), TexFormat::RGB8, torchImage.data());
+  m_torchTexture.params.filterMode = TexFilterMode::Linear;
+  m_torchTexture.params.useMipMaps = true;
+
+  VShader normalTorchesVS;
+  normalTorchesVS.compile(loadShaderFromFile("shader/MapViewNormalTorchesPass.vsh"));
+  FShader normalTorchesFS;
+  normalTorchesFS.compile(loadShaderFromFile("shader/MapViewNormalTorchesPass.fsh"));
+
+  m_normalPassTorches.create(normalTorchesVS, normalTorchesFS);
+  m_normalPassTorches.perFragProc.enableDepthTest();
+  m_normalPassTorches.perFragProc.enableDepthWrite();
+  m_normalPassTorches.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_normalPassTorches.primitiveProc.enableCulling();
+
+  // --------- Final Pass - Blocks -------------
   VShader finalVS;
   finalVS.compile(loadShaderFromFile("shader/MapViewFinalPass.vsh"));
   FShader finalFS;
@@ -56,6 +73,17 @@ void MapView::init() {
   m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
   m_finalPass.primitiveProc.enableCulling();
 
+  // --------- Final Pass - Torches -------------
+  VShader finalTorchesVS;
+  finalTorchesVS.compile(loadShaderFromFile("shader/MapViewFinalTorchesPass.vsh"));
+
+  m_finalPassTorches.create(finalTorchesVS, finalFS);
+  m_finalPassTorches.perFragProc.enableDepthTest();
+  m_finalPassTorches.perFragProc.enableDepthWrite();
+  m_finalPassTorches.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_finalPassTorches.primitiveProc.enableCulling();
+
+  // --------- Lighting Pass -------------
   VShader lightingVS;
   lightingVS.compile(loadShaderFromFile("shader/MapViewLightingPass.vsh"));
   FShader lightingFS;
@@ -77,8 +105,8 @@ void MapView::drawChunks(HotProgram& hotP, HotTexCont& hotTexCont) {
 
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - 4; x <= activeChunk.x + 4; x++) {
-    for(int z = activeChunk.y - 4; z <= activeChunk.y + 4; z++) {
+  for(int x = activeChunk.x - m_visibleChunkRange; x <= activeChunk.x + m_visibleChunkRange; x++) {
+    for(int z = activeChunk.y - m_visibleChunkRange; z <= activeChunk.y + m_visibleChunkRange; z++) {
 
       if(m_map.exists({x * 16, 0, z * 16})) {
 
@@ -139,11 +167,56 @@ void MapView::drawNormalPass(Mat4f viewMat, Mat4f projMat) {
       drawChunks(hotP, hotTexCont);
     });
   });
+
+  m_normalPassTorches.prime([&](HotProgram& hotP) {
+
+    hotP.uniform["u_transform"] = getTorchTransformationMatrix();
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_backPlaneDistance"] = m_cam.getBackPlaneDistance();
+
+    set<Vec3f> torches = getVisibleTorches();
+    for(Vec3f torch : torches) {
+
+      hotP.uniform["u_position"] = torch;
+      hotP.draw(m_torch, PrimitiveType::Triangle);
+    }
+  });
+}
+
+set<Vec3f> MapView::getVisibleTorches() {
+
+  set<Vec3f> torches;
+  Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
+
+  for(int x = activeChunk.x - m_visibleChunkRange + 1; x <= activeChunk.x + m_visibleChunkRange + 1; x++) {
+    for(int z = activeChunk.y - m_visibleChunkRange + 1; z <= activeChunk.y + m_visibleChunkRange + 1; z++) {
+
+      Vec2i chunkViewPos(x, z);
+
+      if(m_map.exists({x * 16, 0, z * 16})) {
+
+        if (isChunkVisible(chunkViewPos)) {
+          if(m_mapView.count(chunkViewPos) == 0) {
+            m_mapView[chunkViewPos].init(chunkViewPos, m_map);
+          }
+
+          set<Vec3f> chunkViewTorches = m_mapView[chunkViewPos].getTorches();
+
+          for(Vec3f torch : chunkViewTorches) {
+            torches.insert(torch);
+          }
+        }
+      }
+    }
+  }
+
+  return torches;
 }
 
 void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
-  set<Vec3f> pointLights = m_map.getPointLights();
+  set<Vec3f> pointLights = getVisibleTorches();
 
   m_lightingPass.prime([&](HotProgram& hotProg) {
 
@@ -151,7 +224,7 @@ void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
       hotProg.uniform["normalTexture"] = 0;
       hotProg.uniform["depthTexture"] = 1;
-      hotProg.uniform["u_lightIntens"] = 1.f;
+      hotProg.uniform["u_lightIntens"] = 5.f;
       hotProg.uniform["u_lightPosition"] = pointLight;
       hotProg.uniform["u_cameraPos"] = m_cam.get_position();
 
@@ -210,6 +283,34 @@ void MapView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffer, Tex2D&
 
     cont.prime([&](HotTexCont& hotCont){
       drawChunks(hotP, hotCont);
+    });
+  });
+
+  m_finalPassTorches.prime([&](HotProgram& hotP) {
+
+    hotP.uniform["u_transform"] = getTorchTransformationMatrix();
+    hotP.uniform["u_view"] = viewMat;
+    hotP.uniform["u_projection"] = projMat;
+    hotP.uniform["u_winSize"] = m_cam.getWindow().getSize();
+    hotP.uniform["s_lightTexture"] = 0;
+    hotP.uniform["s_colorTexture"] = 1;
+    hotP.uniform["s_depthTexture"] = 2;
+    hotP.uniform["u_time"] = m_envir.getTime();
+    hotP.uniform["u_daylength"] = m_envir.getDayLength();
+
+    TexCont cont;
+    cont.addTexture(0, lBuffer);
+    cont.addTexture(1, m_torchTexture);
+    cont.addTexture(2, dBuffer);
+
+    cont.prime([&](HotTexCont& hotTexCont){
+
+      set<Vec3f> torches = getVisibleTorches();
+      for(Vec3f torch : torches) {
+
+        hotP.uniform["u_position"] = torch;
+        hotP.draw(hotTexCont, m_torch, PrimitiveType::Triangle);
+      }
     });
   });
 }
@@ -283,4 +384,15 @@ void MapView::clearMapView(Vec2i position) {
     m_mapView.erase(it++);
   }
   
+}
+
+Mat4f MapView::getTorchTransformationMatrix() {
+
+  // scaling
+  Mat4f scaling = scalingMatrix(Vec3f(0.25f, 0.25f, 0.25f));
+
+  // translation to origin
+  Mat4f translationOrigin = translationMatrix(Vec3f(0, -1.35f, 0));
+
+  return scaling * translationOrigin;
 }

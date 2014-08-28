@@ -1,4 +1,5 @@
 #include "ChunkView.hpp"
+#include "ObjectLoader.hpp"
 
 #include <cstdint>
 
@@ -91,6 +92,10 @@ void ChunkView::updateView() {
 	    if(m_map->isBlockTypeVisible(blockType)) {
         faceCount += countVisibleFaces(blockWorldPos);
 	    }
+
+      if (blockType == BlockType::Torch) {
+        m_torches.insert(blockWorldPos);
+      }
 	  }
 
     // skip blocks with no visible faces
@@ -380,8 +385,9 @@ void ChunkView::addBoxToSeq(HotVertexSeq<Vec3f, Vec2f, float, uint8_t>& hotSeq, 
   indexIndex += indexIndexOffset;
 }
 
-
 void ChunkView::draw(HotProgram& hotProg, HotTexCont& hotCont) {
+
+  // draw the blocks
   for(VertexSeq<Vec3f, Vec2f, float, uint8_t>& sequence : m_chunkSequences) {
     if(sequence) {
       hotProg.draw(hotCont, sequence, PrimitiveType::TriangleStrip);
