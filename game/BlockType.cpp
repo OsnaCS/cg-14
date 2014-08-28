@@ -38,6 +38,9 @@ Vec2f getInventoryCoords(BlockType type, BlockSide side){
 
 	switch(type){
 
+		case BlockType::Torch:
+		return m*Vec2f(1,1);
+
 		case BlockType::Water:
 		return m*Vec2f(1,0);
 				
@@ -173,7 +176,7 @@ int getTexCoords(BlockType type, BlockSide side){
 			case BlockSide::South:
 			case BlockSide::West:
 			case BlockSide::East:
-				return 12;
+				return 13;
 		}
 		
 		case BlockType::Stone:

@@ -21,12 +21,14 @@ ChunkGenerator::ChunkGenerator() {
   m_seed = rand() % 512;
   m_biome_seed = (m_seed*m_seed)%618;
 
+  // Wasserhöhe
+  m_waterHeight = 80 - 6;
+
   // Am Anfang entscheiden, ob Welt mit Wasser oder ohne
   if(m_seed % 2 == 0) {
-    m_setWater = false;
+    m_setWater = true;
   } else {
     m_setWater = true;
-    m_waterHeight = 80 - 6;
   }
   
 }
