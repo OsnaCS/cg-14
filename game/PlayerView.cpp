@@ -162,33 +162,39 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
     numInventory.create(4*seqSize, 5*seqSize );
     numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
     {
-        auto it=items.begin();
-        int cnt = 0; int cntIdx = 0;
+        auto it = items.begin();
+        int indexCounter = 0;
+        int indexBufferIndexCounter = 0;
         for ( int i=0;  it != items.end(); ++i, ++it )
         {
             vector<Vec2f> positions = positionOfNumber( it->second );
 
+            if (positions.size() == 0) {
+              init_pos.x += INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
+            }
+
             auto pos_it = positions.begin();
             for ( int j=0; pos_it != positions.end(); ++pos_it, ++j )
             {
+                float offsetX = -2 * j * item_size.x + j * gap.x; // if j=1, shift position[1] to the left as second digit number
 
-                cnt += j*4;
-                cntIdx += j*5;
-                float offsetX = -2*j*item_size.x+j*gap.x; // if j=1, shift position[1] to the left as second digit number           
-                hot.vertex[i*4+0+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
-                                       , positions[j] );
-                hot.vertex[i*4+2+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
+                hot.vertex[indexCounter].set(Vec2f(init_pos.x + i * item_size.x + offsetX, init_pos.y), Vec3f(1, 1, 1), positions[j]);
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set(Vec2f(init_pos.x + i * item_size.x + offsetX, init_pos.y - item_size.y), Vec3f(1, 1, 1), positions[j] + Vec2f(0, 1.0f));
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
                                        , positions[j] + Vec2f(1/10.f, 0) );
-                hot.vertex[i*4+3+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
                                         , positions[j]+Vec2f(1/10.f, 1.0f) );
-                hot.vertex[i*4+1+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
-                                        , positions[j]+Vec2f(0, 1.0f) );       
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+                
                 init_pos.x += (j==1)?0:INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
-                hot.index[i*5+0+cntIdx] = i*4+0+cnt;
-                hot.index[i*5+1+cntIdx] = i*4+1+cnt;
-                hot.index[i*5+2+cntIdx] = i*4+2+cnt;
-                hot.index[i*5+3+cntIdx] = i*4+3+cnt;
-                hot.index[i*5+4+cntIdx] = GLIndex::PrimitiveRestart;
+
+                hot.index[indexBufferIndexCounter++] = GLIndex::PrimitiveRestart;
 
             }
 
@@ -415,7 +421,16 @@ int PlayerView::calcSeqSize(const std::map<BlockType, int>& items)
     int size = 0;
     for(auto it = items.begin(); it != items.end(); ++it)
     {
-        size += ( it->second > 9 )? 2: 1; // 1 or 2 digit place
+        int numDigits;
+        if (it->second > 99) {
+          numDigits = 0;
+        } else if(it->second > 9) {
+            numDigits = 2;
+        } else {
+          numDigits = 1;
+        }
+
+        size += numDigits;
     }
     return size;
 }
