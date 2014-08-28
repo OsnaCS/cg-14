@@ -106,10 +106,11 @@ void Environment::drawCloudFinalPass(Mat4f viewMat, Mat4f projMat, Tex2D& lBuffe
 
     hotprog.uniform["u_view"] = viewMat;
     hotprog.uniform["u_projection"] = projMat;
-    hotprog.uniform["s_lightTexture"] = 0;
+    //hotprog.uniform["s_lightTexture"] = 0;
     hotprog.uniform["s_depthTexture"] = 1;
     hotprog.uniform["u_winSize"] = m_camera.getWindow().getSize();
     hotprog.uniform["u_backPlaneDistance"] = m_camera.getBackPlaneDistance();
+    hotprog.uniform["u_ambientLight"] = getAmbientIntensity();
     TexCont cont;
     cont.addTexture(0, lBufferTex);
     cont.addTexture(1, gBufferDepth);
@@ -140,7 +141,8 @@ void Environment::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffe
     // hotProg.uniform["u_cameraPos"] = m_camera.get_position();
     hotProg.uniform["u_lightRay"] = getSkyLightDir();
     hotProg.uniform["u_lightIntens"] = getSkyLightIntensity();
-    hotProg.uniform["u_daytime"] = m_time / m_dayLength;
+    //hotProg.uniform["u_ambient"] = m_time / m_dayLength;
+    hotProg.uniform["u_ambient"] = getAmbientIntensity();
 
     Vec3f direction = m_camera.get_direction();
     float backPlaneDistance = m_camera.getBackPlaneDistance();
@@ -352,6 +354,21 @@ void Environment::update(float delta)
     }
   }
 }
+
+float Environment::getAmbientIntensity(){  
+ 
+  float ambienteIntensity = m_time / m_dayLength;
+  
+  if(ambienteIntensity > 0.5){
+    ambienteIntensity = 1 - ambienteIntensity;
+  }
+
+  ambienteIntensity += 0.1;
+
+  return ambienteIntensity;
+
+}
+
 
 void Environment::setDayLength(float sec) 
 { 

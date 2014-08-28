@@ -21,6 +21,8 @@ public:
 
   void update(float delta);
 
+  float getAmbientIntensity();
+
   void setDayLength(float sec);
 
   float getTime()

@@ -8,7 +8,7 @@ uniform float u_backPlaneDistance;
 //uniform sampler2D normalTex;
 
 in VertexData {
-//	vec2 uv; (evtl spaeter)
+	vec2 uv; 
 	vec3 normal;
 	float depth;
 } inData;
@@ -25,7 +25,9 @@ void main() {
 
 	// Gibt ein Vec4 zurueck, wobei die 4. Komponente der Alpha-Wert ist
 //	normal = texture(normalTex, inData.uv).xyz * texTrans;
+  float sinU =sin(inData.uv.x*9.43) * 1.7;
+  float sinV =sin(inData.uv.y*9.43) * 1.7;
 
-	o_depth = vec3(-inData.depth / u_backPlaneDistance, 1.0, 1.0);
+	o_depth = vec3((-inData.depth + (sinU+sinV)) / u_backPlaneDistance, 1.0, 1.0);
 	o_normal = (normal + 1) / 2;
 }
