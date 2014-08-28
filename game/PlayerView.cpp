@@ -121,7 +121,7 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts(){
 void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
 
 	m_normalPass.prime([&](HotProgram& hotPlayer) {
-		Mat4f tmp = viewMat * getRotMatrixPlayer();
+		Mat4f tmp = getRotMatrixPlayer();
 		tmp = tmp.inverted();
     tmp = tmp.transposed();
 		hotPlayer.uniform["u_view"] = viewMat* getTransMatrixPlayer();
@@ -140,7 +140,7 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
   if(m_showPickaxe) {
     // Show pickaxe
     m_normalPass.prime([&](HotProgram& hotPickaxe) {
-    	Mat4f tmp = viewMat * getRotMatrixPickaxe();
+    	Mat4f tmp = getRotMatrixPickaxe();
 			tmp = tmp.inverted();
    	  tmp = tmp.transposed();
       hotPickaxe.uniform["u_view"] = viewMat*getTransMatrix();
