@@ -17,6 +17,10 @@ double getFrequency(BiomeType type) {
       return 0.03;
     case BiomeType::Mountains:
       return 0.03;
+      case BiomeType::WaterHillside:
+      return 0.03;
+    case BiomeType::WaterMountains:
+      return 0.03;
 
     default:
       slogWarning("Unknown BiomeType in getFrequency");
@@ -43,6 +47,10 @@ int getUpperBound(BiomeType type) {
     case BiomeType::Hillside:
       return 93;
     case BiomeType::Mountains:
+      return 93;
+    case BiomeType::WaterHillside:
+      return 93;
+    case BiomeType::WaterMountains:
       return 93;
     default:
       slogWarning("Unknown BiomeType in getUpperBound");
