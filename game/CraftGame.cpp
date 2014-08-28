@@ -29,6 +29,8 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.setFullscreen(fullscreen);
   m_cheatmode = false;
 
+  m_size = size;
+
   //Toggle Pickaxe by pressing p
   m_window.addEventCallback([&](InputEvent e) 
   {
@@ -135,25 +137,31 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
     if(e.type == InputType::MouseMovePos && m_pause) 
     {
+
       m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
+
+      // Startposition des ersten Buttons
+      float starty = m_size.y/20.0+20;
+      // Größe um die die Buttons versetzt nach unten liegen
+      float offset = (m_size.y/6.0);
       
-      if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 50 && m_pos.y <= 100)
+      if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty && m_pos.y <= starty + 50)
       {
         m_button = 1;
       }
-      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 165 && m_pos.y <= 215)
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + offset && m_pos.y <= starty + offset + 50)
       {
         m_button = 2;
       }
-      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 275 && m_pos.y <= 325)
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 2) && m_pos.y <= starty + (offset * 2) + 50)
       {
         m_button = 3;
       }
-      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 385 && m_pos.y <= 435)
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 3) && m_pos.y <= starty + (offset * 3) + 50)
       {
         m_button = 4;
       }
-      else if(m_pos.x >= 505 && m_pos.x <= 775 && m_pos.y >= 492 && m_pos.y <= 542)
+      else if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + (offset * 4) && m_pos.y <= starty + (offset * 4) + 50)
       {
         m_button = 5;
       }
@@ -203,6 +211,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         case 4: 
         {
+          slog("Keine Optionen!");
           return EventResult::Processed; 
           break;
         }
@@ -359,10 +368,10 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
   m_fullScreenQuad2.create(4);
   m_fullScreenQuad2.prime([&](HotVertexSeq<Vec2f, Vec2f>& hotSeq) 
   {
-    hotSeq.vertex[0].set(Vec2f(-680.0/1280.0, 650.0/720.0),Vec2f(0, 0));
-    hotSeq.vertex[1].set(Vec2f(-680.0/1280.0, 470.0/720.0),Vec2f(0, 1));
-    hotSeq.vertex[2].set(Vec2f(680.0/1280.0, 650.0/720.0),Vec2f(1, 0));
-    hotSeq.vertex[3].set(Vec2f(680.0/1280.0, 470.0/720.0),Vec2f(1, 1));
+    hotSeq.vertex[0].set(Vec2f(-680.0/m_size.x, (m_size.y-(m_size.y/10.0))/m_size.y),Vec2f(0, 0));
+    hotSeq.vertex[1].set(Vec2f(-680.0/m_size.x, (m_size.y-(m_size.y/10.0)-180.0)/m_size.y),Vec2f(0, 1));
+    hotSeq.vertex[2].set(Vec2f(680.0/m_size.x, (m_size.y-(m_size.y/10.0))/m_size.y),Vec2f(1, 0));
+    hotSeq.vertex[3].set(Vec2f(680.0/m_size.x, (m_size.y-(m_size.y/10.0)-180.0)/m_size.y),Vec2f(1, 1));
   });
 
   VShader tempVS;
@@ -512,22 +521,22 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.3;
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)));
             hotP.uniform["s_menupng"] = 1;
             hotP.uniform["s_number"] = 2;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.6;
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*2;
             hotP.uniform["s_menupng"] = 2;
             hotP.uniform["s_number"] = 3;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-0.9;
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*3;
             hotP.uniform["s_menupng"] = 3;
             hotP.uniform["s_number"] = 4;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
-            hotP.uniform["u_offset"] = (float)-1.2;
+            hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)))*4;
             hotP.uniform["s_menupng"] = 4;
             hotP.uniform["s_number"] = 5;
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
