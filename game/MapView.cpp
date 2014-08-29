@@ -1,25 +1,49 @@
 #include "MapView.hpp"
 #include "lumina/io/ImageJPEG.hpp"
 #include "ObjectLoader.hpp"
+#include "TexArray.hpp"
 
 #include <math.h>
+#include <vector>
+#include <string>
 
 MapView::MapView(Map& map, Camera& cam, Environment& envir)
-: m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4) {
+: m_map(map), m_cam(cam), m_envir(envir), m_visibleChunkRange(4), m_flickeringDelta(0.f) {
 
 }
 
 void MapView::init() {
 
-  ImageBox image_box = loadPNGImage("gfx/texture.png");
-  m_colorTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, image_box.data());
-  m_colorTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_colorTexture.params.useMipMaps = true;
+  // Texturen laden
+  m_colorTexture.create(Vec2i(256,256), TexFormat::RGBA8, 14);
 
-  ImageBox imageBoxNormal = loadPNGImage("gfx/normals.png");
-  m_normalTexture.create(Vec2i(2048,2048), TexFormat::RGBA8, imageBoxNormal.data());
-  m_normalTexture.params.filterMode = TexFilterMode::Trilinear;
-  m_normalTexture.params.useMipMaps = true;
+  // Dateiname der PNGs
+  vector<string> names = {
+    "grass_top", // 0
+    "water","dirt","grass_side","cactus_side","cactus_top",     // 1,2,3,4,5
+    "birch_leaves","spruce_leaves","stone","sand","birch_side", // 6,7,8,9,10
+    "wood_top","spruce_side","oak_side"                         // 11,12,13
+  };
+
+  // Speichere die Texturen in Vector:
+  for(int i = 0; i < names.size(); i++) {
+    // Texturen laden
+    ImageBox image_box = loadPNGImage("gfx/blocks/" + names[i] + ".png");
+    m_colorTexture.addData(i,image_box.data());
+  }
+  m_colorTexture.generateMipMaps();
+
+
+  // Normalen laden
+  m_normalTexture.create(Vec2i(256,256), TexFormat::RGBA8, 14);  // Normalen zur Textur
+
+  for(int i = 0; i < names.size(); i++) {
+    // Normalen zu den Texturen laden
+    ImageBox image_box_normal = loadPNGImage("gfx/blocks/" + names[i] + "_normal.png");
+    m_normalTexture.addData(i,image_box_normal.data());  
+  }
+  m_normalTexture.generateMipMaps();
+  
 
   VShader vs;
   vs.compile(loadShaderFromFile("shader/CraftGame.vsh"));
@@ -74,10 +98,12 @@ void MapView::init() {
   m_finalPass.primitiveProc.enableCulling();
 
   // --------- Final Pass - Torches -------------
+  FShader finalTorchesFS;
+  finalTorchesFS.compile(loadShaderFromFile("shader/MapViewFinalTorchesPass.fsh"));
   VShader finalTorchesVS;
   finalTorchesVS.compile(loadShaderFromFile("shader/MapViewFinalTorchesPass.vsh"));
 
-  m_finalPassTorches.create(finalTorchesVS, finalFS);
+  m_finalPassTorches.create(finalTorchesVS, finalTorchesFS);
   m_finalPassTorches.perFragProc.enableDepthTest();
   m_finalPassTorches.perFragProc.enableDepthWrite();
   m_finalPassTorches.perFragProc.setDepthFunction(DepthFunction::Less);
@@ -189,8 +215,8 @@ set<Vec3f> MapView::getVisibleTorches() {
   set<Vec3f> torches;
   Vec2i activeChunk = m_map.getChunkPos(m_cam.get_position());
 
-  for(int x = activeChunk.x - m_visibleChunkRange + 1; x <= activeChunk.x + m_visibleChunkRange + 1; x++) {
-    for(int z = activeChunk.y - m_visibleChunkRange + 1; z <= activeChunk.y + m_visibleChunkRange + 1; z++) {
+  for(int x = activeChunk.x - (m_visibleChunkRange + 1); x <= activeChunk.x + (m_visibleChunkRange + 1); x++) {
+    for(int z = activeChunk.y - (m_visibleChunkRange + 1); z <= activeChunk.y + (m_visibleChunkRange + 1); z++) {
 
       Vec2i chunkViewPos(x, z);
 
@@ -214,7 +240,9 @@ set<Vec3f> MapView::getVisibleTorches() {
   return torches;
 }
 
-void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
+void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer, float delta) {
+
+  m_flickeringDelta += delta;
 
   set<Vec3f> pointLights = getVisibleTorches();
 
@@ -224,8 +252,8 @@ void MapView::drawLightingPass(Mat4f viewMat, Mat4f projMat, TexCont& gBuffer) {
 
       hotProg.uniform["normalTexture"] = 0;
       hotProg.uniform["depthTexture"] = 1;
-      hotProg.uniform["u_lightIntens"] = 5.f;
-      hotProg.uniform["u_lightPosition"] = pointLight;
+      hotProg.uniform["u_lightIntens"] = 2.f + 0.5f * sin(5 * m_flickeringDelta + pointLight.x);
+      hotProg.uniform["u_lightPosition"] = pointLight + Vec3f(0, 0.1 * sin(20 * m_flickeringDelta + pointLight.y), 0);
       hotProg.uniform["u_cameraPos"] = m_cam.get_position();
 
       Vec3f direction = m_cam.get_direction();

@@ -46,6 +46,7 @@ public:
   		@return Vec3f position Get the Position in 3D Space
   */
   inline Vec3f getPosition();
+  inline bool getMining();
 
   /**
    * @brief getInventoryItems Get items from player's inventory
@@ -125,15 +126,18 @@ private:
   float m_yMovementspeed;
   float m_zMovementspeed;
   float m_timePassed;
+  bool m_leftMouseCaptured;
   bool m_rightMouseCaptured;
   bool m_wPressed;
   bool m_sPressed;
   bool m_aPressed;
   bool m_dPressed;
   bool m_ePressed;
+  bool m_mining;
   bool m_SpacePressed;
   bool m_CtrlPressed;
   bool m_ShiftPressed;
+  bool m_cheatmode;
   Map& m_map;
   MapView& m_mapView;
   float m_fallen;
@@ -145,6 +149,10 @@ private:
 
 
 /////////////INLINE
+
+bool Player::getMining(){
+  return m_mining;
+}
 
 Vec3f Player::getPosition()
 {

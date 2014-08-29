@@ -14,7 +14,7 @@ uniform sampler2D tex;
 
 void main()
 {
-        vec4 tempTex = texture2D(tex, inData.texPos);
+        vec4 tempTex = texture(tex, inData.texPos);
         if(tempTex.w <=0.25){
             discard;
         }

@@ -1,14 +1,21 @@
 #include "CraftGame.hpp"
+#include "lumina/lumina.hpp"
+
 #include <iostream>
 #include <string>
+
+using namespace lumina;
 
 int main(int argc, char **argv) {
   Vec2i size(800, 600);
   bool fullscreen = false;
 
+  slog("CraftGame v1.0 started...");
+  Logger::setGlobalStdLevelFilter(LogLevel::Info);
+
   for(int i = 0; i < argc; ++i) {
     string str(argv[i]);
-    std::cout << str << std::endl;
+    
     if(str.size() < 2 || str[0] != '-') {
       continue;
     }
@@ -38,11 +45,6 @@ int main(int argc, char **argv) {
 
     }
   }
-
-  std::cout << size << std::endl;
-
-  // return 0;
-
 
   CraftGame game;
   game.init(size, fullscreen);

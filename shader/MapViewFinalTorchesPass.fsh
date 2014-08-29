@@ -4,7 +4,7 @@
 out vec4 o_color;
 
 in VertexData {
-	vec3 uvi;
+	vec2 uv;
 	vec3 pos;
   float simpleLight;
 } inData;
@@ -12,7 +12,7 @@ in VertexData {
 uniform ivec2 u_winSize;
 
 uniform sampler2D s_lightTexture;
-uniform sampler2DArray s_colorTexture;
+uniform sampler2D s_colorTexture;
 uniform sampler2D s_depthTexture;
 
 uniform float u_time;
@@ -22,17 +22,11 @@ void main() {
 
 	vec4 light = texture(s_lightTexture, gl_FragCoord.xy / u_winSize);
 	vec4 depth = texture(s_depthTexture, gl_FragCoord.xy / u_winSize);
-	vec4 texColor = texture(s_colorTexture, inData.uvi);
-
-  // change specular power of water	
-  float specularPower = 0.5;
-  if (inData.uvi.z == 1) {
-    specularPower = 1;
-  }
-
+	vec4 texColor = texture(s_colorTexture, inData.uv);
+	
 	texColor.xyz *= light.xyz;
   texColor.xyz *= inData.simpleLight;
-	texColor.xyz *= ((light.w * specularPower) + 1);
+	texColor.xyz *= (light.w + 1);
 
 	vec3 fogColor = vec3(0.8,0.8,0.8);
 
@@ -102,4 +96,5 @@ void main() {
   }
 
 	o_color = vec4(texColor.xyz, 1);
+
 }

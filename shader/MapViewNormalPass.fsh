@@ -5,10 +5,10 @@ layout(location = 0) out vec3 o_normal;
 layout(location = 1) out vec3 o_depth;
 
 uniform float u_backPlaneDistance;
-uniform sampler2D normalTex;
+uniform sampler2DArray normalTex;
 
 in VertexData {
-	vec2 uv;
+	vec3 uvi;
 	vec3 normal;
 	float depth;
 	vec3 tangent;
@@ -24,9 +24,9 @@ void main() {
 
 	mat3 texTrans = mat3(xA, yA, zA);
 
-	normal = texTrans * (((texture(normalTex, inData.uv).xyz) - 0.5) * 2);
+	normal = texTrans * (((texture(normalTex, inData.uvi).xyz) - 0.5) * 2);
 
-	vec4 normalVec = texture(normalTex, inData.uv);
+	vec4 normalVec = texture(normalTex, inData.uvi);
 
   if(normalVec.w <= 0.38){
     discard;

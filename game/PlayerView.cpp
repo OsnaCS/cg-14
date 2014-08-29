@@ -84,6 +84,8 @@ void PlayerView::init()
 	m_normalPass.perFragProc.enableDepthTest();
 	m_normalPass.perFragProc.enableDepthWrite();
 	m_normalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_normalPass.primitiveProc.enableCulling();
+
 
 	VShader vsFP;
 	vsFP.compile(loadShaderFromFile("shader/PickaxeFinalPass.vsh"));
@@ -94,11 +96,11 @@ void PlayerView::init()
 	m_finalPass.perFragProc.enableDepthTest();
 	m_finalPass.perFragProc.enableDepthWrite();
 	m_finalPass.perFragProc.setDepthFunction(DepthFunction::Less);
+  m_finalPass.primitiveProc.enableCulling();
 
 	m_pickaxe = loadOBJ("gfx/pickaxe.obj");
   m_playerFigure = loadOBJ("gfx/player.obj");
 
-  m_showPickaxe = false;
 
     // To display hearts panel
     initHeartPanel();
@@ -127,7 +129,7 @@ VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
         auto it=items.begin();
         for ( int i=0;  it != items.end(); ++it, ++i )
         {
-            Vec2f texCoord = getTexCoords(it->first, BlockSide::North);
+            Vec2f texCoord = getInventoryCoords(it->first, BlockSide::North);
             hot.vertex[i*4+0].set( Vec2f(INIT_INVENT_POS.x+  i  *INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord );
             hot.vertex[i*4+2].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y), texCoord + Vec2f(1/8.f, 0) );
             hot.vertex[i*4+3].set( Vec2f(INIT_INVENT_POS.x+(i+1)*INVENT_ITEM_SIZE.x, INIT_INVENT_POS.y-INVENT_ITEM_SIZE.y)
@@ -160,33 +162,39 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateInventoryNumbers()
     numInventory.create(4*seqSize, 5*seqSize );
     numInventory.prime([&](HotVertexSeq<Vec2f, Vec3f, Vec2f>& hot)
     {
-        auto it=items.begin();
-        int cnt = 0; int cntIdx = 0;
+        auto it = items.begin();
+        int indexCounter = 0;
+        int indexBufferIndexCounter = 0;
         for ( int i=0;  it != items.end(); ++i, ++it )
         {
             vector<Vec2f> positions = positionOfNumber( it->second );
 
+            if (positions.size() == 0) {
+              init_pos.x += INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
+            }
+
             auto pos_it = positions.begin();
             for ( int j=0; pos_it != positions.end(); ++pos_it, ++j )
             {
+                float offsetX = -2 * j * item_size.x + j * gap.x; // if j=1, shift position[1] to the left as second digit number
 
-                cnt += j*4;
-                cntIdx += j*5;
-                float offsetX = -2*j*item_size.x+j*gap.x; // if j=1, shift position[1] to the left as second digit number           
-                hot.vertex[i*4+0+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
-                                       , positions[j] );
-                hot.vertex[i*4+2+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
+                hot.vertex[indexCounter].set(Vec2f(init_pos.x + i * item_size.x + offsetX, init_pos.y), Vec3f(1, 1, 1), positions[j]);
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set(Vec2f(init_pos.x + i * item_size.x + offsetX, init_pos.y - item_size.y), Vec3f(1, 1, 1), positions[j] + Vec2f(0, 1.0f));
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y), Vec3f(1,1,1)
                                        , positions[j] + Vec2f(1/10.f, 0) );
-                hot.vertex[i*4+3+cnt].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+
+                hot.vertex[indexCounter].set( Vec2f(init_pos.x+(i+1)*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
                                         , positions[j]+Vec2f(1/10.f, 1.0f) );
-                hot.vertex[i*4+1+cnt].set( Vec2f(init_pos.x+    i*item_size.x + offsetX, init_pos.y-item_size.y), Vec3f(1,1,1)
-                                        , positions[j]+Vec2f(0, 1.0f) );       
+                hot.index[indexBufferIndexCounter++] = indexCounter++;
+                
                 init_pos.x += (j==1)?0:INVENT_ITEM_SIZE.x/2; // update  initial position of number block.
-                hot.index[i*5+0+cntIdx] = i*4+0+cnt;
-                hot.index[i*5+1+cntIdx] = i*4+1+cnt;
-                hot.index[i*5+2+cntIdx] = i*4+2+cnt;
-                hot.index[i*5+3+cntIdx] = i*4+3+cnt;
-                hot.index[i*5+4+cntIdx] = GLIndex::PrimitiveRestart;
+
+                hot.index[indexBufferIndexCounter++] = GLIndex::PrimitiveRestart;
 
             }
 
@@ -231,8 +239,8 @@ VertexSeq<Vec2f, Vec3f, Vec2f> PlayerView::updateHearts()
     return heartPanel;
 }
 
-void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
-
+void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam,  bool cheatmode) {
+if(cheatmode){
 	m_normalPass.prime([&](HotProgram& hotPlayer) {
 		Mat4f tmp = getRotMatrixPlayer();
 		tmp = tmp.inverted();
@@ -244,9 +252,9 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
 
   	hotPlayer.draw(m_playerFigure, PrimitiveType::Triangle); 
   });
+}
 
-
-  if(m_showPickaxe) {
+ if(!cheatmode){
     // Show pickaxe
     m_normalPass.prime([&](HotProgram& hotPickaxe) {
     	Mat4f tmp = getRotMatrixPickaxe();
@@ -262,8 +270,8 @@ void PlayerView::drawNormalPass(Mat4f viewMat, Mat4f projMat, Camera& cam) {
   }
 }
 
-void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer) {
-
+void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D& lBuffer,  bool cheatmode) {
+if(cheatmode){
 		m_finalPass.prime([&](HotProgram& hotPlayer) {
 
       hotPlayer.uniform["u_view"] = viewMat * getTransMatrixPlayer();
@@ -279,8 +287,8 @@ void PlayerView::drawFinalPass(Mat4f viewMat, Mat4f projMat, Camera& cam, Tex2D&
         });
       });
     });
-
-  if(m_showPickaxe) {
+}
+  if(!cheatmode) {
     m_finalPass.prime([&](HotProgram& hotP) {
 
       hotP.uniform["u_view"] = viewMat * getTransMatrix();
@@ -413,7 +421,16 @@ int PlayerView::calcSeqSize(const std::map<BlockType, int>& items)
     int size = 0;
     for(auto it = items.begin(); it != items.end(); ++it)
     {
-        size += ( it->second > 9 )? 2: 1; // 1 or 2 digit place
+        int numDigits;
+        if (it->second > 99) {
+          numDigits = 0;
+        } else if(it->second > 9) {
+            numDigits = 2;
+        } else {
+          numDigits = 1;
+        }
+
+        size += numDigits;
     }
     return size;
 }
@@ -439,7 +456,7 @@ Mat4f PlayerView::getTransMatrixPlayer(){
   	Mat4f rotationY = rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle+1.57f));
 
   	//Translation to player height and to the front right
-  	Mat4f translation = translationMatrix(m_player.getPosition() - m_player.getDirection() + Vec3f(0, -1.1, 0));
+  	Mat4f translation = translationMatrix(m_player.getPosition()  + Vec3f(0, -1.1, 0));
 
 
   	return translation * rotationY * translationOrigin * scaling;
@@ -495,21 +512,5 @@ Mat4f PlayerView::getRotMatrixPickaxe(){
 			angle = -angle;
 		}
   	return rotationMatrix(quaternionFromAxisAngle(Vec3f(0.0f, 1.0f, 0.0f), angle));
-}
-
-EventResult PlayerView::processEvent(InputEvent& e, Window& win, bool cheatmode) {
-
-  if(e.type == InputType::KeyPressed) {
-    if((KeyCode)(e.keyInput.key) == KeyCode::T &&  !cheatmode) {
-      togglePickaxe();
-    }else if((KeyCode)(e.keyInput.key) == KeyCode::K){
-    	m_showPickaxe = false;
-    }
-  }
-  return EventResult::Skipped;
-}
-
-void PlayerView::togglePickaxe(){
-	m_showPickaxe = !m_showPickaxe;
 }
 
