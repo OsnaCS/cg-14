@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <utility> 
+
 Map::Map() { m_name = "untitled"; }
 
 Map::Map(string name) { m_name = name; }
@@ -146,7 +148,7 @@ void Map::saveWorld(map<BlockType, int>& inventar) {
   mapfile.close();
 }
 
-Vec4f Map::loadWorld(string name, PlayerInventory pInv) 
+pair <Vec3f, map<BlockType, int> > Map::loadWorld(string name, PlayerInventory pInv) 
 {
 
   string mappath = "save/" + name + "/";
@@ -179,11 +181,11 @@ Vec4f Map::loadWorld(string name, PlayerInventory pInv)
     if(s.length() == 0)
       break;
 
+    // Wenn Inventar Eintrag dann...
     size_t found = s.find(".");
     if (found!=std::string::npos)
     {
-      cout << s.substr(0, found) << endl;
-      cout << s.substr(found+1) << endl;
+      // Füge in neues Inventar ein
       newInv[static_cast<BlockType>(stoi(s.substr(0, found)))] = stoi(s.substr(found + 1));
     }
     else
@@ -231,9 +233,12 @@ Vec4f Map::loadWorld(string name, PlayerInventory pInv)
 
   Vec3f pos = Vec3f(0.0f, 80.5f, 0.0f);
 
-  pInv.setInventory(newInv);
+  // Bilde ein Paar aus pos & Inventar
+  std::pair <Vec3f, map<BlockType, int> > foo;
+  foo = std::make_pair(pos, newInv);
 
-  return Vec4f(pos.x, pos.y, pos.z, 0);
+  return foo;
+  //return Vec4f(pos.x, pos.y, pos.z, 0);
 }
 
 bool Map::isBlockTypeVisible(BlockType blockType) {

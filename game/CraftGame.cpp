@@ -73,10 +73,9 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
   m_window.addEventCallback([&](InputEvent e) 
   {
     // if the inputType was a KeyInput and the key was just pressed and the
-    // key was Escape -> set m_running to false to stop program
+    // key was Escape -> set m_pause to false
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::Escape) 
     {
-      //m_running = false;
       if(m_pause)
       {
         m_pause = false;
@@ -109,7 +108,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
       return EventResult::Processed;
 
     }
-
+    // wenn der Input key p ist dann setze Pause
     if(e.type == InputType::KeyPressed && e.keyInput.key == KeyCode::P)
     {
 
@@ -141,6 +140,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
     if(e.type == InputType::MouseMovePos && m_pause && !m_optionen) 
     {
 
+      // Speichere die aktuelle Mausposition
       m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
 
       // Startposition des ersten Buttons
@@ -148,6 +148,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
       // Größe um die die Buttons versetzt nach unten liegen
       float offset = (m_size.y/6.0);
       
+      // Abhängig davon wo sich die Maus befindet setze den Button
       if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty && m_pos.y <= starty + 50)
       {
         m_button = 1;
@@ -181,6 +182,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
     if(e.type == InputType::MouseMovePos && m_pause && m_optionen) 
     {
 
+      // Speichere die aktuelle Mausposition
       m_pos = Vec2f(e.mouseInput.x, e.mouseInput.y);
 
       // Startposition des ersten Buttons
@@ -188,6 +190,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
       // Größe um die die Buttons versetzt nach unten liegen
       float offset = (m_size.y/6.0);
 
+      // Abhängig davon wo sich die Maus befindet setze den Button
       if(m_pos.x >= m_size.x/2-135 && m_pos.x <= m_size.x/2+135 && m_pos.y >= starty + offset && m_pos.y <= starty + offset + 50)
       {
         m_button = 2;
@@ -224,9 +227,11 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
     if(e.type == InputType::LMouseReleased && m_pause && !m_optionen)
     {
 
+      // Abhängig vom Button führe etwas aus
       switch(m_button)
       {
 
+        // für resume
         case 1:
         {
           m_pause = false;
@@ -235,6 +240,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           return EventResult::Processed; 
           break;
         }
+        // fürs laden
         case 2: 
         {
           // Mapnamen einlesen, das Fenster wird nicht aktualiesiert während der Zeit
@@ -242,11 +248,20 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           {
             string str;
             getline(cin, str);
-            Vec4f posut = m_map.loadWorld(str, m_player.getInventory());
-            cout << m_player.getInventory().getItems().size() << "CraftGame" << endl;
 
+            std::pair <Vec3f, map<BlockType, int> > posuInv;
+            posuInv = m_map.loadWorld(str, m_player.getInventory());
+
+            // Für Pos
+            Vec3f posut = posuInv.first;
             m_player.reset(Vec3f(posut.x,posut.y,posut.z));
             m_mapView.resetMapView();
+
+            // Für Inventar
+            PlayerInventory pi = PlayerInventory(20);
+            pi.setInventory(posuInv.second);
+            m_player.setInventory(pi);
+
           }
           catch(OutOfRangeEx e)
           {
@@ -256,6 +271,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           return EventResult::Processed; 
           break;
         }
+        // fürs speichern
         case 3: 
         {
           string str;
@@ -266,12 +282,14 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           return EventResult::Processed; 
           break;
         }
+        // fürs Optionen Menü
         case 4: 
         {
           m_optionen = true;
           return EventResult::Processed; 
           break;
         }
+        // Fürs schließen
         case 5: 
         {
           m_running = false; 
@@ -292,21 +310,25 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
     if(e.type == InputType::LMouseReleased && m_pause && m_optionen)
     {
 
+      // Abhängig vom Button führe etwas aus
       switch(m_button)
       {
 
+        // Kehre zum Hauptmenü zurück
         case 2: 
         {
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
+        // Kehre zum Hauptmenü zurück
         case 3: 
         {
           m_optionen = false;
           return EventResult::Processed; 
           break;
         }
+        // neues Spiel
         case 4: 
         {
           m_optionen = false;
@@ -317,6 +339,7 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
           return EventResult::Processed; 
           break;
         }
+        // Kehre zum Hauptmenü zurück
         case 5: 
         {
           m_optionen = false;
@@ -325,7 +348,6 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
         }
         default: 
         {
-
           return EventResult::Skipped; 
           break;
         }
@@ -338,8 +360,6 @@ void CraftGame::init(Vec2i size, bool fullscreen) {
 
   });
 
-  // resize window
-  // m_window.resize(Vec2i(1280, 720));
 }
 
 void CraftGame::start() {
@@ -391,6 +411,7 @@ void CraftGame::updateComponents(float delta) {
 
 void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
+  // Lade alle Hauptmenü Texturen
   ImageBox image_resume = loadPNGImage("gfx/resume.png");
   m_resTex.create(Vec2i(680,90), TexFormat::RGBA8, image_resume.data());
   m_resTex.params.filterMode = TexFilterMode::Trilinear;
@@ -589,8 +610,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
     // we need the default FrameBuffer
     hotContext.getDefaultFrameBuffer().prime([&](HotFrameBuffer& hotFB) 
     {
-      // clear the background color of the screen
 
+      // clear the background color of the screen
       hotFB.clearColor(0, Color32fA(0, 0, 0, 0));
       hotFB.clearDepth(1.f);
       
@@ -604,9 +625,11 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
 
       });
 
+      // Shader für das Hauptmenü
       pMenu.prime([&](HotProgram& hotP)
       {
 
+        // Texturen zuweisen
         hotP.uniform["s_menupng"] = 0;
         hotP.uniform["s_resSh"] = 5;
         hotP.uniform["s_Sh"] = m_button;
@@ -623,11 +646,13 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
         cont.prime([&](HotTexCont& hotTexCont) 
         {
 
+          // Abhängig vom Menü etwas anzeigen
           if(m_pause && !m_optionen)
           {
 
+            // Male die Buttons versetzt durch offset
+            // die Textur wird durch die menupng bestimmt
             hotP.uniform["u_offset"] = (float)0.0;
-
             hotP.draw(hotTexCont, m_fullScreenQuad2, PrimitiveType::TriangleStrip);
 
             hotP.uniform["u_offset"] = (float)-(m_size.y/(m_size.y*(3.0)));
@@ -653,6 +678,8 @@ void CraftGame::run(lumina::HotRenderContext& hotContext) {
           }
           else if(m_pause && m_optionen)
           {
+
+            // Male die Buttons versetzt durch offset
             hotP.uniform["u_offset"] = (float)0.0;
             hotP.uniform["s_menupng"] = 3;
 

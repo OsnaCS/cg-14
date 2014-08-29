@@ -55,12 +55,6 @@ public:
 
     void setInventory(std::map<BlockType, int> newInv);
 
-    void reset()
-    {
-        m_items.clear();
-    }
-
-
 private:
     int MAX_DISPLAY_ITEMS;
     std::map<BlockType, int> m_items;

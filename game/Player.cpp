@@ -552,7 +552,6 @@ Vec3i Player::getLastAir()
 
 map<BlockType, int>& Player::getInventoryItems() 
 {
-  getInventory().reset();
   return m_inventory.getItems();
 }
 
@@ -563,6 +562,7 @@ int Player::maxDisplayItems() const
 
 void Player::reset(Vec3f pos)
 {
+  m_inventory = PlayerInventory(20);
   m_position = pos;
 }
 

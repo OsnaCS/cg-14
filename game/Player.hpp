@@ -58,6 +58,11 @@ public:
     return m_inventory;
   }
 
+  void setInventory(PlayerInventory pi)
+  {
+    m_inventory = pi;
+  }
+
   /**
     * @brief maxDisplayItems Maximum number of "listed" items
     * @return

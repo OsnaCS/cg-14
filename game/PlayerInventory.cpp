@@ -59,31 +59,8 @@ BlockType PlayerInventory::getType(int idx) const
 
 void PlayerInventory::setInventory(std::map<BlockType, int> newInv)
 {
-    /*
-    m_items.clear();
 
-    for(map<BlockType, int>::iterator it2 = newInv.begin(); it2 != newInv.end(); it2++) 
-    {
-        m_items[static_cast<BlockType>(it2->first)] = it2->second;
-    }*/
-    std::cout << "ja" << std::endl;
-    m_items.clear();
     m_items = newInv;
-    std::cout << m_items.size()<< std::endl;
-        
-    for(std::map<BlockType, int>::iterator it2 = newInv.begin(); it2 != newInv.end(); it2++) 
-    {
-        std::cout << static_cast<int>(it2->first) << std::endl;
-        std::cout << it2->second << std::endl;
-    }
-
-    for(std::map<BlockType, int>::iterator it = m_items.begin(); it != m_items.end(); it++) 
-    {
-        std::cout << static_cast<int>(it->first) << std::endl;
-        std::cout << it->second << std::endl;
-    }
-
-    std::cout << getItems().size() << "PlayerInventory" << std::endl;
 
 }
 ///////////////////////////////////END OF FILE/////////////////////////////////////

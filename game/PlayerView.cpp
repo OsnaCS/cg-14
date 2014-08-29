@@ -119,7 +119,6 @@ void PlayerView::init()
 VertexSeq<Vec2f, Vec2f> PlayerView::updateInventory()
 {
     const map<BlockType, int> items = m_player.getInventoryItems();
-    slog(m_player.getInventoryItems().size());
 
     VertexSeq<Vec2f, Vec2f> inventoryPanel;
     inventoryPanel.create(4*items.size(), 5*items.size() );

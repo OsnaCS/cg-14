@@ -97,7 +97,7 @@ public:
 	/**
 	*	Soll die Dateien einlesen
 	*/
-	Vec4f loadWorld(string chunkname, PlayerInventory pInv);
+	pair <Vec3f, map<BlockType, int> > loadWorld(string chunkname, PlayerInventory pInv);
 
 	bool isBlockTypeVisible(BlockType blockType);
 
