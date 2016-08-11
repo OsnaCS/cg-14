@@ -265,6 +265,7 @@ void Player::update(float timePassed)
     m_timePassed -= FRAME_PER_MOVE;
     //TODO
     //Check for too much high // to less high
+    //https://pbs.twimg.com/profile_images/2529775225/image.jpg
 
     if(m_wPressed){
         move_forward();
